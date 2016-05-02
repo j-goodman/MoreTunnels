@@ -11,7 +11,7 @@ window.onload = function () {
 var ctx = canvas.getContext('2d');
 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-var player = new Player (6*48, 8*48);
+var player = new Player (6*48, 10*48);
 keyEvents(document, player);
 
 var zoneOne = require('./zones/zoneOne.js');
