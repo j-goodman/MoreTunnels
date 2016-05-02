@@ -1,0 +1,3 @@
+blocks = [];
+
+module.exports = blocks;
