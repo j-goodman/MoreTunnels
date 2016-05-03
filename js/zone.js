@@ -15,6 +15,10 @@ Zone.prototype.build = function (blocks) {
         blocks.push( new Block (xIndex*48, yIndex*48) );
       } else if (square === "Y") {
         blocks.push( new Block (xIndex*48, yIndex*48, "middle") );
+      } else if (square === "F") {
+        blocks.push( new Block (xIndex*48, yIndex*48, "bolted_hang") );
+      } else if (square === "T") {
+        blocks.push( new Block (xIndex*48, yIndex*48, "hanging") );
       }
     });
   });

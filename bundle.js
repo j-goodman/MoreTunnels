@@ -80,6 +80,10 @@
 	    tiles.forEach(function(tile){
 	      tile.sprite.draw(ctx, tile.pos, view.topLeftPos);
 	    });
+	    
+	    blocks.forEach(function(block){
+	      block.sprite.draw(ctx, block.pos, view.topLeftPos);
+	    });
 	
 	    view.recenter(player.pos);
 	
@@ -100,31 +104,31 @@
 
 /***/ },
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var Player = __webpack_require__(2);
-	var Block = __webpack_require__(5);
-	
-	renderZone = {
-	  build: function (zone, canvas) {
-	    zone.blueprint.forEach(function (string, yIndex) {
-	      for (var xIndex=0; xIndex < string.length; xIndex++) {
-	        switch (string.charAt(xIndex)) {
-	          case "_":
-	            break;
-	          case "X":
-	            zone.objects.push(new Block(xIndex, yIndex));
-	            break;
-	          case "!":
-	            zone.objects.push(new Player(xIndex, yIndex));
-	            break;
-	        }
-	      }
-	    });
-	  }
-	};
-	
-	module.exports = renderZone;
+	// var Player = require('./objects/player.js');
+	// var Block = require('./objects/block.js');
+	//
+	// renderZone = {
+	//   build: function (zone, canvas) {
+	//     zone.blueprint.forEach(function (string, yIndex) {
+	//       for (var xIndex=0; xIndex < string.length; xIndex++) {
+	//         switch (string.charAt(xIndex)) {
+	//           case "_":
+	//             break;
+	//           case "X":
+	//             zone.objects.push(new Block(xIndex, yIndex));
+	//             break;
+	//           case "!":
+	//             zone.objects.push(new Player(xIndex, yIndex));
+	//             break;
+	//         }
+	//       }
+	//     });
+	//   }
+	// };
+	//
+	// module.exports = renderZone;
 
 
 /***/ },
@@ -142,7 +146,7 @@
 	};
 	
 	Player.prototype.runSpeed = 6;
-	Player.prototype.jumpPower = 16;
+	Player.prototype.jumpPower = 17;
 	
 	Player.prototype.facing = "right";
 	
@@ -337,7 +341,9 @@
 	Block.prototype.setSprite = function () {
 	  var typeLookUp = {
 	    "top": "blocks/platform_top.gif",
-	    "middle": "blocks/platform_middle.gif"
+	    "middle": "blocks/platform_middle.gif",
+	    "bolted_hang": "blocks/platform_surface_bolt.gif",
+	    "hanging": "blocks/platform_surface.gif"
 	  };
 	  if (!this.type) {
 	    this.type = "top";
@@ -442,9 +448,10 @@
 	var subwayPlatform = new Zone ([
 	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
+	  "--------FTTTF----FTTTF---------FTTTF----F--FTTTF--------",
 	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
-	  "--------------------------------------------------------",
+	  "-----------------------FF---FF---------------------F----",
 	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXX----XXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -476,6 +483,10 @@
 	        blocks.push( new Block (xIndex*48, yIndex*48) );
 	      } else if (square === "Y") {
 	        blocks.push( new Block (xIndex*48, yIndex*48, "middle") );
+	      } else if (square === "F") {
+	        blocks.push( new Block (xIndex*48, yIndex*48, "bolted_hang") );
+	      } else if (square === "T") {
+	        blocks.push( new Block (xIndex*48, yIndex*48, "hanging") );
 	      }
 	    });
 	  });
@@ -494,17 +505,19 @@
 	var subwayPlatform = new Background ([
 	  "========================================================",
 	  "========================================================",
-	  "---L ----L ----L ----L ------L ----L ----L ----L -------",
+	  "========================================================",
+	  "FFFL FFFFL FFFFL FFFFL FFFFFFL FFFFL FFFFL FFFFL FFFFFFF",
 	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
 	  "====I=====I=====I=====I=======I=====I=====I=====I=======",
 	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
 	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
-	  "                         ====                           ",
+	  "                         ----                           ",
 	  "                         ====                           ",
 	  "                         ====                           "
 	],
 	{
 	  "I": new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
+	  "F": [new Sprite (48, 48, 0, ["tile/brick_light.gif"]), new Sprite (48, 48, 0, ["tile/girder_top.gif"])],
 	  "L": [new Sprite (48, 48, 0, ["tile/brick_light.gif"]), new Sprite (144, 48, 0, ["tile/pillar_head.gif"])],
 	  "-": new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
 	  "=": new Sprite (48, 48, 0, ["tile/brick_dark.gif"])

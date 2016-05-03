@@ -12,7 +12,9 @@ var Block = function (x, y, type) {
 Block.prototype.setSprite = function () {
   var typeLookUp = {
     "top": "blocks/platform_top.gif",
-    "middle": "blocks/platform_middle.gif"
+    "middle": "blocks/platform_middle.gif",
+    "bolted_hang": "blocks/platform_surface_bolt.gif",
+    "hanging": "blocks/platform_surface.gif"
   };
   if (!this.type) {
     this.type = "top";
