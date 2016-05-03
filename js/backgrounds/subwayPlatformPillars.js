@@ -2,17 +2,17 @@ var Background = require("../background.js");
 var Sprite = require("../sprite.js");
 
 var subwayPlatform = new Background ([
-  "                                                        ",
-  "                                                        ",
-  "                                                        ",
-  "FFFL FFFFL FFFFL FFFFL FFFFFFL FFFFL FFFFL FFFFL FFFFFFF",
-  "    I     I     I     I       I     I     I     I     I ",
-  "    I     I     I     I       I     I     I     I     I ",
-  "    I     I     I     I       I     I     I     I     I ",
-  "    I     I     I     I       I     I     I     I     I ",
-  "    I     I     I     I       I     I     I     I     I ",
-  "    I     I     I     I       I     I     I     I     I ",
-  "    I     I     I     I       I     I     I     I     I "
+  "                                       ",
+  "                                       ",
+  "                                       ",
+  "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFF",
+  "    I     I     I     I     I     I    ",
+  "    I     I     I     I     I     I    ",
+  "    I     I     I     I     I     I    ",
+  "    I     I     I     I     I     I    ",
+  "    I     I     I     I     I     I    ",
+  "    I     I     I     I     I     I    ",
+  "    I     I     I     I     I     I    "
 ],
 {
   "I": {sprite: new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
