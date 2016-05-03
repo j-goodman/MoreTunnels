@@ -10,16 +10,21 @@ var subwayPlatform = new Background ([
   "====I=====I=====I=====I=======I=====I=====I=====I=======",
   "----I-----I-----I-----I-------I-----I-----I-----I-------",
   "----I-----I-----I-----I-------I-----I-----I-----I-------",
-  "                         ----                           ",
-  "                         ====                           ",
-  "                         ====                           "
+  "--------------------------------------------------------",
+  "========================================================",
+  "========================================================"
 ],
 {
-  "I": new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
-  "F": [new Sprite (48, 48, 0, ["tile/brick_light.gif"]), new Sprite (48, 48, 0, ["tile/girder_top.gif"])],
-  "L": [new Sprite (48, 48, 0, ["tile/brick_light.gif"]), new Sprite (144, 48, 0, ["tile/pillar_head.gif"])],
-  "-": new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
-  "=": new Sprite (48, 48, 0, ["tile/brick_dark.gif"])
+  "I": {sprite: new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
+        depth: 3},
+  "F": {sprite: new Sprite (48, 48, 0, ["tile/girder_top.gif"]),
+        depth: 3},
+  "L": {sprite: new Sprite (144, 48, 0, ["tile/pillar_head.gif"]),
+        depth: 3},
+  "-": {sprite: new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
+        depth: 3},
+  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
+        depth: 3}
 });
 
 module.exports = subwayPlatform;

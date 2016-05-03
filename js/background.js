@@ -9,13 +9,7 @@ Background.prototype.build = function (tiles) {
   this.blueprint.forEach(function (yLine, yIndex) {
     yLine.split("").forEach(function (square, xIndex) {
       if (this.spriteKey[square]) {
-        if (this.spriteKey[square].length) {
-          this.spriteKey[square].forEach(function (sprite) {
-            tiles.push( new Tile (xIndex*48, yIndex*48, sprite) );
-          });
-        } else {
-          tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square]) );
-        }
+        tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square].sprite, this.spriteKey[square].depth) );
       }
     }.bind(this));
   }.bind(this));

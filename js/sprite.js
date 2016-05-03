@@ -38,4 +38,16 @@ Sprite.prototype.draw = function (ctx, pos, viewAnchor) {
   this.animate();
 };
 
+Sprite.prototype.depthDraw = function (ctx, pos, viewAnchor, depthFactor) {
+  //The depth factor should be a multiple of 0.5 between 1.5 and 5
+  ctx.drawImage(
+    this.frames[this.frame],
+    pos.x-(viewAnchor.x/depthFactor),
+    pos.y-(viewAnchor.y/depthFactor),
+    this.width,
+    this.height
+  );
+  this.animate();
+};
+
 module.exports = Sprite;

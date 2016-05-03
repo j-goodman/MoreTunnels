@@ -1,12 +1,11 @@
 var Sprite = require('../sprite.js');
 
-var Tile = function (x, y, sprite) {
+var Tile = function (x, y, sprite, depth) {
   this.pos = {
     x: x,
     y: y
   };
-  this.width = this.width;
-  this.height = this.height;
+  this.depth = depth;
   this.sprite = sprite;
 };
 

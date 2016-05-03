@@ -27,12 +27,9 @@ var view = new View (0, 0, 640, 480, 55*48, 10*48);
     ctx.fillStyle = "turquoise";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    blocks.forEach(function(block){
-      block.sprite.draw(ctx, block.pos, view.topLeftPos);
-    });
 
     tiles.forEach(function(tile){
-      tile.sprite.draw(ctx, tile.pos, view.topLeftPos);
+      tile.sprite.depthDraw(ctx, tile.pos, view.topLeftPos, tile.depth);
     });
 
     blocks.forEach(function(block){

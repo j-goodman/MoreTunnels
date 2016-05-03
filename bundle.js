@@ -73,12 +73,9 @@
 	    ctx.fillStyle = "turquoise";
 	    ctx.fillRect(0, 0, canvas.width, canvas.height);
 	
-	    blocks.forEach(function(block){
-	      block.sprite.draw(ctx, block.pos, view.topLeftPos);
-	    });
 	
 	    tiles.forEach(function(tile){
-	      tile.sprite.draw(ctx, tile.pos, view.topLeftPos);
+	      tile.sprite.depthDraw(ctx, tile.pos, view.topLeftPos, tile.depth);
 	    });
 	
 	    blocks.forEach(function(block){
@@ -314,6 +311,18 @@
 	  this.animate();
 	};
 	
+	Sprite.prototype.depthDraw = function (ctx, pos, viewAnchor, depthFactor) {
+	  //The depth factor should be a multiple of 0.5 between 1.5 and 5
+	  ctx.drawImage(
+	    this.frames[this.frame],
+	    pos.x-(viewAnchor.x/depthFactor),
+	    pos.y-(viewAnchor.y/depthFactor),
+	    this.width,
+	    this.height
+	  );
+	  this.animate();
+	};
+	
 	module.exports = Sprite;
 
 
@@ -514,16 +523,21 @@
 	  "====I=====I=====I=====I=======I=====I=====I=====I=======",
 	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
 	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
-	  "                         ----                           ",
-	  "                         ====                           ",
-	  "                         ====                           "
+	  "--------------------------------------------------------",
+	  "========================================================",
+	  "========================================================"
 	],
 	{
-	  "I": new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
-	  "F": [new Sprite (48, 48, 0, ["tile/brick_light.gif"]), new Sprite (48, 48, 0, ["tile/girder_top.gif"])],
-	  "L": [new Sprite (48, 48, 0, ["tile/brick_light.gif"]), new Sprite (144, 48, 0, ["tile/pillar_head.gif"])],
-	  "-": new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
-	  "=": new Sprite (48, 48, 0, ["tile/brick_dark.gif"])
+	  "I": {sprite: new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
+	        depth: 3},
+	  "F": {sprite: new Sprite (48, 48, 0, ["tile/girder_top.gif"]),
+	        depth: 3},
+	  "L": {sprite: new Sprite (144, 48, 0, ["tile/pillar_head.gif"]),
+	        depth: 3},
+	  "-": {sprite: new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
+	        depth: 3},
+	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
+	        depth: 3}
 	});
 	
 	module.exports = subwayPlatform;
@@ -544,13 +558,7 @@
 	  this.blueprint.forEach(function (yLine, yIndex) {
 	    yLine.split("").forEach(function (square, xIndex) {
 	      if (this.spriteKey[square]) {
-	        if (this.spriteKey[square].length) {
-	          this.spriteKey[square].forEach(function (sprite) {
-	            tiles.push( new Tile (xIndex*48, yIndex*48, sprite) );
-	          });
-	        } else {
-	          tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square]) );
-	        }
+	        tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square].sprite, this.spriteKey[square].depth) );
 	      }
 	    }.bind(this));
 	  }.bind(this));
@@ -565,13 +573,12 @@
 
 	var Sprite = __webpack_require__(3);
 	
-	var Tile = function (x, y, sprite) {
+	var Tile = function (x, y, sprite, depth) {
 	  this.pos = {
 	    x: x,
 	    y: y
 	  };
-	  this.width = this.width;
-	  this.height = this.height;
+	  this.depth = depth;
 	  this.sprite = sprite;
 	};
 	
