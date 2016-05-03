@@ -590,9 +590,9 @@
 	var Sprite = __webpack_require__(3);
 	
 	var subwayPlatform = new Background ([
-	  "                                       ",
-	  "                                       ",
-	  "                                       ",
+	  "=======================================",
+	  "=======================================",
+	  "=======================================",
 	  "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFF",
 	  "    I     I     I     I     I     I    ",
 	  "    I     I     I     I     I     I    ",
@@ -608,6 +608,8 @@
 	  "F": {sprite: new Sprite (48, 48, 0, ["tile/girder_top.gif"]),
 	        depth: 2},
 	  "L": {sprite: new Sprite (144, 48, 0, ["tile/pillar_head.gif"]),
+	        depth: 2},
+	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
 	        depth: 2}
 	});
 	
