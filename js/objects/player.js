@@ -60,11 +60,13 @@ Player.prototype.landUnderFeet = function () {
   blocks.forEach(function (block) {
     if (this.pos.x > block.pos.x - block.sprite.width &&
         this.pos.x < block.pos.x + block.sprite.width &&
-        this.pos.y+this.sprite.height > block.pos.y-2 &&
-        this.pos.y+this.sprite.height < block.pos.y+block.sprite.height+2)
+        this.pos.y+this.sprite.height > block.pos.y-1 &&
+        this.pos.y+this.sprite.height < block.pos.y+block.sprite.height)
     {
-      returnVal = true;
-      this.landOnGround(block);
+      if (this.speed.y >= 0) {
+        returnVal = true;
+        this.landOnGround(block);
+      }
     }
   }.bind(this));
   return returnVal;
@@ -75,10 +77,12 @@ Player.prototype.checkUnderFeet = function () {
   blocks.forEach(function (block) {
     if (this.pos.x > block.pos.x - block.sprite.width &&
         this.pos.x < block.pos.x + block.sprite.width &&
-        this.pos.y+this.sprite.height > block.pos.y-4 &&
+        this.pos.y+this.sprite.height > block.pos.y-1 &&
         this.pos.y+this.sprite.height < block.pos.y+block.sprite.height)
     {
-      returnVal = true;
+      if (this.speed.y >= 0) {
+        returnVal = true;
+      }
     }
   }.bind(this));
   return returnVal;
