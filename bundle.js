@@ -50,6 +50,7 @@
 	var View = __webpack_require__(6);
 	var keyEvents = __webpack_require__(7);
 	var blocks = __webpack_require__(4);
+	var tiles = __webpack_require__(8);
 	
 	window.onload = function () {
 	  var canvas = document.getElementById("canvas");
@@ -57,13 +58,16 @@
 	var ctx = canvas.getContext('2d');
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
-	var player = new Player (6*48, 10*48);
+	var player = new Player (8*48, 5*48);
 	keyEvents(document, player);
 	
-	var zoneOne = __webpack_require__(8);
-	zoneOne.build(blocks);
+	var zone = __webpack_require__(9);
+	zone.build(blocks);
 	
-	var view = new View (0, 0, 640, 480);
+	var background = __webpack_require__(11);
+	background.build(tiles);
+	
+	var view = new View (0, 0, 640, 480, 55*48, 10*48);
 	
 	  setInterval(function () {
 	    ctx.fillStyle = "turquoise";
@@ -71,6 +75,10 @@
 	
 	    blocks.forEach(function(block){
 	      block.sprite.draw(ctx, block.pos, view.topLeftPos);
+	    });
+	
+	    tiles.forEach(function(tile){
+	      tile.sprite.draw(ctx, tile.pos, view.topLeftPos);
 	    });
 	
 	    view.recenter(player.pos);
@@ -134,7 +142,7 @@
 	};
 	
 	Player.prototype.runSpeed = 6;
-	Player.prototype.jumpPower = 18;
+	Player.prototype.jumpPower = 16;
 	
 	Player.prototype.facing = "right";
 	
@@ -317,14 +325,25 @@
 
 	var Sprite = __webpack_require__(3);
 	
-	var Block = function (x, y) {
+	var Block = function (x, y, type) {
 	  this.pos = {
 	    x: x,
 	    y: y
 	  };
+	  this.type = type;
+	  this.setSprite();
 	};
 	
-	Block.prototype.sprite = new Sprite(48, 48, 0, ["blocks/platform_surface.gif"]);
+	Block.prototype.setSprite = function () {
+	  var typeLookUp = {
+	    "top": "blocks/platform_top.gif",
+	    "middle": "blocks/platform_middle.gif"
+	  };
+	  if (!this.type) {
+	    this.type = "top";
+	  }
+	  this.sprite = new Sprite(48, 48, 0, [typeLookUp[this.type]]);
+	};
 	
 	module.exports = Block;
 
@@ -333,15 +352,29 @@
 /* 6 */
 /***/ function(module, exports) {
 
-	var View = function (topLeftX, topLeftY, bottomRightX, bottomRightY) {
+	var View = function (topLeftX, topLeftY, bottomRightX, bottomRightY, maxX, maxY) {
 	  this.topLeftPos = {x: topLeftX, y: topLeftY};
 	  this.width = bottomRightX-topLeftX;
 	  this.height = bottomRightY-topLeftY;
+	  this.maxX = maxX;
+	  this.maxY = maxY;
 	};
 	
 	View.prototype.recenter = function (centerPos) {
 	  this.topLeftPos.x = centerPos.x-this.width/2;
 	  this.topLeftPos.y = centerPos.y-this.height/2;
+	  if (this.topLeftPos.x+this.width > this.maxX) {
+	    this.topLeftPos.x = this.maxX-this.width;
+	  }
+	  if (this.topLeftPos.y+this.height > this.maxY) {
+	    this.topLeftPos.y = this.maxY-this.height;
+	  }
+	  if (this.topLeftPos.x < 0) {
+	    this.topLeftPos.x = 0;
+	  }
+	  if (this.topLeftPos.y < 0) {
+	    this.topLeftPos.y = 0;
+	  }
 	};
 	
 	module.exports = View;
@@ -392,52 +425,141 @@
 
 /***/ },
 /* 8 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var Zone = __webpack_require__(9);
+	tiles = [];
 	
-	var zoneOne = new Zone ([
-	  "------XXXXXXXXXXXXXXXXXXXXX----XXXXXXXX----XXXXXXXXXXXXX",
-	  "XX------------------------------------------------------",
-	  "--------------------------------------------------------",
-	  "--------------------------------------------------------",
-	  "-----XX-------------------------------------------------",
-	  "--------------------------------------------------------",
-	  "--------------------------XX----------------------------",
-	  "XX----------XX----XXXXXX------X-------------------------",
-	  "-----XXXX-----------------XX------XXX-------------------",
-	  "---------------------------------------XX----XXX-X------",
-	  "-----------------------------------------------------XXX",
-	  "--------------------------------------------------------",
-	  "--------------------------------------------------------",
-	  "------------------------XXX--------------------XXXX-----",
-	  "-XXXXXXXXXXXX--XXXXXXX--------XXXXX---X---XXX-----------"
-	]);
-	
-	module.exports = zoneOne;
+	module.exports = tiles;
 
 
 /***/ },
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var Zone = __webpack_require__(10);
+	
+	
+	var subwayPlatform = new Zone ([
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXX----XXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]);
+	
+	module.exports = subwayPlatform;
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var Block = __webpack_require__(5);
+	var Player = __webpack_require__(2);
 	
 	var Zone = function (blueprint) {
 	  this.blueprint = blueprint;
 	};
+	
+	// X Top of a platform
+	// Y Middle of a platform
 	
 	Zone.prototype.build = function (blocks) {
 	  this.blueprint.forEach(function (yLine, yIndex) {
 	    yLine.split("").forEach(function (square, xIndex) {
 	      if (square === "X") {
 	        blocks.push( new Block (xIndex*48, yIndex*48) );
+	      } else if (square === "Y") {
+	        blocks.push( new Block (xIndex*48, yIndex*48, "middle") );
 	      }
 	    });
 	  });
 	};
 	
 	module.exports = Zone;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(12);
+	var Sprite = __webpack_require__(3);
+	
+	var subwayPlatform = new Background ([
+	  "========================================================",
+	  "========================================================",
+	  "---L ----L ----L ----L ------L ----L ----L ----L -------",
+	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
+	  "====I=====I=====I=====I=======I=====I=====I=====I=======",
+	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
+	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
+	  "                         ====                           ",
+	  "                         ====                           ",
+	  "                         ====                           "
+	],
+	{
+	  "I": new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
+	  "L": [new Sprite (48, 48, 0, ["tile/brick_light.gif"]), new Sprite (144, 48, 0, ["tile/pillar_head.gif"])],
+	  "-": new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
+	  "=": new Sprite (48, 48, 0, ["tile/brick_dark.gif"])
+	});
+	
+	module.exports = subwayPlatform;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Tile = __webpack_require__(13);
+	
+	var Background = function (blueprint, spriteKey) {
+	  this.blueprint = blueprint;
+	  this.spriteKey = spriteKey;
+	};
+	
+	Background.prototype.build = function (tiles) {
+	  this.blueprint.forEach(function (yLine, yIndex) {
+	    yLine.split("").forEach(function (square, xIndex) {
+	      if (this.spriteKey[square]) {
+	        if (this.spriteKey[square].length) {
+	          this.spriteKey[square].forEach(function (sprite) {
+	            tiles.push( new Tile (xIndex*48, yIndex*48, sprite) );
+	          });
+	        } else {
+	          tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square]) );
+	        }
+	      }
+	    }.bind(this));
+	  }.bind(this));
+	};
+	
+	module.exports = Background;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	
+	var Tile = function (x, y, sprite) {
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.width = this.width;
+	  this.height = this.height;
+	  this.sprite = sprite;
+	};
+	
+	module.exports = Tile;
 
 
 /***/ }

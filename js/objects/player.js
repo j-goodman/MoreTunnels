@@ -9,7 +9,7 @@ var Player = function (x, y) {
 };
 
 Player.prototype.runSpeed = 6;
-Player.prototype.jumpPower = 18;
+Player.prototype.jumpPower = 16;
 
 Player.prototype.facing = "right";
 
