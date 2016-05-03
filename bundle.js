@@ -80,18 +80,12 @@
 	    tiles.forEach(function(tile){
 	      tile.sprite.draw(ctx, tile.pos, view.topLeftPos);
 	    });
-	    
+	
 	    blocks.forEach(function(block){
 	      block.sprite.draw(ctx, block.pos, view.topLeftPos);
 	    });
 	
 	    view.recenter(player.pos);
-	
-	    if (player.checkUnderFeet()) {
-	      ctx.beginPath();
-	      ctx.arc(80,40,8,0,2*Math.PI);
-	      ctx.stroke();
-	    }
 	
 	    player.sprite.draw(ctx, player.pos, view.topLeftPos);
 	
@@ -266,6 +260,11 @@
 	  ctx.strokeText("posY: "+this.pos.y+"("+Math.round(this.pos.y/48)+")", 12, 24);
 	  ctx.strokeText("spdX: "+this.speed.x, 12, 36);
 	  ctx.strokeText("spdY: "+this.speed.y, 12, 48);
+	  if (this.checkUnderFeet()) {
+	    ctx.beginPath();
+	    ctx.arc(86,40,8,0,2*Math.PI);
+	    ctx.stroke();
+	  }
 	};
 	
 	module.exports = Player;
@@ -452,10 +451,10 @@
 	var subwayPlatform = new Zone ([
 	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
-	  "--------FTTTF----FTTTF---------FTTTF----FTTFTTF---------",
+	  "--------FTTTF----FTTTF--------FTTTTF----FTTFTTF---------",
 	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
-	  "-----------------------FF---FF---------------F-----F----",
+	  "-----------------------FF---FF---------------F----F-----",
 	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXX----XXXXXXXXXXXXXXXXXXXXXXXXXXX",

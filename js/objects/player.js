@@ -129,6 +129,11 @@ Player.prototype.drawData = function (ctx) {
   ctx.strokeText("posY: "+this.pos.y+"("+Math.round(this.pos.y/48)+")", 12, 24);
   ctx.strokeText("spdX: "+this.speed.x, 12, 36);
   ctx.strokeText("spdY: "+this.speed.y, 12, 48);
+  if (this.checkUnderFeet()) {
+    ctx.beginPath();
+    ctx.arc(86,40,8,0,2*Math.PI);
+    ctx.stroke();
+  }
 };
 
 module.exports = Player;

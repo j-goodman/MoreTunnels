@@ -34,18 +34,12 @@ var view = new View (0, 0, 640, 480, 55*48, 10*48);
     tiles.forEach(function(tile){
       tile.sprite.draw(ctx, tile.pos, view.topLeftPos);
     });
-    
+
     blocks.forEach(function(block){
       block.sprite.draw(ctx, block.pos, view.topLeftPos);
     });
 
     view.recenter(player.pos);
-
-    if (player.checkUnderFeet()) {
-      ctx.beginPath();
-      ctx.arc(80,40,8,0,2*Math.PI);
-      ctx.stroke();
-    }
 
     player.sprite.draw(ctx, player.pos, view.topLeftPos);
 
