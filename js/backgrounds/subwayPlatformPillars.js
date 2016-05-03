@@ -7,7 +7,7 @@ var subwayPlatform = new Background ([
   "=======================================",
   "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFF",
   "    I     I     I     I     I     I    ",
-  "    I     I     I     I     I     I    ",
+  "    I     I     IJ    I     I     I    ",
   "    I     I     I     I     I     I    ",
   "    I     I     I     I     I     I    ",
   "    I     I     I     I     I     I    ",
@@ -22,7 +22,9 @@ var subwayPlatform = new Background ([
   "L": {sprite: new Sprite (144, 48, 0, ["tile/pillar_head.gif"]),
         depth: 2},
   "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
-        depth: 2}
+        depth: 2},
+  "J": {sprite: new Sprite (144, 48, 0, ["tile/sign_jay.gif"]),
+        depth: 4}
 });
 
 module.exports = subwayPlatform;
