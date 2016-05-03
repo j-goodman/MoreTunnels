@@ -64,8 +64,11 @@
 	var zone = __webpack_require__(9);
 	zone.build(blocks);
 	
-	var background = __webpack_require__(11);
-	background.build(tiles);
+	var backgroundBricks = __webpack_require__(11);
+	backgroundBricks.build(tiles);
+	
+	var backgroundPillars = __webpack_require__(14);
+	backgroundPillars.build(tiles);
 	
 	var view = new View (0, 0, 640, 480, 55*48, 10*48);
 	
@@ -518,26 +521,20 @@
 	  "========================================================",
 	  "========================================================",
 	  "========================================================",
-	  "FFFL FFFFL FFFFL FFFFL FFFFFFL FFFFL FFFFL FFFFL FFFFFFF",
-	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
-	  "====I=====I=====I=====I=======I=====I=====I=====I=======",
-	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
-	  "----I-----I-----I-----I-------I-----I-----I-----I-------",
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "========================================================",
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
 	  "========================================================",
 	  "========================================================"
 	],
 	{
-	  "I": {sprite: new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
-	        depth: 3},
-	  "F": {sprite: new Sprite (48, 48, 0, ["tile/girder_top.gif"]),
-	        depth: 3},
-	  "L": {sprite: new Sprite (144, 48, 0, ["tile/pillar_head.gif"]),
-	        depth: 3},
 	  "-": {sprite: new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
-	        depth: 3},
+	        depth: 4},
 	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
-	        depth: 3}
+	        depth: 4}
 	});
 	
 	module.exports = subwayPlatform;
@@ -583,6 +580,38 @@
 	};
 	
 	module.exports = Tile;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(12);
+	var Sprite = __webpack_require__(3);
+	
+	var subwayPlatform = new Background ([
+	  "                                                        ",
+	  "                                                        ",
+	  "                                                        ",
+	  "FFFL FFFFL FFFFL FFFFL FFFFFFL FFFFL FFFFL FFFFL FFFFFFF",
+	  "    I     I     I     I       I     I     I     I     I ",
+	  "    I     I     I     I       I     I     I     I     I ",
+	  "    I     I     I     I       I     I     I     I     I ",
+	  "    I     I     I     I       I     I     I     I     I ",
+	  "    I     I     I     I       I     I     I     I     I ",
+	  "    I     I     I     I       I     I     I     I     I ",
+	  "    I     I     I     I       I     I     I     I     I "
+	],
+	{
+	  "I": {sprite: new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
+	        depth: 2},
+	  "F": {sprite: new Sprite (48, 48, 0, ["tile/girder_top.gif"]),
+	        depth: 2},
+	  "L": {sprite: new Sprite (144, 48, 0, ["tile/pillar_head.gif"]),
+	        depth: 2}
+	});
+	
+	module.exports = subwayPlatform;
 
 
 /***/ }

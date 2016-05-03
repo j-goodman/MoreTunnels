@@ -18,8 +18,11 @@ keyEvents(document, player);
 var zone = require('./zones/subwayPlatform.js');
 zone.build(blocks);
 
-var background = require('./backgrounds/subwayPlatform.js');
-background.build(tiles);
+var backgroundBricks = require('./backgrounds/subwayPlatformBricks.js');
+backgroundBricks.build(tiles);
+
+var backgroundPillars = require('./backgrounds/subwayPlatformPillars.js');
+backgroundPillars.build(tiles);
 
 var view = new View (0, 0, 640, 480, 55*48, 10*48);
 
