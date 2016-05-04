@@ -1,0 +1,3 @@
+metaBlocks = [];
+
+module.exports = metaBlocks;

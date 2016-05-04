@@ -1,14 +1,17 @@
 var Block = require("./objects/block.js");
+var metaBlock = require("./objects/metaBlock.js");
 var Player = require("./objects/player.js");
+var Skeleton = require("./objects/skeleton.js");
 
-var Zone = function (blueprint) {
+var Zone = function (blueprint, metaBlueprint) {
   this.blueprint = blueprint;
+  this.metaBlueprint = metaBlueprint;
 };
 
 // X Top of a platform
 // Y Middle of a platform
 
-Zone.prototype.build = function (blocks) {
+Zone.prototype.build = function (blocks, movers, metaBlocks) {
   this.blueprint.forEach(function (yLine, yIndex) {
     yLine.split("").forEach(function (square, xIndex) {
       if (square === "X") {
@@ -19,9 +22,24 @@ Zone.prototype.build = function (blocks) {
         blocks.push( new Block (xIndex*48, yIndex*48, "bolted_hang") );
       } else if (square === "T") {
         blocks.push( new Block (xIndex*48, yIndex*48, "hanging") );
+      } else if (square === "!") {
+        movers.push( new Skeleton (xIndex*48, yIndex*48) );
       }
     });
   });
+  if (this.metaBlueprint) {
+    this.metaBlueprint.forEach(function (yLine, yIndex) {
+      yLine.split("").forEach(function (square, xIndex) {
+        if (square === ">") {
+          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight"]) );
+        } else if (square === "<") {
+          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpLeft"]) );
+        } else if (square === "*") {
+          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight", "jumpLeft"]));
+        }
+      });
+    });
+  }
 };
 
 module.exports = Zone;

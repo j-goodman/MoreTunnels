@@ -7,7 +7,7 @@ var subwayPlatform = new Background ([
   "=======================================",
   "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFF",
   "    I     I     I     I     I     I    ",
-  "    I     I     IJ    I     I     I    ",
+  "    I     I     I     I     I     I    ",
   "    I     I     I     I     I     I    ",
   "    I     I     I     I     I     I    ",
   "    I     I     I     I     I     I    ",

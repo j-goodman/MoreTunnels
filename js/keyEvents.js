@@ -24,11 +24,11 @@ var keyEvents = function (document, player) {
     switch(e.keyCode) {
     case 68: // d
     case 39: //right
-      if (player.speed.x > 0) { player.xStop(); }
+      if (player.speed.x > 0) { player.xRightStop(); }
       break;
     case 65: // a
     case 37: //left
-      if (player.speed.x < 0) { player.xStop(); }
+      if (player.speed.x < 0) { player.xLeftStop(); }
       break;
     }
   };

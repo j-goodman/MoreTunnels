@@ -1,0 +1,3 @@
+players = [];
+
+module.exports = players;

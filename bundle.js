@@ -46,11 +46,15 @@
 
 	var renderZone = __webpack_require__(1);
 	var Player = __webpack_require__(2);
-	var Block = __webpack_require__(5);
-	var View = __webpack_require__(6);
-	var keyEvents = __webpack_require__(7);
-	var blocks = __webpack_require__(4);
-	var tiles = __webpack_require__(8);
+	var Skeleton = __webpack_require__(7);
+	var Block = __webpack_require__(10);
+	var View = __webpack_require__(11);
+	var keyEvents = __webpack_require__(12);
+	var blocks = __webpack_require__(5);
+	var metaBlocks = __webpack_require__(8);
+	var tiles = __webpack_require__(13);
+	var movers = __webpack_require__(14);
+	var players = __webpack_require__(9);
 	
 	window.onload = function () {
 	  var canvas = document.getElementById("canvas");
@@ -58,16 +62,16 @@
 	var ctx = canvas.getContext('2d');
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
-	var player = new Player (8*48, 5*48);
-	keyEvents(document, player);
+	players.push( new Player (8*48, 5*48) );
+	keyEvents(document, players[0]);
 	
-	var zone = __webpack_require__(9);
-	zone.build(blocks);
+	var zone = __webpack_require__(15);
+	zone.build(blocks, movers, metaBlocks);
 	
-	var backgroundBricks = __webpack_require__(11);
+	var backgroundBricks = __webpack_require__(18);
 	backgroundBricks.build(tiles);
 	
-	var backgroundPillars = __webpack_require__(14);
+	var backgroundPillars = __webpack_require__(21);
 	backgroundPillars.build(tiles);
 	
 	var view = new View (0, 0, 640, 480, 55*48, 10*48);
@@ -75,7 +79,6 @@
 	  setInterval(function () {
 	    ctx.fillStyle = "turquoise";
 	    ctx.fillRect(0, 0, canvas.width, canvas.height);
-	
 	
 	    tiles.forEach(function(tile){
 	      tile.sprite.depthDraw(ctx, tile.pos, view.topLeftPos, tile.depth);
@@ -85,13 +88,21 @@
 	      block.sprite.draw(ctx, block.pos, view.topLeftPos);
 	    });
 	
-	    view.recenter(player.pos);
+	    movers.forEach(function(mover){
+	      mover.sprite.draw(ctx, mover.pos, view.topLeftPos);
+	    });
 	
-	    player.sprite.draw(ctx, player.pos, view.topLeftPos);
+	    view.recenter(players[0].pos);
 	
-	    player.drawData(ctx);
+	    players[0].sprite.draw(ctx, players[0].pos, view.topLeftPos);
 	
-	    player.move();
+	    players[0].drawData(ctx);
+	
+	    players[0].move();
+	    movers.forEach(function(mover){
+	      mover.determineAction();
+	      mover.move();
+	    });
 	  }, 32);
 	};
 
@@ -130,139 +141,45 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
-	var blocks = __webpack_require__(4);
+	var Jumpman = __webpack_require__(4);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(5);
 	
 	var Player = function (x, y) {
 	  this.pos = {
 	    x: x,
 	    y: y
 	  };
+	  this.speed = {
+	    x: 0,
+	    y: 0
+	  };
+	  this.facing = "right";
+	  this.frame = "right";
+	  this.accel = {
+	    x: 0,
+	    y: 1
+	  };
+	  this.spriteRoot = "player";
+	  this.setSprites();
+	  this.sprite = this.sprites.standing_right;
+	
+	  // STATS
+	  this.runSpeed = 6;
+	  this.jumpPower = 17;
 	};
 	
-	Player.prototype.runSpeed = 6;
-	Player.prototype.jumpPower = 17;
-	
-	Player.prototype.facing = "right";
-	
-	Player.prototype.frame = "right";
-	
-	Player.prototype.speed = {
-	  x: 0,
-	  y: 0
-	};
-	
-	Player.prototype.accel = {
-	  x: 0,
-	  y: 1
-	};
-	
-	Player.prototype.sprites = {
-	  standing_right: new Sprite(48, 48, 0, ["player/right/standing.gif"]),
-	  jumping_right: new Sprite(48, 48, 0, ["player/right/jumping.gif"]),
-	  standing_left: new Sprite(48, 48, 0, ["player/left/standing.gif"]),
-	  jumping_left: new Sprite(48, 48, 0, ["player/left/jumping.gif"]),
-	  running_right: new Sprite(48, 48, 4, [
-	    "player/right/running/0.gif",
-	    "player/right/running/1.gif",
-	    "player/right/running/2.gif",
-	    "player/right/running/3.gif"
-	  ]),
-	  running_left: new Sprite(48, 48, 4, [
-	    "player/left/running/0.gif",
-	    "player/left/running/1.gif",
-	    "player/left/running/2.gif",
-	    "player/left/running/3.gif"
-	  ])
-	};
-	
-	Player.prototype.sprite = Player.prototype.sprites.running_right;
-	
-	Player.prototype.move = function () {
-	  this.pos.x += this.speed.x;
-	  this.pos.y += this.speed.y;
-	  this.speed.x += this.accel.x;
-	  this.speed.y += this.accel.y;
-	  this.updateSprite();
-	  this.landUnderFeet();
-	};
-	
-	Player.prototype.landUnderFeet = function () {
-	  var returnVal = false;
-	  blocks.forEach(function (block) {
-	    if (this.pos.x > block.pos.x - block.sprite.width &&
-	        this.pos.x < block.pos.x + block.sprite.width &&
-	        this.pos.y+this.sprite.height > block.pos.y-1 &&
-	        this.pos.y+this.sprite.height < block.pos.y+block.sprite.height)
-	    {
-	      if (this.speed.y >= 0) {
-	        returnVal = true;
-	        this.landOnGround(block);
-	      }
-	    }
-	  }.bind(this));
-	  return returnVal;
-	};
-	
-	Player.prototype.checkUnderFeet = function () {
-	  var returnVal = false;
-	  blocks.forEach(function (block) {
-	    if (this.pos.x > block.pos.x - block.sprite.width &&
-	        this.pos.x < block.pos.x + block.sprite.width &&
-	        this.pos.y+this.sprite.height > block.pos.y-1 &&
-	        this.pos.y+this.sprite.height < block.pos.y+block.sprite.height)
-	    {
-	      if (this.speed.y >= 0) {
-	        returnVal = true;
-	      }
-	    }
-	  }.bind(this));
-	  return returnVal;
-	};
-	
-	Player.prototype.landOnGround = function (block) {
-	  if (this.speed.y > -1) {
-	    this.speed.y = 0;
-	  }
-	  this.pos.y = block.pos.y-this.sprite.height;
-	};
-	
-	Player.prototype.updateSprite = function () {
-	  if (this.speed.x === 0) {
-	    if (this.facing === "left") {
-	      this.sprite = this.sprites.standing_left;
-	    } else {
-	      this.sprite = this.sprites.standing_right;
-	    }
-	  } else if (this.speed.x > 0) {
-	    this.sprite = this.sprites.running_right;
-	  } else if (this.speed.x < 0) {
-	    this.sprite = this.sprites.running_left;
-	  } if (!this.checkUnderFeet()) {
-	    if (this.facing === "left") {
-	      this.sprite = this.sprites.jumping_left;
-	    } else {
-	      this.sprite = this.sprites.jumping_right;
-	    }
-	  }
-	};
-	
-	Player.prototype.xStop = function () {
-	  if (this.pos.x%48===0) {
-	    this.speed.x = 0;
-	  } else {
-	    setTimeout(this.xStop.bind(this), 16);
-	  }
-	};
+	Util.inherits(Player, Jumpman);
 	
 	Player.prototype.drawData = function (ctx) {
 	  ctx.font = "12px Courier";
-	  ctx.strokeText("posX: "+this.pos.x+"("+Math.round(this.pos.x/48)+")", 12, 12);
-	  ctx.strokeText("posY: "+this.pos.y+"("+Math.round(this.pos.y/48)+")", 12, 24);
-	  ctx.strokeText("spdX: "+this.speed.x, 12, 36);
-	  ctx.strokeText("spdY: "+this.speed.y, 12, 48);
+	  ctx.strokeText("posX: "+this.pos.x+"("+Math.round(this.pos.x/48)+")", 24, 24);
+	  ctx.strokeText("posY: "+this.pos.y+"("+Math.round(this.pos.y/48)+")", 24, 36);
+	  ctx.strokeText("spdX: "+this.speed.x, 24, 48);
+	  ctx.strokeText("spdY: "+this.speed.y, 24, 60);
 	  if (this.checkUnderFeet()) {
 	    ctx.beginPath();
-	    ctx.arc(86,40,8,0,2*Math.PI);
+	    ctx.arc(98,52,8,0,2*Math.PI);
 	    ctx.stroke();
 	  }
 	};
@@ -331,6 +248,142 @@
 
 /***/ },
 /* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var blocks = __webpack_require__(5);
+	
+	var Jumpman = function () {
+	};
+	
+	Jumpman.prototype.move = function () {
+	  this.pos.x += this.speed.x;
+	  this.pos.y += this.speed.y;
+	  this.speed.x += this.accel.x;
+	  this.speed.y += this.accel.y;
+	  this.updateSprite();
+	  this.landUnderFeet();
+	};
+	
+	Jumpman.prototype.landUnderFeet = function () {
+	  var returnVal = false;
+	  blocks.forEach(function (block) {
+	    if (this.pos.x > block.pos.x - block.sprite.width &&
+	        this.pos.x < block.pos.x + block.sprite.width &&
+	        this.pos.y+this.sprite.height > block.pos.y-1 &&
+	        this.pos.y+this.sprite.height < block.pos.y+block.sprite.height)
+	    {
+	      if (this.speed.y >= 0) {
+	        returnVal = true;
+	        this.landOnGround(block);
+	      }
+	    }
+	  }.bind(this));
+	  return returnVal;
+	};
+	
+	Jumpman.prototype.setSprites = function () {
+	  this.sprites = {
+	    standing_right: new Sprite(48, 48, 0, [this.spriteRoot+"/right/standing.gif"]),
+	    jumping_right: new Sprite(48, 48, 0, [this.spriteRoot+"/right/jumping.gif"]),
+	    standing_left: new Sprite(48, 48, 0, [this.spriteRoot+"/left/standing.gif"]),
+	    jumping_left: new Sprite(48, 48, 0, [this.spriteRoot+"/left/jumping.gif"]),
+	    running_right: new Sprite(48, 48, 4, [
+	      this.spriteRoot+"/right/running/0.gif",
+	      this.spriteRoot+"/right/running/1.gif",
+	      this.spriteRoot+"/right/running/2.gif",
+	      this.spriteRoot+"/right/running/3.gif"
+	    ]),
+	    running_left: new Sprite(48, 48, 4, [
+	      this.spriteRoot+"/left/running/0.gif",
+	      this.spriteRoot+"/left/running/1.gif",
+	      this.spriteRoot+"/left/running/2.gif",
+	      this.spriteRoot+"/left/running/3.gif"
+	    ])
+	  };
+	};
+	
+	Jumpman.prototype.checkUnderFeet = function () {
+	  var returnVal = false;
+	  blocks.forEach(function (block) {
+	    if (this.pos.x > block.pos.x - block.sprite.width &&
+	        this.pos.x < block.pos.x + block.sprite.width &&
+	        this.pos.y+this.sprite.height > block.pos.y-1 &&
+	        this.pos.y+this.sprite.height < block.pos.y+block.sprite.height)
+	    {
+	      if (this.speed.y >= 0) {
+	        returnVal = true;
+	      }
+	    }
+	  }.bind(this));
+	  return returnVal;
+	};
+	
+	Jumpman.prototype.landOnGround = function (block) {
+	  if (this.speed.y > -1) {
+	    this.speed.y = 0;
+	  }
+	  this.pos.y = block.pos.y-this.sprite.height;
+	};
+	
+	Jumpman.prototype.updateSprite = function () {
+	  if (this.speed.x === 0) {
+	    if (this.facing === "left") {
+	      this.sprite = this.sprites.standing_left;
+	    } else {
+	      this.sprite = this.sprites.standing_right;
+	    }
+	  } else if (this.speed.x > 0) {
+	    this.sprite = this.sprites.running_right;
+	  } else if (this.speed.x < 0) {
+	    this.sprite = this.sprites.running_left;
+	  } if (!this.checkUnderFeet()) {
+	    if (this.facing === "left") {
+	      this.sprite = this.sprites.jumping_left;
+	    } else {
+	      this.sprite = this.sprites.jumping_right;
+	    }
+	  }
+	};
+	
+	Jumpman.prototype.xRightStop = function () {
+	  if (this.pos.x%48===0) {
+	    this.speed.x = 0;
+	  } else {
+	    if (this.speed.x > 0) {
+	      setTimeout(this.xRightStop.bind(this), 16);
+	    }
+	  }
+	};
+	
+	Jumpman.prototype.xLeftStop = function () {
+	  if (this.pos.x%48===0) {
+	    this.speed.x = 0;
+	  } else {
+	    if (this.speed.x < 0) {
+	      setTimeout(this.xLeftStop.bind(this), 16);
+	    }
+	  }
+	};
+	
+	Jumpman.prototype.drawData = function (ctx) {
+	  ctx.font = "12px Courier";
+	  ctx.strokeText("posX: "+this.pos.x+"("+Math.round(this.pos.x/48)+")", 24, 24);
+	  ctx.strokeText("posY: "+this.pos.y+"("+Math.round(this.pos.y/48)+")", 24, 36);
+	  ctx.strokeText("spdX: "+this.speed.x, 24, 48);
+	  ctx.strokeText("spdY: "+this.speed.y, 24, 60);
+	  if (this.checkUnderFeet()) {
+	    ctx.beginPath();
+	    ctx.arc(98,52,8,0,2*Math.PI);
+	    ctx.stroke();
+	  }
+	};
+	
+	module.exports = Jumpman;
+
+
+/***/ },
+/* 5 */
 /***/ function(module, exports) {
 
 	blocks = [];
@@ -339,7 +392,131 @@
 
 
 /***/ },
-/* 5 */
+/* 6 */
+/***/ function(module, exports) {
+
+	var Util = {
+	  inherits: function (ChildClass, BaseClass) {
+	    function Surrogate() { this.constructor = ChildClass; }
+	    Surrogate.prototype = BaseClass.prototype;
+	    ChildClass.prototype = new Surrogate();
+	  },
+	
+	  distanceBetween: function (firstPos, secondPos) {
+	    xGap = Math.abs(firstPos.x - secondPos.x);
+	    yGap = Math.abs(firstPos.y - secondPos.y);
+	    return(Math.sqrt(xGap*xGap+yGap*yGap));
+	  },
+	
+	  xChase: function (chaser, targetPos, speed) {
+	    if (chaser.pos.x > players[0].pos.x) {
+	      chaser.speed.x = 0-speed;
+	    } else if (chaser.pos.x < players[0].pos.x) {
+	      chaser.speed.x = speed;
+	    }
+	  }
+	};
+	
+	module.exports = Util;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var Jumpman = __webpack_require__(4);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(5);
+	var metaBlocks = __webpack_require__(8);
+	var players = __webpack_require__(9);
+	
+	var Skeleton = function (x, y) {
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.speed = {
+	    x: 0,
+	    y: 0
+	  };
+	  this.facing = "right";
+	  this.frame = "right";
+	  this.accel = {
+	    x: 0,
+	    y: 1
+	  };
+	  this.spriteRoot = "skeleton";
+	  this.setSprites();
+	  this.sprite = this.sprites.standing_right;
+	
+	  // STATS
+	  this.sightRange = 330;
+	    this.runSpeed = 5;
+	  this.jumpPower = 18;
+	  this.chasingSkill = 2.75;
+	};
+	
+	Util.inherits(Skeleton, Jumpman);
+	
+	Skeleton.prototype.determineAction = function () {
+	  if (Util.distanceBetween(this.pos, players[0].pos) <= this.sightRange) {
+	    // Chance of giving chase
+	    if (Math.random()*32 <= this.chasingSkill) {
+	      Util.xChase(this, players[0].pos, this.runSpeed);
+	    }
+	    // If the player is about to escape the skeleton's range, higher chance
+	    if (Util.distanceBetween(this.pos, players[0].pos) > this.sightRange*0.9) {
+	      if (Math.random()*32 <= this.chasingSkill*7) {
+	        Util.xChase(this, players[0].pos, this.runSpeed);
+	      }
+	    }
+	  }
+	  this.checkForJumpBlock();
+	};
+	
+	Skeleton.prototype.checkForJumpBlock = function () {
+	  metaBlocks.forEach(function(metaBlock){
+	    if (this.pos.x < metaBlock.pos.x+this.sprite.width+2 &&
+	        this.pos.x > metaBlock.pos.x-2 &&
+	        this.pos.y < metaBlock.pos.y+this.sprite.height+2 &&
+	        this.pos.y > metaBlock.pos.y-2
+	       ) {
+	          if (metaBlock.types.includes("jumpRight") &&
+	            this.speed.x > 0) {
+	              this.speed.y = 0-this.jumpPower;
+	          }
+	          if (metaBlock.types.includes("jumpLeft") &&
+	            this.speed.x < 0) {
+	              this.speed.y = 0-this.jumpPower;
+	          }
+	        }
+	  }.bind(this));
+	};
+	
+	module.exports = Skeleton;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	metaBlocks = [];
+	
+	module.exports = metaBlocks;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	players = [];
+	
+	module.exports = players;
+
+
+/***/ },
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -370,7 +547,7 @@
 
 
 /***/ },
-/* 6 */
+/* 11 */
 /***/ function(module, exports) {
 
 	var View = function (topLeftX, topLeftY, bottomRightX, bottomRightY, maxX, maxY) {
@@ -402,7 +579,7 @@
 
 
 /***/ },
-/* 7 */
+/* 12 */
 /***/ function(module, exports) {
 
 	var keyEvents = function (document, player) {
@@ -431,11 +608,11 @@
 	    switch(e.keyCode) {
 	    case 68: // d
 	    case 39: //right
-	      if (player.speed.x > 0) { player.xStop(); }
+	      if (player.speed.x > 0) { player.xRightStop(); }
 	      break;
 	    case 65: // a
 	    case 37: //left
-	      if (player.speed.x < 0) { player.xStop(); }
+	      if (player.speed.x < 0) { player.xLeftStop(); }
 	      break;
 	    }
 	  };
@@ -445,7 +622,7 @@
 
 
 /***/ },
-/* 8 */
+/* 13 */
 /***/ function(module, exports) {
 
 	tiles = [];
@@ -454,44 +631,69 @@
 
 
 /***/ },
-/* 9 */
+/* 14 */
+/***/ function(module, exports) {
+
+	movers = [];
+	
+	module.exports = movers;
+
+
+/***/ },
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(10);
+	var Zone = __webpack_require__(16);
 	
 	
 	var subwayPlatform = new Zone ([
 	  "--------------------------------------------------------",
-	  "--------------------------------------------------------",
+	  "---------!-----------------------------------!----------",
 	  "--------FTTTF----FTTTF--------FTTTTF----FTTFTTF---------",
 	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
-	  "-----------------------FF---FF---------------F----F-----",
+	  "-----------------------FF---FF-------------FTF----F-----",
 	  "--------------------------------------------------------",
-	  "--------------------------------------------------------",
+	  "---------------------------------------------!------!---",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXX----XXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	]);
+	],[
+	  "--------------------------------------------------------",
+	  "----------------<------------------->--<----------------",
+	  "--------FTTTF----FTTTF--------FTTTTF----FTTFTTF---------",
+	  "--------------------------------------------------------",
+	  "-----------------------<>---<>-------------<------------",
+	  "-----------------------FF---FF-------------FTF----F-----",
+	  "--------------------------------------------------------",
+	  "-------------------->--->----<--<------->------<--------",
+	  "XXXXXXXXXXXXXXXXXXXXXXX<X----X>XXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
 	
 	module.exports = subwayPlatform;
 
 
 /***/ },
-/* 10 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Block = __webpack_require__(5);
+	var Block = __webpack_require__(10);
+	var metaBlock = __webpack_require__(17);
 	var Player = __webpack_require__(2);
+	var Skeleton = __webpack_require__(7);
 	
-	var Zone = function (blueprint) {
+	var Zone = function (blueprint, metaBlueprint) {
 	  this.blueprint = blueprint;
+	  this.metaBlueprint = metaBlueprint;
 	};
 	
 	// X Top of a platform
 	// Y Middle of a platform
 	
-	Zone.prototype.build = function (blocks) {
+	Zone.prototype.build = function (blocks, movers, metaBlocks) {
 	  this.blueprint.forEach(function (yLine, yIndex) {
 	    yLine.split("").forEach(function (square, xIndex) {
 	      if (square === "X") {
@@ -502,19 +704,51 @@
 	        blocks.push( new Block (xIndex*48, yIndex*48, "bolted_hang") );
 	      } else if (square === "T") {
 	        blocks.push( new Block (xIndex*48, yIndex*48, "hanging") );
+	      } else if (square === "!") {
+	        movers.push( new Skeleton (xIndex*48, yIndex*48) );
 	      }
 	    });
 	  });
+	  if (this.metaBlueprint) {
+	    this.metaBlueprint.forEach(function (yLine, yIndex) {
+	      yLine.split("").forEach(function (square, xIndex) {
+	        if (square === ">") {
+	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight"]) );
+	        } else if (square === "<") {
+	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpLeft"]) );
+	        } else if (square === "*") {
+	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight", "jumpLeft"]));
+	        }
+	      });
+	    });
+	  }
 	};
 	
 	module.exports = Zone;
 
 
 /***/ },
-/* 11 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Background = __webpack_require__(12);
+	var Sprite = __webpack_require__(3);
+	
+	var MetaBlock = function (x, y, types) {
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.types = types;
+	};
+	
+	module.exports = MetaBlock;
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(19);
 	var Sprite = __webpack_require__(3);
 	
 	var subwayPlatform = new Background ([
@@ -541,10 +775,10 @@
 
 
 /***/ },
-/* 12 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Tile = __webpack_require__(13);
+	var Tile = __webpack_require__(20);
 	
 	var Background = function (blueprint, spriteKey) {
 	  this.blueprint = blueprint;
@@ -565,7 +799,7 @@
 
 
 /***/ },
-/* 13 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -583,10 +817,10 @@
 
 
 /***/ },
-/* 14 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Background = __webpack_require__(12);
+	var Background = __webpack_require__(19);
 	var Sprite = __webpack_require__(3);
 	
 	var subwayPlatform = new Background ([
@@ -595,7 +829,7 @@
 	  "=======================================",
 	  "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFF",
 	  "    I     I     I     I     I     I    ",
-	  "    I     I     IJ    I     I     I    ",
+	  "    I     I     I     I     I     I    ",
 	  "    I     I     I     I     I     I    ",
 	  "    I     I     I     I     I     I    ",
 	  "    I     I     I     I     I     I    ",

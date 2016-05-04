@@ -1,10 +1,14 @@
 var renderZone = require('./renderZone.js');
 var Player = require('./objects/player.js');
+var Skeleton = require('./objects/skeleton.js');
 var Block = require('./objects/block.js');
 var View = require('./objects/view.js');
 var keyEvents = require('./keyEvents.js');
 var blocks = require('./objectArrays/blocks.js');
+var metaBlocks = require('./objectArrays/metaBlocks.js');
 var tiles = require('./objectArrays/tiles.js');
+var movers = require('./objectArrays/movers.js');
+var players = require('./objectArrays/players.js');
 
 window.onload = function () {
   var canvas = document.getElementById("canvas");
@@ -12,11 +16,11 @@ window.onload = function () {
 var ctx = canvas.getContext('2d');
 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-var player = new Player (8*48, 5*48);
-keyEvents(document, player);
+players.push( new Player (8*48, 5*48) );
+keyEvents(document, players[0]);
 
 var zone = require('./zones/subwayPlatform.js');
-zone.build(blocks);
+zone.build(blocks, movers, metaBlocks);
 
 var backgroundBricks = require('./backgrounds/subwayPlatformBricks.js');
 backgroundBricks.build(tiles);
@@ -30,7 +34,6 @@ var view = new View (0, 0, 640, 480, 55*48, 10*48);
     ctx.fillStyle = "turquoise";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-
     tiles.forEach(function(tile){
       tile.sprite.depthDraw(ctx, tile.pos, view.topLeftPos, tile.depth);
     });
@@ -39,12 +42,20 @@ var view = new View (0, 0, 640, 480, 55*48, 10*48);
       block.sprite.draw(ctx, block.pos, view.topLeftPos);
     });
 
-    view.recenter(player.pos);
+    movers.forEach(function(mover){
+      mover.sprite.draw(ctx, mover.pos, view.topLeftPos);
+    });
 
-    player.sprite.draw(ctx, player.pos, view.topLeftPos);
+    view.recenter(players[0].pos);
 
-    player.drawData(ctx);
+    players[0].sprite.draw(ctx, players[0].pos, view.topLeftPos);
 
-    player.move();
+    players[0].drawData(ctx);
+
+    players[0].move();
+    movers.forEach(function(mover){
+      mover.determineAction();
+      mover.move();
+    });
   }, 32);
 };
