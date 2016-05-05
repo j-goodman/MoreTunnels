@@ -10,6 +10,16 @@ Jumpman.prototype.move = function () {
   this.speed.x += this.accel.x;
   this.speed.y += this.accel.y;
   this.updateSprite();
+  this.checkCollisions();
+  if (typeof this.damageRecover !== "undefined") {
+    this.damageRecover -= 1;
+    if (this.damageRecover > 0) {
+      this.drawMeter();
+    }
+  }
+};
+
+Jumpman.prototype.checkCollisions = function () {
   this.landUnderFeet();
 };
 
@@ -30,19 +40,19 @@ Jumpman.prototype.landUnderFeet = function () {
   return returnVal;
 };
 
-Jumpman.prototype.setSprites = function () {
+Jumpman.prototype.setSprites = function (delay) {
   this.sprites = {
     standing_right: new Sprite(48, 48, 0, [this.spriteRoot+"/right/standing.gif"]),
     jumping_right: new Sprite(48, 48, 0, [this.spriteRoot+"/right/jumping.gif"]),
     standing_left: new Sprite(48, 48, 0, [this.spriteRoot+"/left/standing.gif"]),
     jumping_left: new Sprite(48, 48, 0, [this.spriteRoot+"/left/jumping.gif"]),
-    running_right: new Sprite(48, 48, 4, [
+    running_right: new Sprite(48, 48, delay, [
       this.spriteRoot+"/right/running/0.gif",
       this.spriteRoot+"/right/running/1.gif",
       this.spriteRoot+"/right/running/2.gif",
       this.spriteRoot+"/right/running/3.gif"
     ]),
-    running_left: new Sprite(48, 48, 4, [
+    running_left: new Sprite(48, 48, delay, [
       this.spriteRoot+"/left/running/0.gif",
       this.spriteRoot+"/left/running/1.gif",
       this.spriteRoot+"/left/running/2.gif",
@@ -72,6 +82,26 @@ Jumpman.prototype.landOnGround = function (block) {
     this.speed.y = 0;
   }
   this.pos.y = block.pos.y-this.sprite.height;
+};
+
+Jumpman.prototype.checkSides = function () {
+  var returnVal = "none";
+  blocks.forEach(function (block) {
+    if (this.pos.y+this.sprite.height > block.pos.y &&
+        this.pos.y+this.sprite.height < block.pos.y+block.sprite.height) {
+          if (this.pos.x+50 >= block.pos.x &&
+              this.pos.x+46 <= block.pos.x &&
+            this.speed.x > 0) {
+            returnVal = "right";
+          }
+          if (this.pos.x-50 <= block.pos.x &&
+              this.pos.x-46 >= block.pos.x &&
+            this.speed.x < 0) {
+            returnVal = "left";
+          }
+        }
+  }.bind(this));
+  return returnVal;
 };
 
 Jumpman.prototype.updateSprite = function () {

@@ -46,15 +46,15 @@
 
 	var renderZone = __webpack_require__(1);
 	var Player = __webpack_require__(2);
-	var Skeleton = __webpack_require__(7);
-	var Block = __webpack_require__(10);
-	var View = __webpack_require__(11);
-	var keyEvents = __webpack_require__(12);
-	var blocks = __webpack_require__(5);
-	var metaBlocks = __webpack_require__(8);
-	var tiles = __webpack_require__(13);
-	var movers = __webpack_require__(14);
-	var players = __webpack_require__(9);
+	var Skeleton = __webpack_require__(9);
+	var Block = __webpack_require__(12);
+	var View = __webpack_require__(13);
+	var keyEvents = __webpack_require__(14);
+	var blocks = __webpack_require__(6);
+	var metaBlocks = __webpack_require__(10);
+	var tiles = __webpack_require__(8);
+	var movers = __webpack_require__(15);
+	var players = __webpack_require__(11);
 	
 	window.onload = function () {
 	  var canvas = document.getElementById("canvas");
@@ -65,14 +65,15 @@
 	players.push( new Player (8*48, 5*48) );
 	keyEvents(document, players[0]);
 	
-	var zone = __webpack_require__(15);
+	var zone = __webpack_require__(16);
 	zone.build(blocks, movers, metaBlocks);
 	
-	var backgroundBricks = __webpack_require__(18);
+	var backgroundBricks = __webpack_require__(19);
 	backgroundBricks.build(tiles);
 	
-	var backgroundPillars = __webpack_require__(21);
-	backgroundPillars.build(tiles);
+	var backgroundPillars = __webpack_require__(22);
+	backgroundPillars.build(tiles, 2);
+	backgroundPillars.build(tiles, 3);
 	
 	var view = new View (0, 0, 640, 480, 55*48, 10*48);
 	
@@ -80,8 +81,11 @@
 	    ctx.fillStyle = "turquoise";
 	    ctx.fillRect(0, 0, canvas.width, canvas.height);
 	
-	    tiles.forEach(function(tile){
+	    tiles.forEach(function(tile, idx){
 	      tile.sprite.depthDraw(ctx, tile.pos, view.topLeftPos, tile.depth);
+	      if (tile.isMeter) {
+	        delete tiles[idx];
+	      }
 	    });
 	
 	    blocks.forEach(function(block){
@@ -141,9 +145,11 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
-	var Jumpman = __webpack_require__(4);
-	var Util = __webpack_require__(6);
-	var blocks = __webpack_require__(5);
+	var Meter = __webpack_require__(4);
+	var Jumpman = __webpack_require__(5);
+	var Util = __webpack_require__(7);
+	var blocks = __webpack_require__(6);
+	var tiles = __webpack_require__(8);
 	
 	var Player = function (x, y) {
 	  this.pos = {
@@ -161,12 +167,16 @@
 	    y: 1
 	  };
 	  this.spriteRoot = "player";
-	  this.setSprites();
+	  this.setSprites(4);
 	  this.sprite = this.sprites.standing_right;
 	
 	  // STATS
 	  this.runSpeed = 6;
 	  this.jumpPower = 17;
+	  this.maxHealth = 8;
+	
+	  this.health = this.maxHealth;
+	  this.damageRecover = 0;
 	};
 	
 	Util.inherits(Player, Jumpman);
@@ -181,6 +191,19 @@
 	    ctx.beginPath();
 	    ctx.arc(98,52,8,0,2*Math.PI);
 	    ctx.stroke();
+	  }
+	};
+	
+	Player.prototype.drawMeter = function () {
+	  tiles.push( new Meter (this.pos.x, this.pos.y-64, this.health) );
+	};
+	
+	Player.prototype.skeletonBite = function () {
+	  if (this.damageRecover < 0) {
+	    this.damageRecover = 64;
+	    if (this.health <= 8 && this.health > 0) {
+	      this.health -= 1;
+	    }
 	  }
 	};
 	
@@ -251,7 +274,26 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
-	var blocks = __webpack_require__(5);
+	
+	var Meter = function (x, y, health) {
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.depth = 1;
+	  this.isMeter = true;
+	  this.sprite = new Sprite (48, 48, 0, ["meter/"+health+".gif"]);
+	};
+	
+	module.exports = Meter;
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var blocks = __webpack_require__(6);
 	
 	var Jumpman = function () {
 	};
@@ -262,6 +304,16 @@
 	  this.speed.x += this.accel.x;
 	  this.speed.y += this.accel.y;
 	  this.updateSprite();
+	  this.checkCollisions();
+	  if (typeof this.damageRecover !== "undefined") {
+	    this.damageRecover -= 1;
+	    if (this.damageRecover > 0) {
+	      this.drawMeter();
+	    }
+	  }
+	};
+	
+	Jumpman.prototype.checkCollisions = function () {
 	  this.landUnderFeet();
 	};
 	
@@ -282,19 +334,19 @@
 	  return returnVal;
 	};
 	
-	Jumpman.prototype.setSprites = function () {
+	Jumpman.prototype.setSprites = function (delay) {
 	  this.sprites = {
 	    standing_right: new Sprite(48, 48, 0, [this.spriteRoot+"/right/standing.gif"]),
 	    jumping_right: new Sprite(48, 48, 0, [this.spriteRoot+"/right/jumping.gif"]),
 	    standing_left: new Sprite(48, 48, 0, [this.spriteRoot+"/left/standing.gif"]),
 	    jumping_left: new Sprite(48, 48, 0, [this.spriteRoot+"/left/jumping.gif"]),
-	    running_right: new Sprite(48, 48, 4, [
+	    running_right: new Sprite(48, 48, delay, [
 	      this.spriteRoot+"/right/running/0.gif",
 	      this.spriteRoot+"/right/running/1.gif",
 	      this.spriteRoot+"/right/running/2.gif",
 	      this.spriteRoot+"/right/running/3.gif"
 	    ]),
-	    running_left: new Sprite(48, 48, 4, [
+	    running_left: new Sprite(48, 48, delay, [
 	      this.spriteRoot+"/left/running/0.gif",
 	      this.spriteRoot+"/left/running/1.gif",
 	      this.spriteRoot+"/left/running/2.gif",
@@ -324,6 +376,26 @@
 	    this.speed.y = 0;
 	  }
 	  this.pos.y = block.pos.y-this.sprite.height;
+	};
+	
+	Jumpman.prototype.checkSides = function () {
+	  var returnVal = "none";
+	  blocks.forEach(function (block) {
+	    if (this.pos.y+this.sprite.height > block.pos.y &&
+	        this.pos.y+this.sprite.height < block.pos.y+block.sprite.height) {
+	          if (this.pos.x+50 >= block.pos.x &&
+	              this.pos.x+46 <= block.pos.x &&
+	            this.speed.x > 0) {
+	            returnVal = "right";
+	          }
+	          if (this.pos.x-50 <= block.pos.x &&
+	              this.pos.x-46 >= block.pos.x &&
+	            this.speed.x < 0) {
+	            returnVal = "left";
+	          }
+	        }
+	  }.bind(this));
+	  return returnVal;
 	};
 	
 	Jumpman.prototype.updateSprite = function () {
@@ -383,7 +455,7 @@
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	blocks = [];
@@ -392,7 +464,7 @@
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	var Util = {
@@ -421,15 +493,24 @@
 
 
 /***/ },
-/* 7 */
+/* 8 */
+/***/ function(module, exports) {
+
+	tiles = [];
+	
+	module.exports = tiles;
+
+
+/***/ },
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
-	var Jumpman = __webpack_require__(4);
-	var Util = __webpack_require__(6);
-	var blocks = __webpack_require__(5);
-	var metaBlocks = __webpack_require__(8);
-	var players = __webpack_require__(9);
+	var Jumpman = __webpack_require__(5);
+	var Util = __webpack_require__(7);
+	var blocks = __webpack_require__(6);
+	var metaBlocks = __webpack_require__(10);
+	var players = __webpack_require__(11);
 	
 	var Skeleton = function (x, y) {
 	  this.pos = {
@@ -447,12 +528,12 @@
 	    y: 1
 	  };
 	  this.spriteRoot = "skeleton";
-	  this.setSprites();
+	  this.setSprites(5);
 	  this.sprite = this.sprites.standing_right;
 	
 	  // STATS
 	  this.sightRange = 330;
-	    this.runSpeed = 5;
+	    this.runSpeed = 4;
 	  this.jumpPower = 18;
 	  this.chasingSkill = 2.75;
 	};
@@ -460,19 +541,35 @@
 	Util.inherits(Skeleton, Jumpman);
 	
 	Skeleton.prototype.determineAction = function () {
-	  if (Util.distanceBetween(this.pos, players[0].pos) <= this.sightRange) {
-	    // Chance of giving chase
-	    if (Math.random()*32 <= this.chasingSkill) {
-	      Util.xChase(this, players[0].pos, this.runSpeed);
+	  if (this.checkUnderFeet()) {
+	    while (Math.abs(this.speed.x) > this.runSpeed*1.96) {
+	      this.speed.x *= 0.92;
 	    }
-	    // If the player is about to escape the skeleton's range, higher chance
-	    if (Util.distanceBetween(this.pos, players[0].pos) > this.sightRange*0.9) {
-	      if (Math.random()*32 <= this.chasingSkill*7) {
+	    if (Util.distanceBetween(this.pos, players[0].pos) <= this.sightRange) {
+	      // Chance of giving chase
+	      if (Math.random()*32 <= this.chasingSkill) {
 	        Util.xChase(this, players[0].pos, this.runSpeed);
 	      }
+	      // If the player is about to escape the skeleton's range, higher chance
+	      if (Util.distanceBetween(this.pos, players[0].pos) > this.sightRange*0.9) {
+	        if (Math.random()*32 <= this.chasingSkill*7) {
+	          Util.xChase(this, players[0].pos, this.runSpeed);
+	        }
+	      }
+	    } else {
+	      this.wander();
 	    }
+	    this.checkForJumpBlock();
+	    this.checkForPlayer();
 	  }
-	  this.checkForJumpBlock();
+	};
+	
+	Skeleton.prototype.wander = function () {
+	  if (Math.random()*256 < 1) {
+	    this.speed.x = this.runSpeed;
+	  } else if (Math.random()*128 < 2) {
+	    this.speed.x = 0-this.runSpeed;
+	  }
 	};
 	
 	Skeleton.prototype.checkForJumpBlock = function () {
@@ -484,21 +581,56 @@
 	       ) {
 	          if (metaBlock.types.includes("jumpRight") &&
 	            this.speed.x > 0) {
-	              this.speed.y = 0-this.jumpPower;
-	          }
+	              this.jump();
+	            }
 	          if (metaBlock.types.includes("jumpLeft") &&
 	            this.speed.x < 0) {
-	              this.speed.y = 0-this.jumpPower;
+	              this.jump();
+	            }
+	          if (metaBlock.types.includes("switchJumpRight") &&
+	            this.pos.y-players[0].pos.y > -48 &&
+	            this.speed.x > 0) {
+	              this.jump();
+	            }
+	          if (metaBlock.types.includes("switchJumpLeft") &&
+	            this.pos.y-players[0].pos.y > -48 &&
+	            this.speed.x < 0) {
+	              this.jump();
+	            }
+	          if (metaBlock.types.includes("goLeft")) {
+	            this.speed.x = Math.abs(this.speed.x)*(-1);
+	          }
+	          if (metaBlock.types.includes("goRight")) {
+	            this.speed.x = Math.abs(this.speed.x);
 	          }
 	        }
 	  }.bind(this));
+	};
+	
+	Skeleton.prototype.checkForPlayer = function () {
+	  players.forEach(function (player) {
+	    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
+	      this.pos.x > player.pos.x-2 &&
+	      this.pos.y < player.pos.y+this.sprite.height+2 &&
+	      this.pos.y > player.pos.y-2
+	    ) {
+	      if (this.checkUnderFeet() && player.checkUnderFeet()) {
+	        player.skeletonBite();
+	      }
+	    }
+	  }.bind(this));
+	};
+	
+	Skeleton.prototype.jump = function () {
+	  this.speed.y = 0-this.jumpPower;
+	  this.speed.x *= 1.96;
 	};
 	
 	module.exports = Skeleton;
 
 
 /***/ },
-/* 8 */
+/* 10 */
 /***/ function(module, exports) {
 
 	metaBlocks = [];
@@ -507,7 +639,7 @@
 
 
 /***/ },
-/* 9 */
+/* 11 */
 /***/ function(module, exports) {
 
 	players = [];
@@ -516,7 +648,7 @@
 
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -547,7 +679,7 @@
 
 
 /***/ },
-/* 11 */
+/* 13 */
 /***/ function(module, exports) {
 
 	var View = function (topLeftX, topLeftY, bottomRightX, bottomRightY, maxX, maxY) {
@@ -579,7 +711,7 @@
 
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports) {
 
 	var keyEvents = function (document, player) {
@@ -622,16 +754,7 @@
 
 
 /***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	tiles = [];
-	
-	module.exports = tiles;
-
-
-/***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports) {
 
 	movers = [];
@@ -640,19 +763,19 @@
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(16);
+	var Zone = __webpack_require__(17);
 	
 	
 	var subwayPlatform = new Zone ([
 	  "--------------------------------------------------------",
-	  "---------!-----------------------------------!----------",
+	  "---------------------------------------------!----------",
 	  "--------FTTTF----FTTTF--------FTTTTF----FTTFTTF---------",
 	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
-	  "-----------------------FF---FF-------------FTF----F-----",
+	  "-----------------------FF------------------FTF----F-----",
 	  "--------------------------------------------------------",
 	  "---------------------------------------------!------!---",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXX----XXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -660,14 +783,14 @@
 	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
 	],[
 	  "--------------------------------------------------------",
-	  "----------------<------------------->--<----------------",
+	  "------------}---{------------<------}--{----------------",
 	  "--------FTTTF----FTTTF--------FTTTTF----FTTFTTF---------",
 	  "--------------------------------------------------------",
-	  "-----------------------<>---<>-------------<------------",
-	  "-----------------------FF---FF-------------FTF----F-----",
-	  "--------------------------------------------------------",
-	  "-------------------->--->----<--<------->------<--------",
-	  "XXXXXXXXXXXXXXXXXXXXXXX<X----X>XXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "]----------------------{>------------------{-----------[",
+	  "]----------------------FF------------------FTF----F----[",
+	  "]------------------------------------------------------[",
+	  "]------------------->--->---<----------->------<-------[",
+	  "XXXXXXXXXXXXXXXXXXXXXXX<<---->>XXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
 	]
@@ -677,13 +800,13 @@
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Block = __webpack_require__(10);
-	var metaBlock = __webpack_require__(17);
+	var Block = __webpack_require__(12);
+	var metaBlock = __webpack_require__(18);
 	var Player = __webpack_require__(2);
-	var Skeleton = __webpack_require__(7);
+	var Skeleton = __webpack_require__(9);
 	
 	var Zone = function (blueprint, metaBlueprint) {
 	  this.blueprint = blueprint;
@@ -716,7 +839,15 @@
 	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight"]) );
 	        } else if (square === "<") {
 	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpLeft"]) );
-	        } else if (square === "*") {
+	        } else if (square === "{") {
+	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["switchJumpLeft"]) );
+	        } else if (square === "}") {
+	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["switchJumpRight"]) );
+	        } else if (square === "]") {
+	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["goRight"]) );
+	        } else if (square === "[") {
+	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["goLeft"]) );
+	        } else if (square === "^") {
 	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight", "jumpLeft"]));
 	        }
 	      });
@@ -728,7 +859,7 @@
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -745,10 +876,10 @@
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Background = __webpack_require__(19);
+	var Background = __webpack_require__(20);
 	var Sprite = __webpack_require__(3);
 	
 	var subwayPlatform = new Background ([
@@ -766,26 +897,26 @@
 	],
 	{
 	  "-": {sprite: new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
-	        depth: 4},
+	        depth: 5},
 	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
-	        depth: 4}
+	        depth: 5}
 	});
 	
 	module.exports = subwayPlatform;
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Tile = __webpack_require__(20);
+	var Tile = __webpack_require__(21);
 	
 	var Background = function (blueprint, spriteKey) {
 	  this.blueprint = blueprint;
 	  this.spriteKey = spriteKey;
 	};
 	
-	Background.prototype.build = function (tiles) {
+	Background.prototype.build = function (tiles, depth) {
 	  this.blueprint.forEach(function (yLine, yIndex) {
 	    yLine.split("").forEach(function (square, xIndex) {
 	      if (this.spriteKey[square]) {
@@ -799,7 +930,7 @@
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -817,10 +948,10 @@
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Background = __webpack_require__(19);
+	var Background = __webpack_require__(20);
 	var Sprite = __webpack_require__(3);
 	
 	var subwayPlatform = new Background ([
@@ -846,7 +977,7 @@
 	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
 	        depth: 2},
 	  "J": {sprite: new Sprite (144, 48, 0, ["tile/sign_jay.gif"]),
-	        depth: 4}
+	        depth: 5}
 	});
 	
 	module.exports = subwayPlatform;

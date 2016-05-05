@@ -5,7 +5,7 @@ var Background = function (blueprint, spriteKey) {
   this.spriteKey = spriteKey;
 };
 
-Background.prototype.build = function (tiles) {
+Background.prototype.build = function (tiles, depth) {
   this.blueprint.forEach(function (yLine, yIndex) {
     yLine.split("").forEach(function (square, xIndex) {
       if (this.spriteKey[square]) {

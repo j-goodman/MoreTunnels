@@ -26,7 +26,8 @@ var backgroundBricks = require('./backgrounds/subwayPlatformBricks.js');
 backgroundBricks.build(tiles);
 
 var backgroundPillars = require('./backgrounds/subwayPlatformPillars.js');
-backgroundPillars.build(tiles);
+backgroundPillars.build(tiles, 2);
+backgroundPillars.build(tiles, 3);
 
 var view = new View (0, 0, 640, 480, 55*48, 10*48);
 
@@ -34,8 +35,11 @@ var view = new View (0, 0, 640, 480, 55*48, 10*48);
     ctx.fillStyle = "turquoise";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    tiles.forEach(function(tile){
+    tiles.forEach(function(tile, idx){
       tile.sprite.depthDraw(ctx, tile.pos, view.topLeftPos, tile.depth);
+      if (tile.isMeter) {
+        delete tiles[idx];
+      }
     });
 
     blocks.forEach(function(block){

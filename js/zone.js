@@ -34,7 +34,15 @@ Zone.prototype.build = function (blocks, movers, metaBlocks) {
           metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight"]) );
         } else if (square === "<") {
           metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpLeft"]) );
-        } else if (square === "*") {
+        } else if (square === "{") {
+          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["switchJumpLeft"]) );
+        } else if (square === "}") {
+          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["switchJumpRight"]) );
+        } else if (square === "]") {
+          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["goRight"]) );
+        } else if (square === "[") {
+          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["goLeft"]) );
+        } else if (square === "^") {
           metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight", "jumpLeft"]));
         }
       });

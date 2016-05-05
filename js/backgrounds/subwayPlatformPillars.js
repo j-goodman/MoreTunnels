@@ -24,7 +24,7 @@ var subwayPlatform = new Background ([
   "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
         depth: 2},
   "J": {sprite: new Sprite (144, 48, 0, ["tile/sign_jay.gif"]),
-        depth: 4}
+        depth: 5}
 });
 
 module.exports = subwayPlatform;
