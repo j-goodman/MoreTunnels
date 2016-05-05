@@ -58,7 +58,7 @@ Skeleton.prototype.determineAction = function () {
 };
 
 Skeleton.prototype.wander = function () {
-  if (Math.random()*256 < 1) {
+  if (Math.random()*256*(Math.abs(this.speed.x)+0.5) < 1) {
     this.speed.x = this.runSpeed;
   } else if (Math.random()*128 < 2) {
     this.speed.x = 0-this.runSpeed;
