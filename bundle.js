@@ -533,17 +533,18 @@
 	
 	  // STATS
 	  this.sightRange = 330;
-	    this.runSpeed = 4;
+	    this.runSpeed = 5;
 	  this.jumpPower = 18;
-	  this.chasingSkill = 2.75;
+	  this.jumpDistance = 1.3;
+	  this.chasingSkill = 3.5;
 	};
 	
 	Util.inherits(Skeleton, Jumpman);
 	
 	Skeleton.prototype.determineAction = function () {
 	  if (this.checkUnderFeet()) {
-	    while (Math.abs(this.speed.x) > this.runSpeed*1.96) {
-	      this.speed.x *= 0.92;
+	    while (Math.abs(this.speed.x) > this.runSpeed*this.jumpDistance) {
+	      this.speed.x *= 0.75;
 	    }
 	    if (Util.distanceBetween(this.pos, players[0].pos) <= this.sightRange) {
 	      // Chance of giving chase
@@ -589,11 +590,15 @@
 	            }
 	          if (metaBlock.types.includes("switchJumpRight") &&
 	            this.pos.y-players[0].pos.y > -48 &&
+	            !(Util.distanceBetween(this.pos, players[0].pos) < this.sightRange &&
+	            players[0].pos.x < this.pos.x) &&
 	            this.speed.x > 0) {
 	              this.jump();
 	            }
 	          if (metaBlock.types.includes("switchJumpLeft") &&
 	            this.pos.y-players[0].pos.y > -48 &&
+	            !(Util.distanceBetween(this.pos, players[0].pos) < this.sightRange &&
+	            players[0].pos.x > this.pos.x) &&
 	            this.speed.x < 0) {
 	              this.jump();
 	            }
@@ -622,8 +627,10 @@
 	};
 	
 	Skeleton.prototype.jump = function () {
-	  this.speed.y = 0-this.jumpPower;
-	  this.speed.x *= 1.96;
+	  if (this.checkUnderFeet()) {
+	    this.speed.y = 0-this.jumpPower;
+	    this.speed.x *= this.jumpDistance;
+	  }
 	};
 	
 	module.exports = Skeleton;
@@ -772,10 +779,10 @@
 	var subwayPlatform = new Zone ([
 	  "--------------------------------------------------------",
 	  "---------------------------------!-----------!----------",
-	  "--------FTTTF----FTTTF--------FTTTTF----FTTFTTF---------",
+	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
 	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
-	  "-----------------------FF------------------FTF----F-----",
+	  "-----------------------FTF-----------------FTF----F-----",
 	  "--------------------------------------------------------",
 	  "---------------------------------------------!------!---",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXX----XXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -783,11 +790,11 @@
 	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
 	],[
 	  "--------------------------------------------------------",
-	  "------------}---{------------<------}--{----------------",
-	  "--------FTTTF----FTTTF--------FTTTTF----FTTFTTF---------",
+	  "------------}----{-----------<-----}----{{--------------",
+	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
 	  "--------------------------------------------------------",
-	  "]----------------------{>------------------{-----------[",
-	  "]----------------------FF------------------FTF----F----[",
+	  "]----------------------{>------------------{}----------[",
+	  "]----------------------FTF-----------------FTF----F----[",
 	  "]------------------------------------------------------[",
 	  "]------------------->--->---<----------->------<-------[",
 	  "XXXXXXXXXXXXXXXXXXXXXXX<<---->>XXXXXXXXXXXXXXXXXXXXXXXXX",
