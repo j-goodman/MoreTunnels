@@ -3,12 +3,16 @@ var keyEvents = function (document, player) {
     switch(e.keyCode) {
     case 68: // d
     case 39: //right
-      player.speed.x = player.runSpeed;
+      if (player.checkUnderFeet()) {
+        player.speed.x = player.runSpeed;
+      }
       player.facing = "right";
       break;
     case 65: // a
     case 37: //left
-      player.speed.x = 0-player.runSpeed;
+      if (player.checkUnderFeet()) {
+        player.speed.x = 0-player.runSpeed;
+      }
       player.facing = "left";
       break;
     case 87: // w
@@ -16,6 +20,9 @@ var keyEvents = function (document, player) {
       if (player.checkUnderFeet()) {
         player.speed.y = 0-player.jumpPower;
       }
+      break;
+    case 32: //spacebar
+      player.throwHammer();
       break;
     }
   };

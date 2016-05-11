@@ -125,7 +125,7 @@ Jumpman.prototype.updateSprite = function () {
 };
 
 Jumpman.prototype.xRightStop = function () {
-  if (this.pos.x%48===0) {
+  if (this.pos.x%48===0 && this.checkUnderFeet()) {
     this.speed.x = 0;
   } else {
     if (this.speed.x > 0) {
@@ -135,7 +135,7 @@ Jumpman.prototype.xRightStop = function () {
 };
 
 Jumpman.prototype.xLeftStop = function () {
-  if (this.pos.x%48===0) {
+  if (this.pos.x%48===0 && this.checkUnderFeet()) {
     this.speed.x = 0;
   } else {
     if (this.speed.x < 0) {

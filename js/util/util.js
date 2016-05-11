@@ -1,4 +1,9 @@
 var Util = {
+
+  universals: {
+    gravity: 1
+  },
+
   inherits: function (ChildClass, BaseClass) {
     function Surrogate() { this.constructor = ChildClass; }
     Surrogate.prototype = BaseClass.prototype;
@@ -9,6 +14,10 @@ var Util = {
     xGap = Math.abs(firstPos.x - secondPos.x);
     yGap = Math.abs(firstPos.y - secondPos.y);
     return(Math.sqrt(xGap*xGap+yGap*yGap));
+  },
+
+  direction: function (xSpeed, ySpeed) {
+    return Math.atan(ySpeed/xSpeed);
   },
 
   xChase: function (chaser, targetPos, speed) {

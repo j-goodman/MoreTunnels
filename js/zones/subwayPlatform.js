@@ -21,7 +21,7 @@ var subwayPlatform = new Zone ([
   "]----------------------{>------------------{}----------[",
   "]----------------------FTF-----------------FTF----F----[",
   "]------------------------------------------------------[",
-  "]------------------->--->---<----------->------<-------[",
+  "]-------------------}--->---<----------->------<-------[",
   "XXXXXXXXXXXXXXXXXXXXXXX<<---->>XXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"

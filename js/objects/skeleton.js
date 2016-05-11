@@ -6,6 +6,7 @@ var metaBlocks = require('../objectArrays/metaBlocks.js');
 var players = require('../objectArrays/players.js');
 
 var Skeleton = function (x, y) {
+  this.type = "skeleton";
   this.pos = {
     x: x,
     y: y
@@ -35,6 +36,7 @@ var Skeleton = function (x, y) {
 Util.inherits(Skeleton, Jumpman);
 
 Skeleton.prototype.determineAction = function () {
+  this.facing = (this.speed.x < 0 ? "left" : "right");
   if (this.checkUnderFeet()) {
     while (Math.abs(this.speed.x) > this.runSpeed*this.jumpDistance) {
       this.speed.x *= 0.75;

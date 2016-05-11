@@ -147,8 +147,10 @@
 	var Sprite = __webpack_require__(3);
 	var Meter = __webpack_require__(4);
 	var Jumpman = __webpack_require__(5);
+	var Hammer = __webpack_require__(23);
 	var Util = __webpack_require__(7);
 	var blocks = __webpack_require__(6);
+	var movers = __webpack_require__(15);
 	var tiles = __webpack_require__(8);
 	
 	var Player = function (x, y) {
@@ -164,7 +166,7 @@
 	  this.frame = "right";
 	  this.accel = {
 	    x: 0,
-	    y: 1
+	    y: Util.universals.gravity
 	  };
 	  this.spriteRoot = "player";
 	  this.setSprites(4);
@@ -173,7 +175,10 @@
 	  // STATS
 	  this.runSpeed = 6;
 	  this.jumpPower = 17;
+	  this.throwPower = 24;
 	  this.maxHealth = 8;
+	
+	  this.hasHammer = true;
 	
 	  this.health = this.maxHealth;
 	  this.damageRecover = 0;
@@ -207,6 +212,22 @@
 	  }
 	};
 	
+	Player.prototype.hammerCount = function () {
+	  increment = 0;
+	  movers.forEach(function(mover) {
+	    if (mover && mover.type === "hammer") {
+	      increment++;
+	    }
+	  });
+	  return increment;
+	};
+	
+	Player.prototype.throwHammer = function () {
+	  if (this.hammerCount() === 0) {
+	    movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, (this.facing === "right" ? this.speed.x + this.throwPower : this.speed.x - this.throwPower), this.speed.y));
+	  }
+	};
+	
 	module.exports = Player;
 
 
@@ -220,6 +241,7 @@
 	  this.height = height;
 	  this.frameDelay = 0;
 	  this.frameDelayMax = frameDelay;
+	  this.angle = 0;
 	  sourcePathArray.forEach(function(path, index){
 	    this.frames[index] = new Image(width, height);
 	    this.frames[index].src = "./sprites/"+path;
@@ -419,7 +441,7 @@
 	};
 	
 	Jumpman.prototype.xRightStop = function () {
-	  if (this.pos.x%48===0) {
+	  if (this.pos.x%48===0 && this.checkUnderFeet()) {
 	    this.speed.x = 0;
 	  } else {
 	    if (this.speed.x > 0) {
@@ -429,7 +451,7 @@
 	};
 	
 	Jumpman.prototype.xLeftStop = function () {
-	  if (this.pos.x%48===0) {
+	  if (this.pos.x%48===0 && this.checkUnderFeet()) {
 	    this.speed.x = 0;
 	  } else {
 	    if (this.speed.x < 0) {
@@ -468,6 +490,11 @@
 /***/ function(module, exports) {
 
 	var Util = {
+	
+	  universals: {
+	    gravity: 1
+	  },
+	
 	  inherits: function (ChildClass, BaseClass) {
 	    function Surrogate() { this.constructor = ChildClass; }
 	    Surrogate.prototype = BaseClass.prototype;
@@ -478,6 +505,10 @@
 	    xGap = Math.abs(firstPos.x - secondPos.x);
 	    yGap = Math.abs(firstPos.y - secondPos.y);
 	    return(Math.sqrt(xGap*xGap+yGap*yGap));
+	  },
+	
+	  direction: function (xSpeed, ySpeed) {
+	    return Math.atan(ySpeed/xSpeed);
 	  },
 	
 	  xChase: function (chaser, targetPos, speed) {
@@ -513,6 +544,7 @@
 	var players = __webpack_require__(11);
 	
 	var Skeleton = function (x, y) {
+	  this.type = "skeleton";
 	  this.pos = {
 	    x: x,
 	    y: y
@@ -542,6 +574,7 @@
 	Util.inherits(Skeleton, Jumpman);
 	
 	Skeleton.prototype.determineAction = function () {
+	  this.facing = (this.speed.x < 0 ? "left" : "right");
 	  if (this.checkUnderFeet()) {
 	    while (Math.abs(this.speed.x) > this.runSpeed*this.jumpDistance) {
 	      this.speed.x *= 0.75;
@@ -726,12 +759,16 @@
 	    switch(e.keyCode) {
 	    case 68: // d
 	    case 39: //right
-	      player.speed.x = player.runSpeed;
+	      if (player.checkUnderFeet()) {
+	        player.speed.x = player.runSpeed;
+	      }
 	      player.facing = "right";
 	      break;
 	    case 65: // a
 	    case 37: //left
-	      player.speed.x = 0-player.runSpeed;
+	      if (player.checkUnderFeet()) {
+	        player.speed.x = 0-player.runSpeed;
+	      }
 	      player.facing = "left";
 	      break;
 	    case 87: // w
@@ -739,6 +776,9 @@
 	      if (player.checkUnderFeet()) {
 	        player.speed.y = 0-player.jumpPower;
 	      }
+	      break;
+	    case 32: //spacebar
+	      player.throwHammer();
 	      break;
 	    }
 	  };
@@ -796,7 +836,7 @@
 	  "]----------------------{>------------------{}----------[",
 	  "]----------------------FTF-----------------FTF----F----[",
 	  "]------------------------------------------------------[",
-	  "]------------------->--->---<----------->------<-------[",
+	  "]-------------------}--->---<----------->------<-------[",
 	  "XXXXXXXXXXXXXXXXXXXXXXX<<---->>XXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
@@ -988,6 +1028,100 @@
 	});
 	
 	module.exports = subwayPlatform;
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(7);
+	var blocks = __webpack_require__(6);
+	var movers = __webpack_require__(15);
+	var player = __webpack_require__(11);
+	
+	var Hammer = function (index, x, y, xspeed, yspeed) {
+	  this.type = "hammer";
+	  this.index = index;
+	  this.attraction = 1;
+	  this.maxSpeed = 42;
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.speed = {
+	    x: xspeed,
+	    y: yspeed
+	  };
+	  this.accel = {
+	    x: 0,
+	    y: 0
+	  };
+	  this.setSprites();
+	};
+	
+	Hammer.prototype.setSprites = function () {
+	  this.leftSprite = new Sprite (48, 48, 0, [
+	      "hammer/left/0.gif",
+	      "hammer/left/1.gif",
+	      "hammer/left/2.gif",
+	      "hammer/left/3.gif",
+	      "hammer/left/4.gif",
+	      "hammer/left/5.gif",
+	      "hammer/left/6.gif",
+	      "hammer/left/7.gif",
+	      "hammer/left/8.gif",
+	      "hammer/left/9.gif",
+	    ]
+	  );
+	  this.rightSprite = new Sprite (48, 48, 0, [
+	      "hammer/right/0.gif",
+	      "hammer/right/1.gif",
+	      "hammer/right/2.gif",
+	      "hammer/right/3.gif",
+	      "hammer/right/4.gif",
+	      "hammer/right/5.gif",
+	      "hammer/right/6.gif",
+	      "hammer/right/7.gif",
+	      "hammer/right/8.gif",
+	      "hammer/right/9.gif",
+	    ]
+	  );
+	  this.sprite = this.speed.x > 0 ? this.rightSprite : this.leftSprite;
+	};
+	
+	Hammer.prototype.move = function () {
+	  if (Math.abs(this.speed.x) < this.maxSpeed) {
+	    this.speed.x += this.accel.x;
+	  }
+	  if (Math.abs(this.speed.y) < this.maxSpeed) {
+	    this.speed.y += this.accel.y;
+	  }
+	  this.pos.x += this.speed.x;
+	  this.pos.y += this.speed.y;
+	};
+	
+	Hammer.prototype.determineAction = function () {
+	  this.accel.x = (this.pos.x > players[0].pos.x ?
+	    -this.attraction : this.attraction);
+	  this.accel.y = (this.pos.y > players[0].pos.y ?
+	    -this.attraction : this.attraction);
+	  this.catchCheck();
+	};
+	
+	Hammer.prototype.catchCheck = function () {
+	  // if (Util.distanceBetween(
+	  //
+	  // )) {
+	  //
+	  // }
+	};
+	
+	Hammer.prototype.destroy = function () {
+	  movers[this.index].delete();
+	};
+	
+	module.exports = Hammer;
 
 
 /***/ }

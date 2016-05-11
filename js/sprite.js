@@ -4,6 +4,7 @@ var Sprite = function (width, height, frameDelay, sourcePathArray) {
   this.height = height;
   this.frameDelay = 0;
   this.frameDelayMax = frameDelay;
+  this.angle = 0;
   sourcePathArray.forEach(function(path, index){
     this.frames[index] = new Image(width, height);
     this.frames[index].src = "./sprites/"+path;

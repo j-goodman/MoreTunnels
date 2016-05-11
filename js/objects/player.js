@@ -1,8 +1,10 @@
 var Sprite = require('../sprite.js');
 var Meter = require('./meter.js');
 var Jumpman = require('./jumpman.js');
+var Hammer = require('./hammer.js');
 var Util = require('../util/util.js');
 var blocks = require('../objectArrays/blocks.js');
+var movers = require('../objectArrays/movers.js');
 var tiles = require('../objectArrays/tiles.js');
 
 var Player = function (x, y) {
@@ -18,7 +20,7 @@ var Player = function (x, y) {
   this.frame = "right";
   this.accel = {
     x: 0,
-    y: 1
+    y: Util.universals.gravity
   };
   this.spriteRoot = "player";
   this.setSprites(4);
@@ -27,7 +29,10 @@ var Player = function (x, y) {
   // STATS
   this.runSpeed = 6;
   this.jumpPower = 17;
+  this.throwPower = 24;
   this.maxHealth = 8;
+
+  this.hasHammer = true;
 
   this.health = this.maxHealth;
   this.damageRecover = 0;
@@ -58,6 +63,22 @@ Player.prototype.skeletonBite = function () {
     if (this.health <= 8 && this.health > 0) {
       this.health -= 1;
     }
+  }
+};
+
+Player.prototype.hammerCount = function () {
+  increment = 0;
+  movers.forEach(function(mover) {
+    if (mover && mover.type === "hammer") {
+      increment++;
+    }
+  });
+  return increment;
+};
+
+Player.prototype.throwHammer = function () {
+  if (this.hammerCount() === 0) {
+    movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, (this.facing === "right" ? this.speed.x + this.throwPower : this.speed.x - this.throwPower), this.speed.y));
   }
 };
 
