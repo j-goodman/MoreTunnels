@@ -125,8 +125,19 @@ Skeleton.prototype.determineAction = function () {
     }
     this.checkForJumpBlock();
     this.checkForHammer();
+    this.dodgeHammer();
     this.checkForPlayer();
   }
+};
+
+Skeleton.prototype.dodgeHammer = function () {
+  movers.forEach(function (mover) {
+    if (mover.type === "hammer" &&
+        Util.distanceBetween(this.pos, mover.pos) > this.sightRange/5 &&
+        Util.distanceBetween(this.pos, mover.pos) < this.sightRange/3 ) {
+      this.jump();
+    }
+  }.bind(this));
 };
 
 Skeleton.prototype.jump = function () {
