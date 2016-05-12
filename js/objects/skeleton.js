@@ -44,7 +44,7 @@ Skeleton.prototype.checkForHammer = function () {
         Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
         mover.soft <= 0) {
       mover.ricochet();
-      mover.soft = 16;
+      mover.soft = 8;
       this.shatter();
     }
   }.bind(this));
@@ -133,6 +133,7 @@ Skeleton.prototype.determineAction = function () {
 Skeleton.prototype.dodgeHammer = function () {
   movers.forEach(function (mover) {
     if (mover.type === "hammer" &&
+        Math.round(Math.random()) &&
         Util.distanceBetween(this.pos, mover.pos) > this.sightRange/5 &&
         Util.distanceBetween(this.pos, mover.pos) < this.sightRange/3 ) {
       this.jump();
