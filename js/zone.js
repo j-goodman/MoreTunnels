@@ -23,7 +23,7 @@ Zone.prototype.build = function (blocks, movers, metaBlocks) {
       } else if (square === "T") {
         blocks.push( new Block (xIndex*48, yIndex*48, "hanging") );
       } else if (square === "!") {
-        movers.push( new Skeleton (xIndex*48, yIndex*48) );
+        movers.push( new Skeleton (movers.length, xIndex*48, yIndex*48) );
       }
     });
   });

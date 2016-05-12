@@ -22,7 +22,7 @@ var Player = function (x, y) {
     x: 0,
     y: Util.universals.gravity
   };
-  this.spriteRoot = "player";
+  this.spriteRoot = "hammerman";
   this.setSprites(4);
   this.sprite = this.sprites.standing_right;
 
@@ -79,6 +79,17 @@ Player.prototype.hammerCount = function () {
 Player.prototype.throwHammer = function () {
   if (this.hammerCount() === 0) {
     movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, (this.facing === "right" ? this.speed.x + this.throwPower : this.speed.x - this.throwPower), this.speed.y));
+  }
+};
+
+Player.prototype.updateSpriteRoot = function () {
+  if (this.hammerCount() === 0) {
+    this.spriteRoot = "hammerman";
+    this.setSprites(4);
+  }
+  if (this.hammerCount() !== 0) {
+    this.spriteRoot = "player";
+    this.setSprites(4);
   }
 };
 

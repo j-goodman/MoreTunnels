@@ -1,12 +1,15 @@
 var Sprite = require('../sprite.js');
 var Jumpman = require('./jumpman.js');
+var Boneheap = require('./boneheap.js');
 var Util = require('../util/util.js');
 var blocks = require('../objectArrays/blocks.js');
 var metaBlocks = require('../objectArrays/metaBlocks.js');
 var players = require('../objectArrays/players.js');
+var movers = require('../objectArrays/movers.js');
 
-var Skeleton = function (x, y) {
+var Skeleton = function (index, x, y) {
   this.type = "skeleton";
+  this.index = index;
   this.pos = {
     x: x,
     y: y
@@ -19,7 +22,7 @@ var Skeleton = function (x, y) {
   this.frame = "right";
   this.accel = {
     x: 0,
-    y: 1
+    y: Util.universals.gravity
   };
   this.spriteRoot = "skeleton";
   this.setSprites(5);
@@ -35,37 +38,30 @@ var Skeleton = function (x, y) {
 
 Util.inherits(Skeleton, Jumpman);
 
-Skeleton.prototype.determineAction = function () {
-  this.facing = (this.speed.x < 0 ? "left" : "right");
-  if (this.checkUnderFeet()) {
-    while (Math.abs(this.speed.x) > this.runSpeed*this.jumpDistance) {
-      this.speed.x *= 0.75;
+Skeleton.prototype.checkForHammer = function () {
+  movers.forEach(function (mover) {
+    if (mover.type === "hammer" &&
+        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
+        mover.soft <= 0) {
+      mover.ricochet();
+      mover.soft = 16;
+      this.shatter();
     }
-    if (Util.distanceBetween(this.pos, players[0].pos) <= this.sightRange) {
-      // Chance of giving chase
-      if (Math.random()*32 <= this.chasingSkill) {
-        Util.xChase(this, players[0].pos, this.runSpeed);
-      }
-      // If the player is about to escape the skeleton's range, higher chance
-      if (Util.distanceBetween(this.pos, players[0].pos) > this.sightRange*0.9) {
-        if (Math.random()*32 <= this.chasingSkill*7) {
-          Util.xChase(this, players[0].pos, this.runSpeed);
-        }
-      }
-    } else {
-      this.wander();
-    }
-    this.checkForJumpBlock();
-    this.checkForPlayer();
-  }
+  }.bind(this));
 };
 
-Skeleton.prototype.wander = function () {
-  if (Math.random()*256*(Math.abs(this.speed.x)+0.5) < 1) {
-    this.speed.x = this.runSpeed;
-  } else if (Math.random()*128 < 2) {
-    this.speed.x = 0-this.runSpeed;
-  }
+Skeleton.prototype.checkForPlayer = function () {
+  players.forEach(function (player) {
+    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
+      this.pos.x > player.pos.x-2 &&
+      this.pos.y < player.pos.y+this.sprite.height+2 &&
+      this.pos.y > player.pos.y-2
+    ) {
+      if (this.checkUnderFeet() && player.checkUnderFeet()) {
+        player.skeletonBite();
+      }
+    }
+  }.bind(this));
 };
 
 Skeleton.prototype.checkForJumpBlock = function () {
@@ -107,24 +103,48 @@ Skeleton.prototype.checkForJumpBlock = function () {
   }.bind(this));
 };
 
-Skeleton.prototype.checkForPlayer = function () {
-  players.forEach(function (player) {
-    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
-      this.pos.x > player.pos.x-2 &&
-      this.pos.y < player.pos.y+this.sprite.height+2 &&
-      this.pos.y > player.pos.y-2
-    ) {
-      if (this.checkUnderFeet() && player.checkUnderFeet()) {
-        player.skeletonBite();
-      }
+Skeleton.prototype.determineAction = function () {
+  this.facing = (this.speed.x < 0 ? "left" : "right");
+  if (this.checkUnderFeet()) {
+    while (Math.abs(this.speed.x) > this.runSpeed*this.jumpDistance) {
+      this.speed.x *= 0.75;
     }
-  }.bind(this));
+    if (Util.distanceBetween(this.pos, players[0].pos) <= this.sightRange) {
+      // Chance of giving chase
+      if (Math.random()*32 <= this.chasingSkill) {
+        Util.xChase(this, players[0].pos, this.runSpeed);
+      }
+      // If the player is about to escape the skeleton's range, higher chance
+      if (Util.distanceBetween(this.pos, players[0].pos) > this.sightRange*0.9) {
+        if (Math.random()*32 <= this.chasingSkill*7) {
+          Util.xChase(this, players[0].pos, this.runSpeed);
+        }
+      }
+    } else {
+      this.wander();
+    }
+    this.checkForJumpBlock();
+    this.checkForHammer();
+    this.checkForPlayer();
+  }
 };
 
 Skeleton.prototype.jump = function () {
   if (this.checkUnderFeet()) {
     this.speed.y = 0-this.jumpPower;
     this.speed.x *= this.jumpDistance;
+  }
+};
+
+Skeleton.prototype.shatter = function () {
+  movers[this.index] = new Boneheap (this.index, this.pos);
+};
+
+Skeleton.prototype.wander = function () {
+  if (Math.random()*256*(Math.abs(this.speed.x)+0.5) < 1) {
+    this.speed.x = this.runSpeed;
+  } else if (Math.random()*128 < 2) {
+    this.speed.x = 0-this.runSpeed;
   }
 };
 
