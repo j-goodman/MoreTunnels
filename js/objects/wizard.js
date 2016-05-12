@@ -7,7 +7,7 @@ var metaBlocks = require('../objectArrays/metaBlocks.js');
 var players = require('../objectArrays/players.js');
 var movers = require('../objectArrays/movers.js');
 
-var Skeleton = function (index, x, y) {
+var Wizard = function (index, x, y) {
   this.type = "skeleton";
   this.index = index;
   this.pos = {
@@ -24,47 +24,42 @@ var Skeleton = function (index, x, y) {
     x: 0,
     y: Util.universals.gravity
   };
-  this.spriteRoot = "skeleton";
-  this.setSprites(5);
+  this.spriteRoot = "wizard";
+  this.setSprites(6);
   this.sprite = this.sprites.standing_right;
 
   // STATS
-  this.sightRange = 330;
-    this.runSpeed = 5;
+  this.sightRange = 270;
+  this.runSpeed = 4;
   this.jumpPower = 18;
-  this.jumpDistance = 1.3;
-  this.chasingSkill = 3.5;
+  this.jumpDistance = 1.4;
+  this.chasingSkill = 5;
+  this.magicRange = 48;
 };
 
-Util.inherits(Skeleton, Jumpman);
+Util.inherits(Wizard, Jumpman);
 
-Skeleton.prototype.checkForHammer = function () {
+Wizard.prototype.checkForBoneheap = function () {
+  var boneheap = Util.findByType("boneheap", movers);
+  if (boneheap && Util.distanceBetween(this.pos, boneheap.pos) < this.magicRange) {
+    this.speed.x = 0;
+    boneheap.reanimate(this.index, this.pos.x, this.pos.y);
+  }
+};
+
+Wizard.prototype.checkForHammer = function () {
   movers.forEach(function (mover) {
     if (mover.type === "hammer" &&
         Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
         mover.soft <= 0) {
       mover.ricochet();
       mover.soft = 8;
-      this.shatter();
+      this.destroy();
     }
   }.bind(this));
 };
 
-Skeleton.prototype.checkForPlayer = function () {
-  players.forEach(function (player) {
-    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
-      this.pos.x > player.pos.x-2 &&
-      this.pos.y < player.pos.y+this.sprite.height+2 &&
-      this.pos.y > player.pos.y-2
-    ) {
-      if (this.checkUnderFeet() && player.checkUnderFeet()) {
-        player.skeletonBite();
-      }
-    }
-  }.bind(this));
-};
-
-Skeleton.prototype.checkForJumpBlock = function () {
+Wizard.prototype.checkForJumpBlock = function () {
   metaBlocks.forEach(function(metaBlock){
     if (this.pos.x < metaBlock.pos.x+this.sprite.width+2 &&
         this.pos.x > metaBlock.pos.x-2 &&
@@ -103,22 +98,21 @@ Skeleton.prototype.checkForJumpBlock = function () {
   }.bind(this));
 };
 
-Skeleton.prototype.determineAction = function () {
+Wizard.prototype.destroy = function () {
+  delete movers[this.index];
+};
+
+Wizard.prototype.determineAction = function () {
   this.facing = (this.speed.x < 0 ? "left" : "right");
   if (this.checkUnderFeet()) {
     while (Math.abs(this.speed.x) > this.runSpeed*this.jumpDistance) {
       this.speed.x *= 0.75;
     }
-    if (Util.distanceBetween(this.pos, players[0].pos) <= this.sightRange) {
-      // Chance of giving chase
+    var boneheap = Util.findByType("boneheap", movers);
+    if (boneheap) {
+      // Chance of going after a heap
       if (Math.random()*32 <= this.chasingSkill) {
-        Util.xChase(this, players[0].pos, this.runSpeed);
-      }
-      // If the player is about to escape the skeleton's range, higher chance
-      if (Util.distanceBetween(this.pos, players[0].pos) > this.sightRange*0.9) {
-        if (Math.random()*32 <= this.chasingSkill*7) {
-          Util.xChase(this, players[0].pos, this.runSpeed);
-        }
+        Util.xChase(this, boneheap.pos, this.runSpeed);
       }
     } else {
       this.wander();
@@ -126,22 +120,24 @@ Skeleton.prototype.determineAction = function () {
     this.checkForJumpBlock();
     this.checkForHammer();
     this.dodgeHammer();
-    this.checkForPlayer();
   }
+  if (this.pos.y > players[0].pos.y+48*2) {
+    this.turnIntoABird();
+  }
+  this.checkForBoneheap();
 };
 
-Skeleton.prototype.dodgeHammer = function () {
+Wizard.prototype.dodgeHammer = function () {
   movers.forEach(function (mover) {
     if (mover.type === "hammer" &&
-        Math.round(Math.random()*2) &&
-        Util.distanceBetween(this.pos, mover.pos) > this.sightRange/5 &&
-        Util.distanceBetween(this.pos, mover.pos) < this.sightRange/3 ) {
-      this.jump();
+        Util.distanceBetween(this.pos, mover.pos) > this.sightRange/12 &&
+        Util.distanceBetween(this.pos, mover.pos) < this.sightRange/2 ) {
+      this.turnIntoABird();
     }
   }.bind(this));
 };
 
-Skeleton.prototype.jump = function () {
+Wizard.prototype.jump = function () {
   if (this.checkUnderFeet()) {
     this.speed.y = 0-this.jumpPower;
     this.speed.x *= this.jumpDistance;
@@ -151,11 +147,26 @@ Skeleton.prototype.jump = function () {
   }
 };
 
-Skeleton.prototype.shatter = function () {
-  movers[this.index] = new Boneheap (this.index, this.pos);
+Wizard.prototype.lowJump = function () {
+  if (this.checkUnderFeet()) {
+    this.speed.y = 0-this.jumpPower/1.3;
+    this.speed.x *= this.jumpDistance;
+    if (this.pos.x < 48*5 && this.speed.x < 0) {
+      this.speed.x *= (-1);
+    }
+  }
 };
 
-Skeleton.prototype.wander = function () {
+Wizard.prototype.transmogrify = function () {
+  var Pigeon = require('./pigeon.js');
+  movers[this.index] = new Pigeon (this.index, this.pos.x, this.pos.y);
+};
+
+Wizard.prototype.turnIntoABird = function () {
+  this.transmogrify();
+};
+
+Wizard.prototype.wander = function () {
   if (Math.random()*256*(Math.abs(this.speed.x)+0.5) < 1) {
     this.speed.x = this.runSpeed;
   } else if (Math.random()*128 < 2) {
@@ -163,4 +174,4 @@ Skeleton.prototype.wander = function () {
   }
 };
 
-module.exports = Skeleton;
+module.exports = Wizard;

@@ -20,6 +20,16 @@ Util.direction = function (xSpeed, ySpeed) {
   return Math.atan(ySpeed/xSpeed);
 };
 
+Util.findByType = function (type, array) {
+  var result;
+  array.forEach(function (mover) {
+    if (mover.type && mover.type === type) {
+      result = mover;
+    }
+  });
+  return result;
+};
+
 Util.moveTowards = function (moverPos, targetPos, vectorSpeed) {
   var xSpeed = ((moverPos.x - targetPos.x)/(Math.sqrt(
     Math.pow((moverPos.x - targetPos.x), 2) + Math.pow((moverPos.y - targetPos.y), 2)
@@ -31,6 +41,16 @@ Util.moveTowards = function (moverPos, targetPos, vectorSpeed) {
     x: xSpeed,
     y: ySpeed
   };
+};
+
+Util.typeCount = function (type, array) {
+  var increment = 0;
+  array.forEach(function (mover) {
+    if (mover.type && mover.type === type) {
+      increment ++;
+    }
+  });
+  return increment;
 };
 
 Util.xChase = function (chaser, targetPos, speed) {

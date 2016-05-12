@@ -42,6 +42,11 @@ Boneheap.prototype.landUnderFeet = Jumpman.prototype.landUnderFeet;
 
 Boneheap.prototype.landOnGround = Jumpman.prototype.landOnGround;
 
+Boneheap.prototype.reanimate = function () {
+  var Skeleton = require('./skeleton.js');
+  movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y));
+};
+
 Boneheap.prototype.setSprites = function () {
   this.collapseSprite = new Sprite (48, 48, 0, [
       "boneheap/collapsing/0.gif",

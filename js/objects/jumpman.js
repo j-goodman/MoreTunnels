@@ -59,6 +59,9 @@ Jumpman.prototype.setSprites = function (delay) {
       this.spriteRoot+"/left/running/3.gif"
     ])
   };
+  if (this.setExtraSprites) {
+    this.setExtraSprites();
+  }
 };
 
 Jumpman.prototype.checkUnderFeet = function () {

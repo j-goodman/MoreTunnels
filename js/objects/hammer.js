@@ -72,10 +72,10 @@ Hammer.prototype.move = function () {
     this.pos.x += this.speed.x > 0 ? this.maxSpeed : 0-this.maxSpeed;
   }
 
-  if (Math.abs(this.speed.y) <= this.maxSpeed) {
+  if (Math.abs(this.speed.y) <= this.maxSpeed/2) {
     this.pos.y += this.speed.y;
   } else {
-    this.pos.y += this.speed.y > 0 ? this.maxSpeed : 0-this.maxSpeed;
+    this.pos.y += this.speed.y > 0 ? this.maxSpeed/2 : 0-this.maxSpeed/2;
   }
 };
 

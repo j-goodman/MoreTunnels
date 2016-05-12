@@ -76,6 +76,23 @@ Player.prototype.hammerCount = function () {
   return increment;
 };
 
+Player.prototype.setExtraSprites = function () {
+  this.sprites.throwing_right = new Sprite(48, 48, 0, [
+    this.spriteRoot+"/right/throw/0.gif",
+    this.spriteRoot+"/right/throw/1.gif",
+    this.spriteRoot+"/right/throw/2.gif",
+    this.spriteRoot+"/right/throw/3.gif",
+    this.spriteRoot+"/right/throw/4.gif",
+  ]);
+  this.sprites.throwing_left = new Sprite(48, 48, 0, [
+    this.spriteRoot+"/left/throw/0.gif",
+    this.spriteRoot+"/left/throw/1.gif",
+    this.spriteRoot+"/left/throw/2.gif",
+    this.spriteRoot+"/left/throw/3.gif",
+    this.spriteRoot+"/left/throw/4.gif",
+  ]);
+};
+
 Player.prototype.throwHammer = function () {
   if (this.hammerCount() === 0) {
     movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, (this.facing === "right" ? this.speed.x + this.throwPower : this.speed.x - this.throwPower), this.speed.y));
