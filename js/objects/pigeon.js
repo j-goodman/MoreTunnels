@@ -44,7 +44,7 @@ Pigeon.prototype.animateTransformation = function () {
   } else if (this.age === 4) {
     this.spriteRoot = "wizardpigeon";
     this.setSprites(2);
-  } else if (this.age === 8) {
+  } else if (this.age === 22) {
     this.spriteRoot = "pigeon";
     this.setSprites(2);
   }
@@ -71,7 +71,7 @@ Pigeon.prototype.checkForHammer = function () {
         mover.soft <= 0) {
       mover.ricochet();
       mover.soft = 8;
-      this.turnIntoAPerson();
+      this.transmogrify();
     }
   }.bind(this));
 };
@@ -124,6 +124,12 @@ Pigeon.prototype.jump = function () {
 Pigeon.prototype.setExtraSprites = function () {
   this.sprites.jumping_right = this.sprites.running_right;
   this.sprites.jumping_left = this.sprites.running_left;
+  this.spriteRoot = "pigeonwizard";
+  this.setSprites(2);
+  this.spriteRoot = "wizardpigeon";
+  this.setSprites(2);
+  this.spriteRoot = "pigeon";
+  this.setSprites(2);
 };
 
 Pigeon.prototype.transmogrify = function () {

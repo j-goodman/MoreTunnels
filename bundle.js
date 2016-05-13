@@ -193,6 +193,7 @@
 	  ctx.strokeText("posY: "+this.pos.y+"("+Math.round(this.pos.y/48)+")", 24, 36);
 	  ctx.strokeText("spdX: "+this.speed.x, 24, 48);
 	  ctx.strokeText("spdY: "+this.speed.y, 24, 60);
+	  ctx.strokeText("hp: "+this.health, 24, 72);
 	  if (this.checkUnderFeet()) {
 	    ctx.beginPath();
 	    ctx.arc(98,52,8,0,2*Math.PI);
@@ -238,6 +239,10 @@
 	    this.spriteRoot+"/left/throw/3.gif",
 	    this.spriteRoot+"/left/throw/4.gif",
 	  ]);
+	  this.spriteRoot = "hammerman";
+	  this.setSprites(4);
+	  this.spriteRoot = "player";
+	  this.setSprites(4);
 	};
 	
 	Player.prototype.throwHammer = function () {
@@ -1126,7 +1131,6 @@
 
 	var Zone = __webpack_require__(19);
 	
-	
 	var subwayPlatform = new Zone ([
 	  "--------------------------------------------------------",
 	  "------------*--------------------!-----------!----------",
@@ -1290,7 +1294,7 @@
 	  } else if (this.age === 4) {
 	    this.spriteRoot = "wizardpigeon";
 	    this.setSprites(2);
-	  } else if (this.age === 8) {
+	  } else if (this.age === 22) {
 	    this.spriteRoot = "pigeon";
 	    this.setSprites(2);
 	  }
@@ -1317,7 +1321,7 @@
 	        mover.soft <= 0) {
 	      mover.ricochet();
 	      mover.soft = 8;
-	      this.turnIntoAPerson();
+	      this.transmogrify();
 	    }
 	  }.bind(this));
 	};
@@ -1370,6 +1374,12 @@
 	Pigeon.prototype.setExtraSprites = function () {
 	  this.sprites.jumping_right = this.sprites.running_right;
 	  this.sprites.jumping_left = this.sprites.running_left;
+	  this.spriteRoot = "pigeonwizard";
+	  this.setSprites(2);
+	  this.spriteRoot = "wizardpigeon";
+	  this.setSprites(2);
+	  this.spriteRoot = "pigeon";
+	  this.setSprites(2);
 	};
 	
 	Pigeon.prototype.transmogrify = function () {
