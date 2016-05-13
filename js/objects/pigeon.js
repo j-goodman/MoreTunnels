@@ -33,6 +33,8 @@ var Pigeon = function (index, x, y) {
   this.sightRange = 270;
   this.runSpeed = 5;
   this.jumpPower = 6;
+  this.chasingSkill = 5;
+
   this.spriteRoot = "pigeonwizard";
   this.setSprites(2);
   this.spriteRoot = "wizardpigeon";

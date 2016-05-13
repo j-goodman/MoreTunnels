@@ -32,7 +32,7 @@ backgroundPillars.build(tiles, 3);
 var view = new View (0, 0, 640, 480, 55*48, 10*48);
 
   setInterval(function () {
-    ctx.fillStyle = "turquoise";
+    ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     tiles.forEach(function(tile, idx){

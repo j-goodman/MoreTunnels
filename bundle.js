@@ -78,7 +78,7 @@
 	var view = new View (0, 0, 640, 480, 55*48, 10*48);
 	
 	  setInterval(function () {
-	    ctx.fillStyle = "turquoise";
+	    ctx.fillStyle = "black";
 	    ctx.fillRect(0, 0, canvas.width, canvas.height);
 	
 	    tiles.forEach(function(tile, idx){
@@ -183,6 +183,7 @@
 	
 	  this.health = this.maxHealth;
 	  this.damageRecover = 0;
+	  
 	  this.spriteRoot = "player";
 	  this.setSprites(4);
 	  this.spriteRoot = "hammerman";
@@ -901,7 +902,7 @@
 	  if (this.checkUnderFeet()) {
 	    this.speed.y = 0-this.jumpPower;
 	    this.speed.x *= this.jumpDistance;
-	    if (this.pos.x < 48*5 && this.speed.x < 0) {
+	    if (this.pos.x < 48*7 && this.speed.x < 0) {
 	      this.speed.x *= (-1);
 	    }
 	  }
@@ -1283,6 +1284,8 @@
 	  this.sightRange = 270;
 	  this.runSpeed = 5;
 	  this.jumpPower = 6;
+	  this.chasingSkill = 5;
+	
 	  this.spriteRoot = "pigeonwizard";
 	  this.setSprites(2);
 	  this.spriteRoot = "wizardpigeon";

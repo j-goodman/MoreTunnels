@@ -152,7 +152,7 @@ Skeleton.prototype.jump = function () {
   if (this.checkUnderFeet()) {
     this.speed.y = 0-this.jumpPower;
     this.speed.x *= this.jumpDistance;
-    if (this.pos.x < 48*5 && this.speed.x < 0) {
+    if (this.pos.x < 48*7 && this.speed.x < 0) {
       this.speed.x *= (-1);
     }
   }
