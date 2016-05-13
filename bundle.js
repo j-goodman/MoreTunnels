@@ -183,9 +183,9 @@
 	
 	  this.health = this.maxHealth;
 	  this.damageRecover = 0;
-	  this.spriteRoot = "hammerman";
-	  this.setSprites(4);
 	  this.spriteRoot = "player";
+	  this.setSprites(4);
+	  this.spriteRoot = "hammerman";
 	  this.setSprites(4);
 	};
 	
