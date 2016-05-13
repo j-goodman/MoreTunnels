@@ -5,6 +5,7 @@ var Jumpman = function () {
 };
 
 Jumpman.prototype.move = function () {
+  this.age++;
   this.pos.x += this.speed.x;
   this.pos.y += this.speed.y;
   this.speed.x += this.accel.x;

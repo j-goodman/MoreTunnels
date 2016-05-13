@@ -10,6 +10,7 @@ var movers = require('../objectArrays/movers.js');
 var Pigeon = function (index, x, y) {
   this.type = "pigeon";
   this.index = index;
+  this.age = 0;
   this.pos = {
     x: x,
     y: y
@@ -36,6 +37,19 @@ var Pigeon = function (index, x, y) {
 
 Util.inherits(Pigeon, Jumpman);
 
+Pigeon.prototype.animateTransformation = function () {
+  if (this.age < 2) {
+    this.spriteRoot = "pigeonwizard";
+    this.setSprites(2);
+  } else if (this.age === 4) {
+    this.spriteRoot = "wizardpigeon";
+    this.setSprites(2);
+  } else if (this.age === 8) {
+    this.spriteRoot = "pigeon";
+    this.setSprites(2);
+  }
+};
+
 Pigeon.prototype.checkForBoneheap = function () {
   var boneheap = Util.findByType("boneheap", movers);
   var hammer = Util.findByType("hammer", movers);
@@ -57,11 +71,15 @@ Pigeon.prototype.checkForHammer = function () {
         mover.soft <= 0) {
       mover.ricochet();
       mover.soft = 8;
+      this.turnIntoAPerson();
     }
   }.bind(this));
 };
 
 Pigeon.prototype.determineAction = function () {
+  if (players[0].age > 12) {
+    this.animateTransformation();
+  }
   if (this.speed.y > 3) {
     this.speed.y = 3;
   }
@@ -109,7 +127,9 @@ Pigeon.prototype.transmogrify = function () {
 };
 
 Pigeon.prototype.turnIntoAPerson = function () {
-  this.transmogrify();
+  if (this.age > 48) {
+    this.transmogrify();
+  }
 };
 
 Pigeon.prototype.wander = function () {

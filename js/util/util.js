@@ -54,9 +54,9 @@ Util.typeCount = function (type, array) {
 };
 
 Util.xChase = function (chaser, targetPos, speed) {
-  if (chaser.pos.x > players[0].pos.x) {
+  if (chaser.pos.x > targetPos.x) {
     chaser.speed.x = 0-speed;
-  } else if (chaser.pos.x < players[0].pos.x) {
+  } else if (chaser.pos.x < targetPos.x) {
     chaser.speed.x = speed;
   }
 };

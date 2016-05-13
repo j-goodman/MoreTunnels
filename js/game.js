@@ -58,8 +58,8 @@ var view = new View (0, 0, 640, 480, 55*48, 10*48);
 
     players[0].move();
     movers.forEach(function(mover){
-      mover.determineAction();
       mover.move();
+      mover.determineAction();
     });
   }, 32);
 };

@@ -8,6 +8,7 @@ var movers = require('../objectArrays/movers.js');
 var tiles = require('../objectArrays/tiles.js');
 
 var Player = function (x, y) {
+  this.age = 0;
   this.pos = {
     x: x,
     y: y

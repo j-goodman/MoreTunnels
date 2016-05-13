@@ -10,6 +10,7 @@ var movers = require('../objectArrays/movers.js');
 var Skeleton = function (index, x, y) {
   this.type = "skeleton";
   this.index = index;
+  this.age = 0;
   this.pos = {
     x: x,
     y: y
@@ -123,6 +124,9 @@ Skeleton.prototype.determineAction = function () {
     } else {
       this.wander();
     }
+    if (this.age < 12) {
+      this.sprite = this.sprites.rising;
+    }
     this.checkForJumpBlock();
     this.checkForHammer();
     this.dodgeHammer();
@@ -149,6 +153,16 @@ Skeleton.prototype.jump = function () {
       this.speed.x *= (-1);
     }
   }
+};
+
+Skeleton.prototype.setExtraSprites = function () {
+  this.sprites.rising = new Sprite (48, 48, 2, [
+      "boneheap/collapsing/3.gif",
+      "boneheap/collapsing/2.gif",
+      "boneheap/collapsing/1.gif",
+      "boneheap/collapsing/0.gif"
+    ]
+  );
 };
 
 Skeleton.prototype.shatter = function () {
