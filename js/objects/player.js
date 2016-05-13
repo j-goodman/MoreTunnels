@@ -37,6 +37,10 @@ var Player = function (x, y) {
 
   this.health = this.maxHealth;
   this.damageRecover = 0;
+  this.spriteRoot = "hammerman";
+  this.setSprites(4);
+  this.spriteRoot = "player";
+  this.setSprites(4);
 };
 
 Util.inherits(Player, Jumpman);
@@ -93,10 +97,6 @@ Player.prototype.setExtraSprites = function () {
     this.spriteRoot+"/left/throw/3.gif",
     this.spriteRoot+"/left/throw/4.gif",
   ]);
-  this.spriteRoot = "hammerman";
-  this.setSprites(4);
-  this.spriteRoot = "player";
-  this.setSprites(4);
 };
 
 Player.prototype.throwHammer = function () {

@@ -33,6 +33,12 @@ var Pigeon = function (index, x, y) {
   this.sightRange = 270;
   this.runSpeed = 5;
   this.jumpPower = 6;
+  this.spriteRoot = "pigeonwizard";
+  this.setSprites(2);
+  this.spriteRoot = "wizardpigeon";
+  this.setSprites(2);
+  this.spriteRoot = "pigeon";
+  this.setSprites(2);
 };
 
 Util.inherits(Pigeon, Jumpman);
@@ -124,12 +130,6 @@ Pigeon.prototype.jump = function () {
 Pigeon.prototype.setExtraSprites = function () {
   this.sprites.jumping_right = this.sprites.running_right;
   this.sprites.jumping_left = this.sprites.running_left;
-  this.spriteRoot = "pigeonwizard";
-  this.setSprites(2);
-  this.spriteRoot = "wizardpigeon";
-  this.setSprites(2);
-  this.spriteRoot = "pigeon";
-  this.setSprites(2);
 };
 
 Pigeon.prototype.transmogrify = function () {

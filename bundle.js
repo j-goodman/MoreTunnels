@@ -183,6 +183,10 @@
 	
 	  this.health = this.maxHealth;
 	  this.damageRecover = 0;
+	  this.spriteRoot = "hammerman";
+	  this.setSprites(4);
+	  this.spriteRoot = "player";
+	  this.setSprites(4);
 	};
 	
 	Util.inherits(Player, Jumpman);
@@ -239,10 +243,6 @@
 	    this.spriteRoot+"/left/throw/3.gif",
 	    this.spriteRoot+"/left/throw/4.gif",
 	  ]);
-	  this.spriteRoot = "hammerman";
-	  this.setSprites(4);
-	  this.spriteRoot = "player";
-	  this.setSprites(4);
 	};
 	
 	Player.prototype.throwHammer = function () {
@@ -1283,6 +1283,12 @@
 	  this.sightRange = 270;
 	  this.runSpeed = 5;
 	  this.jumpPower = 6;
+	  this.spriteRoot = "pigeonwizard";
+	  this.setSprites(2);
+	  this.spriteRoot = "wizardpigeon";
+	  this.setSprites(2);
+	  this.spriteRoot = "pigeon";
+	  this.setSprites(2);
 	};
 	
 	Util.inherits(Pigeon, Jumpman);
@@ -1374,12 +1380,6 @@
 	Pigeon.prototype.setExtraSprites = function () {
 	  this.sprites.jumping_right = this.sprites.running_right;
 	  this.sprites.jumping_left = this.sprites.running_left;
-	  this.spriteRoot = "pigeonwizard";
-	  this.setSprites(2);
-	  this.spriteRoot = "wizardpigeon";
-	  this.setSprites(2);
-	  this.spriteRoot = "pigeon";
-	  this.setSprites(2);
 	};
 	
 	Pigeon.prototype.transmogrify = function () {
