@@ -36,6 +36,7 @@ var Wizard = function (index, x, y) {
   this.chasingSkill = 2.5;
   this.magicRange = 48;
   this.age = 0;
+  this.casting = false;
   this.deathStop = 20;
   this.dying = false;
 };
@@ -59,7 +60,15 @@ Wizard.prototype.checkForBoneheap = function () {
   var boneheap = Util.findByType("boneheap", movers);
   if (boneheap && Util.distanceBetween(this.pos, boneheap.pos) < this.magicRange) {
     this.speed.x = 0;
+    this.casting = true;
+    if (this.sprites.casting_right) {
+      this.sprite = (boneheap.pos.x > this.pos.x) ? this.sprites.casting_right : this.sprites.casting_left;
+    }
+  }
+  if (this.casting && !Math.round(Math.random()*24)) {
     boneheap.reanimate(this.index, this.pos.x, this.pos.y);
+    this.casting = false;
+    this.sprite = this.facing === "right" ? this.sprites.standing_right : this.sprites.standing_left;
   }
 };
 
@@ -198,6 +207,22 @@ Wizard.prototype.setExtraSprites = function () {
     this.spriteRoot+"/"+this.facing+"/shrivel/5.gif",
     this.spriteRoot+"/"+this.facing+"/shrivel/6.gif",
   ]);
+  if (this.spriteRoot === "wizard") {
+    this.sprites.casting_left = new Sprite(48, 48, 3, [
+      this.spriteRoot+"/left/casting/0.gif",
+      this.spriteRoot+"/left/casting/1.gif",
+      this.spriteRoot+"/left/casting/2.gif",
+      this.spriteRoot+"/left/casting/3.gif",
+      this.spriteRoot+"/left/casting/4.gif",
+    ]);
+    this.sprites.casting_right = new Sprite(48, 48, 3, [
+      this.spriteRoot+"/right/casting/0.gif",
+      this.spriteRoot+"/right/casting/1.gif",
+      this.spriteRoot+"/right/casting/2.gif",
+      this.spriteRoot+"/right/casting/3.gif",
+      this.spriteRoot+"/right/casting/4.gif",
+    ]);
+  }
 };
 
 Wizard.prototype.transmogrify = function () {
@@ -207,14 +232,7 @@ Wizard.prototype.transmogrify = function () {
 
 Wizard.prototype.turnIntoABird = function () {
   if (this.age > 21 && !this.dying) {
-    this.spriteRoot = "pigeonwizard";
-    this.setSprites(1);
-    if (this.age % 248 === 0) {
-      this.transmogrify();
-    } else {
-      this.age ++;
-      this.turnIntoABird();
-    }
+    this.transmogrify();
   }
 };
 

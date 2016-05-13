@@ -553,7 +553,7 @@
 	  };
 	  this.setSprites();
 	  this.age = 0;
-	  this.soft = 4;
+	  this.soft = 2;
 	};
 	
 	Hammer.prototype.catchCheck = function () {
@@ -769,12 +769,12 @@
 	    x: 0,
 	    y: 0
 	  };
-	  this.facing = "right";
-	  this.frame = "right";
 	  this.accel = {
 	    x: 0,
 	    y: Util.universals.gravity
 	  };
+	  this.facing = "right";
+	  this.frame = "right";
 	  this.spriteRoot = "skeleton";
 	  this.setSprites(5);
 	  this.sprite = this.sprites.standing_right;
@@ -795,7 +795,7 @@
 	        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
 	        mover.soft <= 0) {
 	      mover.ricochet();
-	      mover.soft = 8;
+	      mover.soft = 4;
 	      this.shatter();
 	    }
 	  }.bind(this));
@@ -817,7 +817,11 @@
 	
 	Skeleton.prototype.checkForJumpBlock = function () {
 	  metaBlocks.forEach(function(metaBlock){
-	    if (this.pos.x < metaBlock.pos.x+this.sprite.width+2 &&
+	    if (metaBlock && metaBlock.types.includes("horseGate") &&
+	        Util.distanceBetween(players[0].pos, metaBlock.pos) < 480) {
+	        metaBlock.destroy();
+	    }
+	    if (metaBlock && this.pos.x < metaBlock.pos.x+this.sprite.width+2 &&
 	        this.pos.x > metaBlock.pos.x-2 &&
 	        this.pos.y < metaBlock.pos.y+this.sprite.height+2 &&
 	        this.pos.y > metaBlock.pos.y-2
@@ -849,6 +853,10 @@
 	          }
 	          if (metaBlock.types.includes("goRight")) {
 	            this.speed.x = Math.abs(this.speed.x);
+	          }
+	          if (metaBlock.types.includes("horseGate")) {
+	            this.speed.x = 0;
+	            this.speed.y = 0;
 	          }
 	        }
 	  }.bind(this));
@@ -890,7 +898,7 @@
 	Skeleton.prototype.dodgeHammer = function () {
 	  movers.forEach(function (mover) {
 	    if (mover.type === "hammer" &&
-	        Math.round(Math.random()*2) &&
+	        Math.round(Math.random()*0.8) &&
 	        Util.distanceBetween(this.pos, mover.pos) > this.sightRange/5 &&
 	        Util.distanceBetween(this.pos, mover.pos) < this.sightRange/3 ) {
 	      this.jump();
@@ -1134,25 +1142,25 @@
 	
 	var subwayPlatform = new Zone ([
 	  "--------------------------------------------------------",
-	  "------------*--------------------!-----------!----------",
+	  "------------*----------------------!----------!---------",
 	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
 	  "--------------------------------------------------------",
 	  "--------------------------------------------------------",
 	  "-----------------FF----FTF-----------------FTF----F-----",
 	  "--------------------------------------------------------",
-	  "---------------------------------------------!------!---",
+	  "--------------------------------!---------------------!-",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXX----XXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
 	],[
 	  "--------------------------------------------------------",
-	  "------------}----{-----------<-----}----{{--------------",
+	  "------------}----{-----------<----#}----{{--------------",
 	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
 	  "--------------------------------------------------------",
 	  "]----------------{}-----{>------------------{}----------[",
 	  "]----------------FF----FTF-----------------FTF----F----[",
 	  "]------------------------------------------------------[",
-	  "]------------}------}--->---<----------->------<-------[",
+	  "]------------}------}--->---<-#--------->------<-------[",
 	  "XXXXXXXXXXXXXXXXXXXXXXX<<---->>XXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
@@ -1206,19 +1214,21 @@
 	    this.metaBlueprint.forEach(function (yLine, yIndex) {
 	      yLine.split("").forEach(function (square, xIndex) {
 	        if (square === ">") {
-	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight"]) );
+	          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["jumpRight"]) );
 	        } else if (square === "<") {
-	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpLeft"]) );
+	          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["jumpLeft"]) );
 	        } else if (square === "{") {
-	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["switchJumpLeft"]) );
+	          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["switchJumpLeft"]) );
 	        } else if (square === "}") {
-	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["switchJumpRight"]) );
+	          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["switchJumpRight"]) );
 	        } else if (square === "]") {
-	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["goRight"]) );
+	          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["goRight"]) );
 	        } else if (square === "[") {
-	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["goLeft"]) );
+	          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["goLeft"]) );
+	        } else if (square === "#") {
+	          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["horseGate"]) );
 	        } else if (square === "^") {
-	          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight", "jumpLeft"]));
+	          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["jumpRight", "jumpLeft"]));
 	        }
 	      });
 	    });
@@ -1233,13 +1243,19 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
+	var metaBlocks = __webpack_require__(14);
 	
-	var MetaBlock = function (x, y, types) {
+	var MetaBlock = function (index, x, y, types) {
+	  this.index = index;
 	  this.pos = {
 	    x: x,
 	    y: y
 	  };
 	  this.types = types;
+	};
+	
+	MetaBlock.prototype.destroy = function () {
+	  delete metaBlocks[this.index];
 	};
 	
 	module.exports = MetaBlock;
@@ -1556,6 +1572,7 @@
 	  this.chasingSkill = 2.5;
 	  this.magicRange = 48;
 	  this.age = 0;
+	  this.casting = false;
 	  this.deathStop = 20;
 	  this.dying = false;
 	};
@@ -1579,7 +1596,15 @@
 	  var boneheap = Util.findByType("boneheap", movers);
 	  if (boneheap && Util.distanceBetween(this.pos, boneheap.pos) < this.magicRange) {
 	    this.speed.x = 0;
+	    this.casting = true;
+	    if (this.sprites.casting_right) {
+	      this.sprite = (boneheap.pos.x > this.pos.x) ? this.sprites.casting_right : this.sprites.casting_left;
+	    }
+	  }
+	  if (this.casting && !Math.round(Math.random()*24)) {
 	    boneheap.reanimate(this.index, this.pos.x, this.pos.y);
+	    this.casting = false;
+	    this.sprite = this.facing === "right" ? this.sprites.standing_right : this.sprites.standing_left;
 	  }
 	};
 	
@@ -1718,6 +1743,22 @@
 	    this.spriteRoot+"/"+this.facing+"/shrivel/5.gif",
 	    this.spriteRoot+"/"+this.facing+"/shrivel/6.gif",
 	  ]);
+	  if (this.spriteRoot === "wizard") {
+	    this.sprites.casting_left = new Sprite(48, 48, 3, [
+	      this.spriteRoot+"/left/casting/0.gif",
+	      this.spriteRoot+"/left/casting/1.gif",
+	      this.spriteRoot+"/left/casting/2.gif",
+	      this.spriteRoot+"/left/casting/3.gif",
+	      this.spriteRoot+"/left/casting/4.gif",
+	    ]);
+	    this.sprites.casting_right = new Sprite(48, 48, 3, [
+	      this.spriteRoot+"/right/casting/0.gif",
+	      this.spriteRoot+"/right/casting/1.gif",
+	      this.spriteRoot+"/right/casting/2.gif",
+	      this.spriteRoot+"/right/casting/3.gif",
+	      this.spriteRoot+"/right/casting/4.gif",
+	    ]);
+	  }
 	};
 	
 	Wizard.prototype.transmogrify = function () {
@@ -1727,14 +1768,7 @@
 	
 	Wizard.prototype.turnIntoABird = function () {
 	  if (this.age > 21 && !this.dying) {
-	    this.spriteRoot = "pigeonwizard";
-	    this.setSprites(1);
-	    if (this.age % 248 === 0) {
-	      this.transmogrify();
-	    } else {
-	      this.age ++;
-	      this.turnIntoABird();
-	    }
+	    this.transmogrify();
 	  }
 	};
 	

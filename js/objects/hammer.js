@@ -23,7 +23,7 @@ var Hammer = function (index, x, y, xspeed, yspeed) {
   };
   this.setSprites();
   this.age = 0;
-  this.soft = 4;
+  this.soft = 2;
 };
 
 Hammer.prototype.catchCheck = function () {

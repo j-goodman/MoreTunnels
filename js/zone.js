@@ -38,19 +38,21 @@ Zone.prototype.build = function (blocks, movers, metaBlocks) {
     this.metaBlueprint.forEach(function (yLine, yIndex) {
       yLine.split("").forEach(function (square, xIndex) {
         if (square === ">") {
-          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight"]) );
+          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["jumpRight"]) );
         } else if (square === "<") {
-          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpLeft"]) );
+          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["jumpLeft"]) );
         } else if (square === "{") {
-          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["switchJumpLeft"]) );
+          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["switchJumpLeft"]) );
         } else if (square === "}") {
-          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["switchJumpRight"]) );
+          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["switchJumpRight"]) );
         } else if (square === "]") {
-          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["goRight"]) );
+          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["goRight"]) );
         } else if (square === "[") {
-          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["goLeft"]) );
+          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["goLeft"]) );
+        } else if (square === "#") {
+          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["horseGate"]) );
         } else if (square === "^") {
-          metaBlocks.push( new metaBlock (xIndex*48, yIndex*48, ["jumpRight", "jumpLeft"]));
+          metaBlocks.push( new metaBlock (metaBlocks.length, xIndex*48, yIndex*48, ["jumpRight", "jumpLeft"]));
         }
       });
     });

@@ -19,12 +19,12 @@ var Skeleton = function (index, x, y) {
     x: 0,
     y: 0
   };
-  this.facing = "right";
-  this.frame = "right";
   this.accel = {
     x: 0,
     y: Util.universals.gravity
   };
+  this.facing = "right";
+  this.frame = "right";
   this.spriteRoot = "skeleton";
   this.setSprites(5);
   this.sprite = this.sprites.standing_right;
@@ -45,7 +45,7 @@ Skeleton.prototype.checkForHammer = function () {
         Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
         mover.soft <= 0) {
       mover.ricochet();
-      mover.soft = 8;
+      mover.soft = 4;
       this.shatter();
     }
   }.bind(this));
@@ -67,7 +67,11 @@ Skeleton.prototype.checkForPlayer = function () {
 
 Skeleton.prototype.checkForJumpBlock = function () {
   metaBlocks.forEach(function(metaBlock){
-    if (this.pos.x < metaBlock.pos.x+this.sprite.width+2 &&
+    if (metaBlock && metaBlock.types.includes("horseGate") &&
+        Util.distanceBetween(players[0].pos, metaBlock.pos) < 480) {
+        metaBlock.destroy();
+    }
+    if (metaBlock && this.pos.x < metaBlock.pos.x+this.sprite.width+2 &&
         this.pos.x > metaBlock.pos.x-2 &&
         this.pos.y < metaBlock.pos.y+this.sprite.height+2 &&
         this.pos.y > metaBlock.pos.y-2
@@ -99,6 +103,10 @@ Skeleton.prototype.checkForJumpBlock = function () {
           }
           if (metaBlock.types.includes("goRight")) {
             this.speed.x = Math.abs(this.speed.x);
+          }
+          if (metaBlock.types.includes("horseGate")) {
+            this.speed.x = 0;
+            this.speed.y = 0;
           }
         }
   }.bind(this));
@@ -140,7 +148,7 @@ Skeleton.prototype.determineAction = function () {
 Skeleton.prototype.dodgeHammer = function () {
   movers.forEach(function (mover) {
     if (mover.type === "hammer" &&
-        Math.round(Math.random()*2) &&
+        Math.round(Math.random()*0.8) &&
         Util.distanceBetween(this.pos, mover.pos) > this.sightRange/5 &&
         Util.distanceBetween(this.pos, mover.pos) < this.sightRange/3 ) {
       this.jump();
