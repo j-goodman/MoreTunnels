@@ -103,6 +103,7 @@ Pigeon.prototype.determineAction = function () {
     var boneheap = Util.findByType("boneheap", movers);
     this.speed.x = this.pos.x < boneheap.pos.x ? this.runSpeed : 0-this.runSpeed;
   }
+  this.checkForHammer();
   this.checkForBoneheap();
 };
 

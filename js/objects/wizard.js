@@ -121,8 +121,8 @@ Wizard.prototype.die = function () {
   };
 };
 
-Wizard.prototype.destroy = function () {
-  delete movers[this.index];
+Wizard.prototype.shatter = function () {
+  movers[this.index] = new Boneheap (this.index, this.pos);
 };
 
 Wizard.prototype.determineAction = function () {
@@ -152,7 +152,7 @@ Wizard.prototype.determineAction = function () {
     this.deathStop --;
   }
   if (this.deathStop === 0) {
-    this.destroy();
+    this.shatter();
   }
   this.checkForBoneheap();
 };

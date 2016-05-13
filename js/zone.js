@@ -2,6 +2,7 @@ var Block = require("./objects/block.js");
 var metaBlock = require("./objects/metaBlock.js");
 var Player = require("./objects/player.js");
 var Skeleton = require("./objects/skeleton.js");
+var Boneheap = require("./objects/boneheap.js");
 var Pigeon = require("./objects/pigeon.js");
 var Wizard = require("./objects/wizard.js");
 
@@ -24,6 +25,8 @@ Zone.prototype.build = function (blocks, movers, metaBlocks) {
         blocks.push( new Block (xIndex*48, yIndex*48, "bolted_hang") );
       } else if (square === "T") {
         blocks.push( new Block (xIndex*48, yIndex*48, "hanging") );
+      } else if (square === "H") {
+        movers.push( new Boneheap (movers.length, {x: xIndex*48, y: yIndex*48}) );
       } else if (square === "!") {
         movers.push( new Skeleton (movers.length, xIndex*48, yIndex*48) );
       } else if (square === "*") {

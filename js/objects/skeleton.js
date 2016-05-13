@@ -131,10 +131,10 @@ Skeleton.prototype.determineAction = function () {
       this.shatter();
     }
     this.checkForJumpBlock();
-    this.checkForHammer();
-    this.dodgeHammer();
     this.checkForPlayer();
+    this.dodgeHammer();
   }
+  this.checkForHammer();
 };
 
 Skeleton.prototype.dodgeHammer = function () {

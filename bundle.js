@@ -875,10 +875,10 @@
 	      this.shatter();
 	    }
 	    this.checkForJumpBlock();
-	    this.checkForHammer();
-	    this.dodgeHammer();
 	    this.checkForPlayer();
+	    this.dodgeHammer();
 	  }
+	  this.checkForHammer();
 	};
 	
 	Skeleton.prototype.dodgeHammer = function () {
@@ -1165,6 +1165,7 @@
 	var metaBlock = __webpack_require__(20);
 	var Player = __webpack_require__(2);
 	var Skeleton = __webpack_require__(12);
+	var Boneheap = __webpack_require__(13);
 	var Pigeon = __webpack_require__(21);
 	var Wizard = __webpack_require__(26);
 	
@@ -1187,6 +1188,8 @@
 	        blocks.push( new Block (xIndex*48, yIndex*48, "bolted_hang") );
 	      } else if (square === "T") {
 	        blocks.push( new Block (xIndex*48, yIndex*48, "hanging") );
+	      } else if (square === "H") {
+	        movers.push( new Boneheap (movers.length, {x: xIndex*48, y: yIndex*48}) );
 	      } else if (square === "!") {
 	        movers.push( new Skeleton (movers.length, xIndex*48, yIndex*48) );
 	      } else if (square === "*") {
@@ -1346,6 +1349,7 @@
 	    var boneheap = Util.findByType("boneheap", movers);
 	    this.speed.x = this.pos.x < boneheap.pos.x ? this.runSpeed : 0-this.runSpeed;
 	  }
+	  this.checkForHammer();
 	  this.checkForBoneheap();
 	};
 	
@@ -1624,8 +1628,8 @@
 	  };
 	};
 	
-	Wizard.prototype.destroy = function () {
-	  delete movers[this.index];
+	Wizard.prototype.shatter = function () {
+	  movers[this.index] = new Boneheap (this.index, this.pos);
 	};
 	
 	Wizard.prototype.determineAction = function () {
@@ -1655,7 +1659,7 @@
 	    this.deathStop --;
 	  }
 	  if (this.deathStop === 0) {
-	    this.destroy();
+	    this.shatter();
 	  }
 	  this.checkForBoneheap();
 	};
