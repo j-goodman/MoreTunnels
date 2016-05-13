@@ -36,7 +36,7 @@ var Wizard = function (index, x, y) {
   this.chasingSkill = 2.5;
   this.magicRange = 48;
   this.age = 0;
-  this.deathStop = 18;
+  this.deathStop = 20;
   this.dying = false;
 };
 
@@ -197,7 +197,6 @@ Wizard.prototype.setExtraSprites = function () {
     this.spriteRoot+"/"+this.facing+"/shrivel/4.gif",
     this.spriteRoot+"/"+this.facing+"/shrivel/5.gif",
     this.spriteRoot+"/"+this.facing+"/shrivel/6.gif",
-    this.spriteRoot+"/"+this.facing+"/shrivel/7.gif",
   ]);
 };
 

@@ -127,6 +127,9 @@ Skeleton.prototype.determineAction = function () {
     if (this.age < 12) {
       this.sprite = this.sprites.rising;
     }
+    if (this.speed.y > 100) {
+      this.shatter();
+    }
     this.checkForJumpBlock();
     this.checkForHammer();
     this.dodgeHammer();

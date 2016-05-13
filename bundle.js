@@ -871,6 +871,9 @@
 	    if (this.age < 12) {
 	      this.sprite = this.sprites.rising;
 	    }
+	    if (this.speed.y > 100) {
+	      this.shatter();
+	    }
 	    this.checkForJumpBlock();
 	    this.checkForHammer();
 	    this.dodgeHammer();
@@ -1348,8 +1351,12 @@
 	
 	Pigeon.prototype.dodgeHammer = function () {
 	  var hammer = Util.findByType("hammer", movers);
+	  var boneheap = Util.findByType("boneheap", movers);
 	  this.jump();
 	  this.speed.x = this.pos.x > hammer.pos.x ? this.runSpeed : 0-this.runSpeed;
+	  if (boneheap) {
+	    this.speed.x = this.pos.x < boneheap.pos.x ? this.runSpeed : 0-this.runSpeed;
+	  }
 	};
 	
 	Pigeon.prototype.jump = function () {
@@ -1532,7 +1539,7 @@
 	  this.chasingSkill = 2.5;
 	  this.magicRange = 48;
 	  this.age = 0;
-	  this.deathStop = 18;
+	  this.deathStop = 20;
 	  this.dying = false;
 	};
 	
@@ -1693,7 +1700,6 @@
 	    this.spriteRoot+"/"+this.facing+"/shrivel/4.gif",
 	    this.spriteRoot+"/"+this.facing+"/shrivel/5.gif",
 	    this.spriteRoot+"/"+this.facing+"/shrivel/6.gif",
-	    this.spriteRoot+"/"+this.facing+"/shrivel/7.gif",
 	  ]);
 	};
 	

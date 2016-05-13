@@ -108,8 +108,12 @@ Pigeon.prototype.determineAction = function () {
 
 Pigeon.prototype.dodgeHammer = function () {
   var hammer = Util.findByType("hammer", movers);
+  var boneheap = Util.findByType("boneheap", movers);
   this.jump();
   this.speed.x = this.pos.x > hammer.pos.x ? this.runSpeed : 0-this.runSpeed;
+  if (boneheap) {
+    this.speed.x = this.pos.x < boneheap.pos.x ? this.runSpeed : 0-this.runSpeed;
+  }
 };
 
 Pigeon.prototype.jump = function () {
