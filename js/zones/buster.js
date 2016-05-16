@@ -3,13 +3,13 @@ var Zone = require("../zone.js");
 
 var tooManyCooks = new Zone ([
   "--------------------------------------------------------",
-  "---------*-------*--------------------------*-----------",
+  "---------*-----------H----------H---*-------*-----------",
   "---------F-------FTTTTF--------FTTTTF-------F-----------",
   "--------------------------------------------------------",
-  "-**--------------***----------------------------------*-",
+  "-!---------------------------------!------------------*-",
   "TTF--------------FTTF------------FTTF----------------TTF",
   "--------------------------------------------------------",
-  "--------------H-----------------------------------------",
+  "--------------H-----------!------------------H----H-----",
   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
@@ -21,7 +21,7 @@ var tooManyCooks = new Zone ([
   "]-}---------------}----------------{-----------------{-[",
   "TTF--------------FTTF------------FTTF----------------TTF",
   "]------------------------------------------------------[",
-  "]----------->-------------<-->----------<--------------[",
+  "]----------->-------------<-->----------<--#-----------[",
   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"

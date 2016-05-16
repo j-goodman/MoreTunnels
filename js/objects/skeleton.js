@@ -30,11 +30,11 @@ var Skeleton = function (index, x, y) {
   this.sprite = this.sprites.standing_right;
 
   // STATS
-  this.sightRange = 330;
-    this.runSpeed = 5;
-  this.jumpPower = 18;
-  this.jumpDistance = 1.3;
-  this.chasingSkill = 3.5;
+  this.sightRange = Util.approximately(330);
+  this.runSpeed = Util.approximately(4);
+  this.jumpPower = Util.approximately(15);
+  this.jumpDistance = Util.approximately(1.1);
+  this.chasingSkill = Util.approximately(3.5);
 };
 
 Util.inherits(Skeleton, Jumpman);

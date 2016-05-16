@@ -52,7 +52,7 @@ Pigeon.prototype.animateTransformation = function () {
   } else if (this.age === 4) {
     this.spriteRoot = "wizardpigeon";
     this.setSprites(2);
-  } else if (this.age === 22) {
+  } else if (this.age === 18) {
     this.spriteRoot = "pigeon";
     this.setSprites(2);
   }
@@ -109,7 +109,7 @@ Pigeon.prototype.determineAction = function () {
   }
   if (Util.typeCount("boneheap", movers) > 0 && Math.random()*64 < 1) {
     var boneheap = Util.findByType("boneheap", movers);
-    this.speed.x = this.pos.x < boneheap.pos.x ? this.runSpeed : 0-this.runSpeed;
+    Util.xChase(this, boneheap.pos, this.runSpeed);
   }
   this.checkForHammer();
   this.checkForBoneheap();
@@ -120,7 +120,7 @@ Pigeon.prototype.dodgeHammer = function () {
   var boneheap = Util.findByType("boneheap", movers);
   this.jump();
   this.speed.x = this.pos.x > hammer.pos.x ? this.runSpeed : 0-this.runSpeed;
-  if (boneheap) {
+  if (boneheap && !Math.round(Math.random()*2)) {
     this.speed.x = this.pos.x < boneheap.pos.x ? this.runSpeed : 0-this.runSpeed;
   }
 };

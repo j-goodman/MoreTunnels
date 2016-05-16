@@ -29,12 +29,13 @@ var Wizard = function (index, x, y) {
   this.sprite = this.sprites.standing_right;
 
   // STATS
-  this.sightRange = 270;
-  this.runSpeed = 4;
-  this.jumpPower = 18;
-  this.jumpDistance = 1.4;
-  this.chasingSkill = 2.5;
-  this.magicRange = 48;
+  this.sightRange = Util.approximately(270);
+  this.runSpeed = Util.approximately(4);
+  this.jumpPower = Util.approximately(18);
+  this.jumpDistance = Util.approximately(1.4);
+  this.chasingSkill = Util.approximately(2);
+  this.magicRange = Util.approximately(48);
+
   this.age = 0;
   this.casting = false;
   this.deathStop = 20;
@@ -61,14 +62,14 @@ Wizard.prototype.checkForBoneheap = function () {
   if (boneheap && Util.distanceBetween(this.pos, boneheap.pos) < this.magicRange) {
     this.speed.x = 0;
     this.casting = true;
-    if (this.sprites.casting_right) {
+    if (this.sprites.casting_right && !this.dying) {
       this.sprite = (boneheap.pos.x > this.pos.x) ? this.sprites.casting_right : this.sprites.casting_left;
     }
-  }
-  if (this.casting && !Math.round(Math.random()*24)) {
-    boneheap.reanimate(this.index, this.pos.x, this.pos.y);
-    this.casting = false;
-    this.sprite = this.facing === "right" ? this.sprites.standing_right : this.sprites.standing_left;
+    if (this.casting && !this.dying && !Math.round(Math.random()*24)) {
+      boneheap.reanimate(this.index, this.pos.x, this.pos.y);
+      this.casting = false;
+      this.sprite = this.facing === "right" ? this.sprites.standing_right : this.sprites.standing_left;
+    }
   }
 };
 
@@ -172,6 +173,7 @@ Wizard.prototype.dodgeHammer = function () {
     if (mover.type === "hammer" &&
         Util.distanceBetween(this.pos, mover.pos) > this.sightRange/24 &&
         Util.distanceBetween(this.pos, mover.pos) < this.sightRange/2 ) {
+      this.lowJump();
       this.turnIntoABird();
     }
   }.bind(this));
@@ -195,6 +197,7 @@ Wizard.prototype.lowJump = function () {
       this.speed.x *= (-1);
     }
   }
+  this.speed.x = Math.round(Math.random()) ? this.runSpeed : 0-this.runSpeed;
 };
 
 Wizard.prototype.setExtraSprites = function () {

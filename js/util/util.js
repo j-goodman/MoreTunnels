@@ -10,6 +10,19 @@ Util.inherits = function (ChildClass, BaseClass) {
   ChildClass.prototype = new Surrogate();
 };
 
+Util.approximately = function (integer, otherIntegers) {
+  var aprx =
+    integer + Math.random()*integer - Math.random()*integer +
+    integer + Math.random()*integer - Math.random()*integer +
+    integer + Math.random()*integer - Math.random()*integer +
+    integer + Math.random()*integer - Math.random()*integer +
+    integer + Math.random()*integer - Math.random()*integer +
+    integer + Math.random()*integer - Math.random()*integer +
+    integer + Math.random()*integer - Math.random()*integer +
+    integer + Math.random()*integer - Math.random()*integer;
+  return Math.ceil(aprx/8);
+};
+
 Util.distanceBetween = function (firstPos, secondPos) {
   xGap = Math.abs(firstPos.x - secondPos.x);
   yGap = Math.abs(firstPos.y - secondPos.y);

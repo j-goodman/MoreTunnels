@@ -68,14 +68,14 @@
 	var zone = __webpack_require__(18);
 	zone.build(blocks, movers, metaBlocks);
 	
-	var backgroundBricks = __webpack_require__(22);
+	var backgroundBricks = __webpack_require__(23);
 	backgroundBricks.build(tiles);
 	
-	var backgroundPillars = __webpack_require__(25);
+	var backgroundPillars = __webpack_require__(26);
 	backgroundPillars.build(tiles, 2);
 	backgroundPillars.build(tiles, 3);
 	
-	var view = new View (0, 0, 640, 480, 55*48, 10*48);
+	var view = new View (0, 0, 640, 480, 555*48, 11*48);
 	
 	  setInterval(function () {
 	    ctx.fillStyle = "black";
@@ -663,6 +663,19 @@
 	  ChildClass.prototype = new Surrogate();
 	};
 	
+	Util.approximately = function (integer, otherIntegers) {
+	  var aprx =
+	    integer + Math.random()*integer - Math.random()*integer +
+	    integer + Math.random()*integer - Math.random()*integer +
+	    integer + Math.random()*integer - Math.random()*integer +
+	    integer + Math.random()*integer - Math.random()*integer +
+	    integer + Math.random()*integer - Math.random()*integer +
+	    integer + Math.random()*integer - Math.random()*integer +
+	    integer + Math.random()*integer - Math.random()*integer +
+	    integer + Math.random()*integer - Math.random()*integer;
+	  return Math.ceil(aprx/8);
+	};
+	
 	Util.distanceBetween = function (firstPos, secondPos) {
 	  xGap = Math.abs(firstPos.x - secondPos.x);
 	  yGap = Math.abs(firstPos.y - secondPos.y);
@@ -780,11 +793,11 @@
 	  this.sprite = this.sprites.standing_right;
 	
 	  // STATS
-	  this.sightRange = 330;
-	    this.runSpeed = 5;
-	  this.jumpPower = 18;
-	  this.jumpDistance = 1.3;
-	  this.chasingSkill = 3.5;
+	  this.sightRange = Util.approximately(330);
+	  this.runSpeed = Util.approximately(4);
+	  this.jumpPower = Util.approximately(15);
+	  this.jumpDistance = Util.approximately(1.1);
+	  this.chasingSkill = Util.approximately(3.5);
 	};
 	
 	Util.inherits(Skeleton, Jumpman);
@@ -1142,10 +1155,10 @@
 	
 	var subwayPlatform = new Zone ([
 	  "--------------------------------------------------------",
-	  "------------*----------------------!----------!---------",
+	  "------------*----------------------!---------*!---------",
 	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
-	  "--------------------------------------------------------",
-	  "--------------------------------------------------------",
+	  "--------------------------------------------!-----------",
+	  "--------------------------------------------#!----------",
 	  "-----------------FF----FTF-----------------FTF----F-----",
 	  "--------------------------------------------------------",
 	  "--------------------------------!---------------------!-",
@@ -1180,7 +1193,7 @@
 	var Skeleton = __webpack_require__(12);
 	var Boneheap = __webpack_require__(13);
 	var Pigeon = __webpack_require__(21);
-	var Wizard = __webpack_require__(26);
+	var Wizard = __webpack_require__(22);
 	
 	var Zone = function (blueprint, metaBlueprint) {
 	  this.blueprint = blueprint;
@@ -1319,7 +1332,7 @@
 	  } else if (this.age === 4) {
 	    this.spriteRoot = "wizardpigeon";
 	    this.setSprites(2);
-	  } else if (this.age === 22) {
+	  } else if (this.age === 18) {
 	    this.spriteRoot = "pigeon";
 	    this.setSprites(2);
 	  }
@@ -1376,7 +1389,7 @@
 	  }
 	  if (Util.typeCount("boneheap", movers) > 0 && Math.random()*64 < 1) {
 	    var boneheap = Util.findByType("boneheap", movers);
-	    this.speed.x = this.pos.x < boneheap.pos.x ? this.runSpeed : 0-this.runSpeed;
+	    Util.xChase(this, boneheap.pos, this.runSpeed);
 	  }
 	  this.checkForHammer();
 	  this.checkForBoneheap();
@@ -1387,7 +1400,7 @@
 	  var boneheap = Util.findByType("boneheap", movers);
 	  this.jump();
 	  this.speed.x = this.pos.x > hammer.pos.x ? this.runSpeed : 0-this.runSpeed;
-	  if (boneheap) {
+	  if (boneheap && !Math.round(Math.random()*2)) {
 	    this.speed.x = this.pos.x < boneheap.pos.x ? this.runSpeed : 0-this.runSpeed;
 	  }
 	};
@@ -1402,7 +1415,7 @@
 	};
 	
 	Pigeon.prototype.transmogrify = function () {
-	  var Wizard = __webpack_require__(26);
+	  var Wizard = __webpack_require__(22);
 	  movers[this.index] = new Wizard (this.index, this.pos.x, this.pos.y);
 	};
 	
@@ -1424,114 +1437,6 @@
 
 /***/ },
 /* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Background = __webpack_require__(23);
-	var Sprite = __webpack_require__(3);
-	
-	var subwayPlatform = new Background ([
-	  "---------------------------",
-	  "---------------------------",
-	  "---------------------------",
-	  "---------------------------",
-	  "---------------------------",
-	  "===========================",
-	  "---------------------------",
-	  "---------------------------",
-	  "---------------------------",
-	  "===========================",
-	  "==========================="
-	],
-	{
-	  "-": {sprite: new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
-	        depth: 5},
-	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
-	        depth: 5}
-	});
-	
-	module.exports = subwayPlatform;
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Tile = __webpack_require__(24);
-	
-	var Background = function (blueprint, spriteKey) {
-	  this.blueprint = blueprint;
-	  this.spriteKey = spriteKey;
-	};
-	
-	Background.prototype.build = function (tiles, depth) {
-	  this.blueprint.forEach(function (yLine, yIndex) {
-	    yLine.split("").forEach(function (square, xIndex) {
-	      if (this.spriteKey[square]) {
-	        tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square].sprite, this.spriteKey[square].depth) );
-	      }
-	    }.bind(this));
-	  }.bind(this));
-	};
-	
-	module.exports = Background;
-
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	
-	var Tile = function (x, y, sprite, depth) {
-	  this.pos = {
-	    x: x,
-	    y: y
-	  };
-	  this.depth = depth;
-	  this.sprite = sprite;
-	};
-	
-	module.exports = Tile;
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Background = __webpack_require__(23);
-	var Sprite = __webpack_require__(3);
-	
-	var subwayPlatform = new Background ([
-	  "=======================================",
-	  "=======================================",
-	  "=======================================",
-	  "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFF",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    "
-	],
-	{
-	  "I": {sprite: new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
-	        depth: 2},
-	  "F": {sprite: new Sprite (48, 48, 0, ["tile/girder_top.gif"]),
-	        depth: 2},
-	  "L": {sprite: new Sprite (144, 48, 0, ["tile/pillar_head.gif"]),
-	        depth: 2},
-	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
-	        depth: 2},
-	  "J": {sprite: new Sprite (144, 48, 0, ["tile/sign_jay.gif"]),
-	        depth: 5}
-	});
-	
-	module.exports = subwayPlatform;
-
-
-/***/ },
-/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -1565,12 +1470,13 @@
 	  this.sprite = this.sprites.standing_right;
 	
 	  // STATS
-	  this.sightRange = 270;
-	  this.runSpeed = 4;
-	  this.jumpPower = 18;
-	  this.jumpDistance = 1.4;
-	  this.chasingSkill = 2.5;
-	  this.magicRange = 48;
+	  this.sightRange = Util.approximately(270);
+	  this.runSpeed = Util.approximately(4);
+	  this.jumpPower = Util.approximately(18);
+	  this.jumpDistance = Util.approximately(1.4);
+	  this.chasingSkill = Util.approximately(2);
+	  this.magicRange = Util.approximately(48);
+	
 	  this.age = 0;
 	  this.casting = false;
 	  this.deathStop = 20;
@@ -1597,14 +1503,14 @@
 	  if (boneheap && Util.distanceBetween(this.pos, boneheap.pos) < this.magicRange) {
 	    this.speed.x = 0;
 	    this.casting = true;
-	    if (this.sprites.casting_right) {
+	    if (this.sprites.casting_right && !this.dying) {
 	      this.sprite = (boneheap.pos.x > this.pos.x) ? this.sprites.casting_right : this.sprites.casting_left;
 	    }
-	  }
-	  if (this.casting && !Math.round(Math.random()*24)) {
-	    boneheap.reanimate(this.index, this.pos.x, this.pos.y);
-	    this.casting = false;
-	    this.sprite = this.facing === "right" ? this.sprites.standing_right : this.sprites.standing_left;
+	    if (this.casting && !this.dying && !Math.round(Math.random()*24)) {
+	      boneheap.reanimate(this.index, this.pos.x, this.pos.y);
+	      this.casting = false;
+	      this.sprite = this.facing === "right" ? this.sprites.standing_right : this.sprites.standing_left;
+	    }
 	  }
 	};
 	
@@ -1708,6 +1614,7 @@
 	    if (mover.type === "hammer" &&
 	        Util.distanceBetween(this.pos, mover.pos) > this.sightRange/24 &&
 	        Util.distanceBetween(this.pos, mover.pos) < this.sightRange/2 ) {
+	      this.lowJump();
 	      this.turnIntoABird();
 	    }
 	  }.bind(this));
@@ -1731,6 +1638,7 @@
 	      this.speed.x *= (-1);
 	    }
 	  }
+	  this.speed.x = Math.round(Math.random()) ? this.runSpeed : 0-this.runSpeed;
 	};
 	
 	Wizard.prototype.setExtraSprites = function () {
@@ -1781,6 +1689,114 @@
 	};
 	
 	module.exports = Wizard;
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(24);
+	var Sprite = __webpack_require__(3);
+	
+	var subwayPlatform = new Background ([
+	  "---------------------------",
+	  "---------------------------",
+	  "---------------------------",
+	  "---------------------------",
+	  "---------------------------",
+	  "===========================",
+	  "---------------------------",
+	  "---------------------------",
+	  "---------------------------",
+	  "===========================",
+	  "==========================="
+	],
+	{
+	  "-": {sprite: new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
+	        depth: 5},
+	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
+	        depth: 5}
+	});
+	
+	module.exports = subwayPlatform;
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Tile = __webpack_require__(25);
+	
+	var Background = function (blueprint, spriteKey) {
+	  this.blueprint = blueprint;
+	  this.spriteKey = spriteKey;
+	};
+	
+	Background.prototype.build = function (tiles, depth) {
+	  this.blueprint.forEach(function (yLine, yIndex) {
+	    yLine.split("").forEach(function (square, xIndex) {
+	      if (this.spriteKey[square]) {
+	        tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square].sprite, this.spriteKey[square].depth) );
+	      }
+	    }.bind(this));
+	  }.bind(this));
+	};
+	
+	module.exports = Background;
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	
+	var Tile = function (x, y, sprite, depth) {
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.depth = depth;
+	  this.sprite = sprite;
+	};
+	
+	module.exports = Tile;
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(24);
+	var Sprite = __webpack_require__(3);
+	
+	var subwayPlatform = new Background ([
+	  "=======================================",
+	  "=======================================",
+	  "=======================================",
+	  "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFF",
+	  "    I     I     I     I     I     I    ",
+	  "    I     I     I     I     I     I    ",
+	  "    I     I     I     I     I     I    ",
+	  "    I     I     I     I     I     I    ",
+	  "    I     I     I     I     I     I    ",
+	  "    I     I     I     I     I     I    ",
+	  "    I     I     I     I     I     I    "
+	],
+	{
+	  "I": {sprite: new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
+	        depth: 2},
+	  "F": {sprite: new Sprite (48, 48, 0, ["tile/girder_top.gif"]),
+	        depth: 2},
+	  "L": {sprite: new Sprite (144, 48, 0, ["tile/pillar_head.gif"]),
+	        depth: 2},
+	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
+	        depth: 2},
+	  "J": {sprite: new Sprite (144, 48, 0, ["tile/sign_jay.gif"]),
+	        depth: 5}
+	});
+	
+	module.exports = subwayPlatform;
 
 
 /***/ }

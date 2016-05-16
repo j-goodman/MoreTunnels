@@ -29,7 +29,7 @@ var backgroundPillars = require('./backgrounds/subwayPlatformPillars.js');
 backgroundPillars.build(tiles, 2);
 backgroundPillars.build(tiles, 3);
 
-var view = new View (0, 0, 640, 480, 55*48, 10*48);
+var view = new View (0, 0, 640, 480, 555*48, 11*48);
 
   setInterval(function () {
     ctx.fillStyle = "black";
