@@ -4,23 +4,39 @@ var Util = {
   },
 };
 
+Array.prototype.mean = function () {
+  var sum = 0;
+  for (var i = 0; i < this.length; i++) {
+    sum += this[i];
+  }
+  return sum/this.length;
+};
+
 Util.inherits = function (ChildClass, BaseClass) {
   function Surrogate() { this.constructor = ChildClass; }
   Surrogate.prototype = BaseClass.prototype;
   ChildClass.prototype = new Surrogate();
 };
 
-Util.approximately = function (integer, otherIntegers) {
-  var aprx =
-    integer + Math.random()*integer - Math.random()*integer +
-    integer + Math.random()*integer - Math.random()*integer +
-    integer + Math.random()*integer - Math.random()*integer +
-    integer + Math.random()*integer - Math.random()*integer +
-    integer + Math.random()*integer - Math.random()*integer +
-    integer + Math.random()*integer - Math.random()*integer +
-    integer + Math.random()*integer - Math.random()*integer +
-    integer + Math.random()*integer - Math.random()*integer;
-  return Math.ceil(aprx/8);
+Util.approximately = function (integers, normFactor, middleInt) {
+  if (typeof integers !== "object") {
+    integers = [integers];
+  }
+  if (typeof normFactor === "undefined") {
+    normFactor = 7;
+  }
+  if (typeof middleInt === "undefined") {
+    middleInt = integers[0];
+  }
+
+  integers[integers.length-1] = integers[integers.length-1] + Math.random()*integers[integers.length-1] - Math.random()*integers[integers.length-1];
+
+  if (integers.length === normFactor) {
+    return Math.ceil(integers.mean());
+  } else {
+    integers.push(middleInt);
+    return Util.approximately(integers, normFactor, middleInt);
+  }
 };
 
 Util.distanceBetween = function (firstPos, secondPos) {
