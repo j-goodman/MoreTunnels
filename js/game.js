@@ -70,7 +70,7 @@ Window.newGame = function () {
   };
 
   Game.setView = function () {
-    var view = new this.View (0, 0, 640, 480, 48*this.zone.blueprint[0].length, 48*this.zone.blueprint.length);
+    var view = new this.View (0, 0, 640, 480, 48*(this.zone.blueprint[0].length-1), 48*this.zone.blueprint.length);
     this.view = view;
     Util.universals.view = view;
     Util.universals.roomBottomRight = {x: 48*(this.zone.blueprint[0].length-1), y: 48*this.zone.blueprint.length};

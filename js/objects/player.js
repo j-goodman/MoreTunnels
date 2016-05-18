@@ -77,8 +77,14 @@ Player.prototype.drawMeter = function () {
   overlays.push( new Meter (this.pos.x, this.pos.y-64, this.health) );
 };
 
+Player.prototype.enterSubway = function (subway) {
+  this.invisible = true;
+  this.onSubway = subway;
+};
+
 Player.prototype.move = function () {
   this.age++;
+  this.upKeyAux = null;
   this.pos.x += this.speed.x;
   this.pos.y += this.speed.y;
   this.speed.x += this.accel.x;
@@ -90,6 +96,9 @@ Player.prototype.move = function () {
     if (this.damageRecover > 0) {
       this.drawMeter();
     }
+  }
+  if (this.onSubway) {
+    this.pos.x += this.onSubway.speed.x;
   }
 };
 

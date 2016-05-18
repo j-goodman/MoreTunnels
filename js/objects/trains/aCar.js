@@ -2,13 +2,14 @@ var Util = require('../../util/util.js');
 var Sprite = require('../../sprite.js');
 var Doors = require('./doors.js');
 
-var A = function (index, carType, x, y, xSpeed, xAccel) {
+var A = function (index, carType, x, y, xSpeed, xAccel, conductor) {
   this.index = index;
   this.type = "aCar";
   this.spriteHeight = 100;
   this.spriteWidth = 240;
   this.carType = carType;
   this.entering = true;
+  this.conductor = conductor;
   this.pos = {
     x: x,
     y: y
@@ -36,8 +37,9 @@ A.prototype.move = function () {
 };
 
 A.prototype.act = function () {
-  if (this.speed.x === 0 && Util.typeCount("doors", trains) <= Util.typeCount("aCar", trains)) {
-    trains.push(new Doors (trains.length, this.pos));
+  if (this.speed.x === 0 && Util.typeCount("doors", trains) < Util.typeCount("aCar", trains)) {
+    this.doors = new Doors (trains.length, this.pos, this);
+    trains.push(this.doors);
   }
 };
 

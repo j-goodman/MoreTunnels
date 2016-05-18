@@ -144,6 +144,9 @@ Jumpman.prototype.updateSprite = function () {
       this.sprite = this.sprites.jumping_right;
     }
   }
+  if (this.invisible) {
+    this.sprite = {draw: function () {}};
+  }
 };
 
 Jumpman.prototype.xStop = function () {

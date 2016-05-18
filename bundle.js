@@ -116,7 +116,7 @@
 	  };
 	
 	  Game.setView = function () {
-	    var view = new this.View (0, 0, 640, 480, 48*this.zone.blueprint[0].length, 48*this.zone.blueprint.length);
+	    var view = new this.View (0, 0, 640, 480, 48*(this.zone.blueprint[0].length-1), 48*this.zone.blueprint.length);
 	    this.view = view;
 	    Util.universals.view = view;
 	    Util.universals.roomBottomRight = {x: 48*(this.zone.blueprint[0].length-1), y: 48*this.zone.blueprint.length};
@@ -306,8 +306,14 @@
 	  overlays.push( new Meter (this.pos.x, this.pos.y-64, this.health) );
 	};
 	
+	Player.prototype.enterSubway = function (subway) {
+	  this.invisible = true;
+	  this.onSubway = subway;
+	};
+	
 	Player.prototype.move = function () {
 	  this.age++;
+	  this.upKeyAux = null;
 	  this.pos.x += this.speed.x;
 	  this.pos.y += this.speed.y;
 	  this.speed.x += this.accel.x;
@@ -319,6 +325,9 @@
 	    if (this.damageRecover > 0) {
 	      this.drawMeter();
 	    }
+	  }
+	  if (this.onSubway) {
+	    this.pos.x += this.onSubway.speed.x;
 	  }
 	};
 	
@@ -635,6 +644,9 @@
 	    } else {
 	      this.sprite = this.sprites.jumping_right;
 	    }
+	  }
+	  if (this.invisible) {
+	    this.sprite = {draw: function () {}};
 	  }
 	};
 	
@@ -2516,16 +2528,24 @@
 	      var ACar = __webpack_require__(37);
 	      if (Util.typeCount("skeleton", this.movers) <= 1) {
 	        if (Util.typeCount("aCar", this.trains) === 0) {
-	          this.trains.push(new ACar (trains.length, "front", -1300, this.zone.trainY-100, 26, -0.1));
-	          this.trains.push(new ACar (trains.length, "middle", -1540, this.zone.trainY-100, 26, -0.1));
-	          this.trains.push(new ACar (trains.length, "middle", -1780, this.zone.trainY-100, 26, -0.1));
-	          this.trains.push(new ACar (trains.length, "middle", -2020, this.zone.trainY-100, 26, -0.1));
-	          this.trains.push(new ACar (trains.length, "middle", -2260, this.zone.trainY-100, 26, -0.1));
-	          this.trains.push(new ACar (trains.length, "rear", -2500, this.zone.trainY-100, 26, -0.1));
+	          this.trains.push(new ACar (trains.length, "front", -1300, this.zone.trainY-100, 26, -0.1, this));
+	          this.trains.push(new ACar (trains.length, "middle", -1540, this.zone.trainY-100, 26, -0.1, this));
+	          this.trains.push(new ACar (trains.length, "middle", -1780, this.zone.trainY-100, 26, -0.1, this));
+	          this.trains.push(new ACar (trains.length, "middle", -2020, this.zone.trainY-100, 26, -0.1, this));
+	          this.trains.push(new ACar (trains.length, "middle", -2260, this.zone.trainY-100, 26, -0.1, this));
+	          this.trains.push(new ACar (trains.length, "rear", -2500, this.zone.trainY-100, 26, -0.1, this));
 	        }
 	      }
 	    break;
 	  }
+	};
+	
+	Conductor.prototype.departTrains = function () {
+	  this.trains.forEach(function (train) {
+	    if (train.doors) {
+	      train.doors.close();
+	    }
+	  });
 	};
 	
 	module.exports = Conductor;
@@ -2540,13 +2560,13 @@
 	
 	var throop = new Zone ("Throop", [
 	  "---------------------------------------------------------------------------",
-	  "----------*---------------------------------------------------#?*----------",
+	  "----------*---------------------------------------------------#!*----------",
 	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
 	  "---------------------------------------------------------------------------",
-	  "---------------------*---------------------------#?-----#?-----------------",
+	  "---------------------*---------------------------#!-----#!-----------------",
 	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
 	  "---------------------------------------------------------------------------",
-	  "-?#-?#--?#---------------------------------------------------#!-------#!---",
+	  "-!#-!#--!#---------------------------------------------------#!-------#!---",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
@@ -2645,13 +2665,14 @@
 	var Sprite = __webpack_require__(3);
 	var Doors = __webpack_require__(39);
 	
-	var A = function (index, carType, x, y, xSpeed, xAccel) {
+	var A = function (index, carType, x, y, xSpeed, xAccel, conductor) {
 	  this.index = index;
 	  this.type = "aCar";
 	  this.spriteHeight = 100;
 	  this.spriteWidth = 240;
 	  this.carType = carType;
 	  this.entering = true;
+	  this.conductor = conductor;
 	  this.pos = {
 	    x: x,
 	    y: y
@@ -2679,8 +2700,9 @@
 	};
 	
 	A.prototype.act = function () {
-	  if (this.speed.x === 0 && Util.typeCount("doors", trains) <= Util.typeCount("aCar", trains)) {
-	    trains.push(new Doors (trains.length, this.pos));
+	  if (this.speed.x === 0 && Util.typeCount("doors", trains) < Util.typeCount("aCar", trains)) {
+	    this.doors = new Doors (trains.length, this.pos, this);
+	    trains.push(this.doors);
 	  }
 	};
 	
@@ -2717,13 +2739,15 @@
 	var Util = __webpack_require__(6);
 	var Sprite = __webpack_require__(3);
 	var players = __webpack_require__(11);
+	var trains = __webpack_require__(38);
 	
-	var Doors = function (index, pos) {
+	var Doors = function (index, pos, train) {
 	  this.index = index;
 	  this.type = "doors";
 	  this.spriteHeight = 100;
 	  this.spriteWidth = 240;
 	  this.pos = pos;
+	  this.train = train;
 	  this.setSprites();
 	};
 	
@@ -2734,11 +2758,13 @@
 	};
 	
 	Doors.prototype.checkForPlayer = function () {
-	  if ((
+	  if (
+	      (
 	      //Left Door
 	      players[0].pos.x + players[0].spriteSize > this.pos.x + 24 &&
 	      players[0].pos.x < this.pos.x + 58 &&
-	      players[0].pos.y > this.pos.y)||(
+	      players[0].pos.y > this.pos.y) ||
+	      (
 	      //Right Door
 	      players[0].pos.x + players[0].spriteSize > this.pos.x + 186 &&
 	      players[0].pos.x < this.pos.x + 220 &&
@@ -2746,15 +2772,27 @@
 	      ) {
 	        players[0].drawUpKey();
 	        players[0].upKeyAux = function () {
-	
-	        };
-	      } else {
-	        players[0].upKeyAux = null;
+	          players[0].enterSubway(this.train);
+	          this.train.conductor.departTrains();
+	        }.bind(this);
 	      }
 	};
 	
+	Doors.prototype.close = function () {
+	  this.sprite = this.sprites.closing;
+	  this.sprite.addAnimationEndCallback(function () {
+	    this.train.accel.x = 0.1;
+	    this.destroy();
+	  }.bind(this));
+	};
+	
+	Doors.prototype.destroy = function () {
+	  delete trains[this.index];
+	};
+	
 	Doors.prototype.setSprites = function () {
-	  this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 1,
+	  this.sprites = {};
+	  this.sprites.opening = new Sprite (this.spriteWidth, this.spriteHeight, 1,
 	    [
 	      "trains/A/cars/doorsOpening/0.gif",
 	      "trains/A/cars/doorsOpening/1.gif",
@@ -2762,8 +2800,18 @@
 	      "trains/A/cars/doorsOpening/3.gif"
 	    ]
 	  );
+	  this.sprites.closing = new Sprite (this.spriteWidth, this.spriteHeight, 1,
+	    [
+	      "trains/A/cars/doorsOpening/3.gif",
+	      "trains/A/cars/doorsOpening/2.gif",
+	      "trains/A/cars/doorsOpening/1.gif",
+	      "trains/A/cars/doorsOpening/0.gif"
+	    ]
+	  );
+	  this.sprites.open = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/openDoors.gif"]);
+	  this.sprite = this.sprites.opening;
 	  this.sprite.addAnimationEndCallback(function () {
-	    this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/openDoors.gif"]);
+	    this.sprite = this.sprites.open;
 	  }.bind(this));
 	};
 	
