@@ -5,13 +5,18 @@ var Sprite = function (width, height, frameDelay, sourcePathArray) {
   this.frameDelay = 0;
   this.frameDelayMax = frameDelay;
   this.angle = 0;
-  sourcePathArray.forEach(function(path, index){
-    this.frames[index] = new Image(width, height);
+  sourcePathArray.forEach(function (path, index) {
+    this.frames[index] = new Image (width, height);
     this.frames[index].src = "./sprites/"+path;
   }.bind(this));
+  this.endCallback = null;
 };
 
 Sprite.prototype.frame = 0;
+
+Sprite.prototype.addAnimationEndCallback = function (callback) {
+  this.endCallback = callback;
+};
 
 Sprite.prototype.animate = function () {
   if (this.frames.length > 1) {
@@ -19,6 +24,9 @@ Sprite.prototype.animate = function () {
         this.frame++;
         if (this.frame === this.frames.length) {
           this.frame = 0;
+          if (this.endCallback) {
+            this.endCallback();
+          }
         }
     }
     this.frameDelay-=1;

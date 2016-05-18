@@ -2,6 +2,7 @@ var renderZone = require('./renderZone.js');
 var Player = require('./objects/player.js');
 var Skeleton = require('./objects/skeleton.js');
 var Block = require('./objects/block.js');
+var Util = require('./util/util.js');
 var View = require('./objects/view.js');
 var keyEvents = require('./keyEvents.js');
 var blocks = require('./objectArrays/blocks.js');
@@ -14,12 +15,14 @@ window.onload = function () {
   var canvas = document.getElementById("canvas");
 
 var ctx = canvas.getContext('2d');
+Util.universals.canvasContext = ctx;
 ctx.clearRect(0, 0, canvas.width, canvas.height);
+
 
 players.push( new Player (8*48, 5*48) );
 keyEvents(document, players[0]);
 
-var zone = require('./zones/subwayPlatform.js');
+var zone = require('./zones/shoggothBattle.js');
 zone.build(blocks, movers, metaBlocks);
 
 var backgroundBricks = require('./backgrounds/subwayPlatformBricks.js');
@@ -30,6 +33,8 @@ backgroundPillars.build(tiles, 2);
 backgroundPillars.build(tiles, 3);
 
 var view = new View (0, 0, 640, 480, 55*48, 11*48);
+Util.universals.view = view;
+Util.universals.roomBottomRight = {x: 55*48, y: 11*48};
 
   setInterval(function () {
     ctx.fillStyle = "black";
@@ -50,8 +55,6 @@ var view = new View (0, 0, 640, 480, 55*48, 11*48);
       mover.sprite.draw(ctx, mover.pos, view.topLeftPos);
     });
 
-    view.recenter(players[0].pos);
-
     players[0].sprite.draw(ctx, players[0].pos, view.topLeftPos);
 
     players[0].drawData(ctx);
@@ -59,7 +62,9 @@ var view = new View (0, 0, 640, 480, 55*48, 11*48);
     players[0].move();
     movers.forEach(function(mover){
       mover.move();
-      mover.determineAction();
+      mover.act();
     });
+
+    view.recenter(players[0].pos);
   }, 32);
 };

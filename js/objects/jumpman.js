@@ -1,7 +1,18 @@
 var Sprite = require('../sprite.js');
+var Util = require('../util/util.js');
 var blocks = require('../objectArrays/blocks.js');
 
 var Jumpman = function () {
+};
+
+Jumpman.prototype.avoidRoomEdge = function () {
+  if (this.checkUnderFeet()) {
+    if (this.pos.x < Math.abs(this.stats.runSpeed) * 20) {
+      this.speed.x = Math.abs(this.stats.runSpeed);
+    } else if (this.pos.x > Util.universals.roomBottomRight.x - Math.abs(this.stats.runSpeed * 20)) {
+      this.speed.x = 0-Math.abs(this.stats.runSpeed);
+    }
+  }
 };
 
 Jumpman.prototype.move = function () {
@@ -43,17 +54,17 @@ Jumpman.prototype.landUnderFeet = function () {
 
 Jumpman.prototype.setSprites = function (delay) {
   this.sprites = {
-    standing_right: new Sprite(48, 48, 0, [this.spriteRoot+"/right/standing.gif"]),
-    jumping_right: new Sprite(48, 48, 0, [this.spriteRoot+"/right/jumping.gif"]),
-    standing_left: new Sprite(48, 48, 0, [this.spriteRoot+"/left/standing.gif"]),
-    jumping_left: new Sprite(48, 48, 0, [this.spriteRoot+"/left/jumping.gif"]),
-    running_right: new Sprite(48, 48, delay, [
+    standing_right: new Sprite(this.spriteSize, this.spriteSize, 0, [this.spriteRoot+"/right/standing.gif"]),
+    jumping_right: new Sprite(this.spriteSize, this.spriteSize, 0, [this.spriteRoot+"/right/jumping.gif"]),
+    standing_left: new Sprite(this.spriteSize, this.spriteSize, 0, [this.spriteRoot+"/left/standing.gif"]),
+    jumping_left: new Sprite(this.spriteSize, this.spriteSize, 0, [this.spriteRoot+"/left/jumping.gif"]),
+    running_right: new Sprite(this.spriteSize, this.spriteSize, delay, [
       this.spriteRoot+"/right/running/0.gif",
       this.spriteRoot+"/right/running/1.gif",
       this.spriteRoot+"/right/running/2.gif",
       this.spriteRoot+"/right/running/3.gif"
     ]),
-    running_left: new Sprite(48, 48, delay, [
+    running_left: new Sprite(this.spriteSize, this.spriteSize, delay, [
       this.spriteRoot+"/left/running/0.gif",
       this.spriteRoot+"/left/running/1.gif",
       this.spriteRoot+"/left/running/2.gif",
@@ -108,6 +119,13 @@ Jumpman.prototype.checkSides = function () {
   return returnVal;
 };
 
+Jumpman.prototype.spriteCenter = function () {
+  return {
+    x: this.pos.x + this.sprite.width/2,
+    y: this.pos.y + this.sprite.height/2
+  };
+};
+
 Jumpman.prototype.updateSprite = function () {
   if (this.speed.x === 0) {
     if (this.facing === "left") {
@@ -128,8 +146,16 @@ Jumpman.prototype.updateSprite = function () {
   }
 };
 
+Jumpman.prototype.xStop = function () {
+  if (this.speed.x > 0) {
+    this.xRightStop();
+  } else {
+    this.xLeftStop();
+  }
+};
+
 Jumpman.prototype.xRightStop = function () {
-  if (this.pos.x%48===0 && this.checkUnderFeet()) {
+  if (this.pos.x%24===0 && this.checkUnderFeet()) {
     this.speed.x = 0;
   } else {
     if (this.speed.x > 0) {
@@ -139,7 +165,7 @@ Jumpman.prototype.xRightStop = function () {
 };
 
 Jumpman.prototype.xLeftStop = function () {
-  if (this.pos.x%48===0 && this.checkUnderFeet()) {
+  if (this.pos.x%24===0 && this.checkUnderFeet()) {
     this.speed.x = 0;
   } else {
     if (this.speed.x < 0) {

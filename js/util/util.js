@@ -1,6 +1,9 @@
 var Util = {
   universals: {
-    gravity: 1
+    gravity: 1,
+    canvasContext: null,
+    view: null,
+    roomBottomRight: {x: 0, y: 0}
   },
 };
 
@@ -29,7 +32,9 @@ Util.approximately = function (integers, normFactor, middleInt) {
     middleInt = integers[0];
   }
 
-  integers[integers.length-1] = integers[integers.length-1] + Math.random()*integers[integers.length-1] - Math.random()*integers[integers.length-1];
+  integers[integers.length-1] = integers[integers.length-1] +
+  Math.random()*integers[integers.length-1] -
+  Math.random()*integers[integers.length-1];
 
   if (integers.length === normFactor) {
     return Math.ceil(integers.mean());
@@ -53,6 +58,21 @@ Util.findByType = function (type, array) {
   var result;
   array.forEach(function (mover) {
     if (mover.type && mover.type === type) {
+      result = mover;
+    }
+  });
+  return result;
+};
+
+Util.findTypeByProx = function (type, array, pos) {
+  var result;
+  array.forEach(function (mover) {
+    if (mover.type && mover.type === type && !result ) {
+      result = mover;
+    }
+    if (mover.type && mover.type === type &&
+        Util.distanceBetween(mover.pos, pos) <
+        Util.distanceBetween(result.pos, pos)) {
       result = mover;
     }
   });

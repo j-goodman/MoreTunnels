@@ -1,5 +1,6 @@
 var Sprite = require('../sprite.js');
 var Util = require('../util/util.js');
+var Aura = require('./aura.js');
 var blocks = require('../objectArrays/blocks.js');
 var movers = require('../objectArrays/movers.js');
 var players = require('../objectArrays/players.js');
@@ -8,6 +9,7 @@ var Hammer = function (index, x, y, xspeed, yspeed) {
   this.type = "hammer";
   this.index = index;
   this.attraction = 1.8;
+  this.spriteSize = 48;
   this.maxSpeed = 16;
   this.pos = {
     x: x,
@@ -24,6 +26,24 @@ var Hammer = function (index, x, y, xspeed, yspeed) {
   this.setSprites();
   this.age = 0;
   this.soft = 2;
+  this.hexed = false;
+  this.aura = null;
+};
+
+Hammer.prototype.act = function () {
+  this.accel.x = (this.pos.x > players[0].pos.x ?
+    -this.attraction : this.attraction);
+  this.accel.y = (this.pos.y > players[0].pos.y ?
+    -this.attraction : this.attraction);
+  this.catchCheck();
+  this.age ++;
+  if (this.soft > 0) {
+    this.soft --;
+  }
+  if (Util.distanceBetween(this.pos, players[0].pos) > 48*10) {
+    this.speed = Util.moveTowards(this.pos, players[0].pos, this.maxSpeed);
+  }
+  this.checkForHexes();
 };
 
 Hammer.prototype.catchCheck = function () {
@@ -42,25 +62,39 @@ Hammer.prototype.catchCheck = function () {
   }
 };
 
+Hammer.prototype.checkForHexes = function () {
+  if (this.hexed) {
+    if (this.attraction < 1.8) {
+      this.attraction += 0.05;
+    } else {
+      this.hexed = false;
+      this.aura.destroy();
+      this.haywire();
+    }
+  }
+};
+
 Hammer.prototype.destroy = function () {
+  if (this.aura) {
+    this.aura.destroy();
+  }
   if (this.age > 16) {
     delete movers[this.index];
   }
 };
 
-Hammer.prototype.determineAction = function () {
-  this.accel.x = (this.pos.x > players[0].pos.x ?
-    -this.attraction : this.attraction);
-  this.accel.y = (this.pos.y > players[0].pos.y ?
-    -this.attraction : this.attraction);
-  this.catchCheck();
-  this.age ++;
-  if (this.soft > 0) {
-    this.soft --;
-  }
-  if (Util.distanceBetween(this.pos, players[0].pos) > 48*10) {
-    this.speed = Util.moveTowards(this.pos, players[0].pos, this.maxSpeed);
-  }
+Hammer.prototype.haywire = function () {
+  this.speed.x = (Math.random() * this.maxSpeed * 2) - this.maxSpeed;
+  this.speed.y = (Math.random() * this.maxSpeed * 2) - this.maxSpeed;
+};
+
+Hammer.prototype.hex = function () {
+  this.attraction = -4;
+  this.speed.y = 0;
+  this.speed.x = 0;
+  this.hexed = true;
+  this.aura = new Aura (movers.length, this.pos, "pinkish");
+  movers.push(this.aura);
 };
 
 Hammer.prototype.move = function () {

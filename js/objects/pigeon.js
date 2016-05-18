@@ -7,9 +7,10 @@ var metaBlocks = require('../objectArrays/metaBlocks.js');
 var players = require('../objectArrays/players.js');
 var movers = require('../objectArrays/movers.js');
 
-var Pigeon = function (index, x, y) {
+var Pigeon = function (index, x, y, stats) {
   this.type = "pigeon";
   this.index = index;
+  this.spriteSize = 48;
   this.age = 0;
   this.pos = {
     x: x,
@@ -29,11 +30,19 @@ var Pigeon = function (index, x, y) {
   this.setSprites(1);
   this.sprite = this.sprites.standing_right;
 
-  // STATS
-  this.sightRange = 270;
-  this.runSpeed = 5;
-  this.jumpPower = 6;
-  this.chasingSkill = 5;
+  if (stats === undefined) {
+    this.stats = {
+      sightRange: Util.approximately(270),
+      runSpeed: Util.approximately(4),
+      jumpPower: Util.approximately(18),
+      jumpDistance: Util.approximately(1.4),
+      chasingSkill: Util.approximately(2),
+      magicRange: Util.approximately(72),
+      castingDelay: Util.approximately(18)
+    };
+  } else {
+    this.stats = stats;
+  }
 
   this.spriteRoot = "pigeonwizard";
   this.setSprites(2);
@@ -59,14 +68,14 @@ Pigeon.prototype.animateTransformation = function () {
 };
 
 Pigeon.prototype.checkForBoneheap = function () {
-  var boneheap = Util.findByType("boneheap", movers);
+  var boneheap = Util.findTypeByProx("boneheap", movers, this.pos);
   var hammer = Util.findByType("hammer", movers);
-  if (boneheap && Util.distanceBetween(this.pos, boneheap.pos) < this.sightRange &&
+  if (boneheap && Util.distanceBetween(this.pos, boneheap.pos) < this.stats.sightRange &&
       !(hammer &&
-      Util.distanceBetween(this.pos, hammer.pos) > this.sightRange/12 &&
-      Util.distanceBetween(this.pos, hammer.pos) < this.sightRange/2 )
+      Util.distanceBetween(this.pos, hammer.pos) > this.stats.sightRange/12 &&
+      Util.distanceBetween(this.pos, hammer.pos) < this.stats.sightRange/2 )
     ) {
-    this.speed.x = 0;
+    this.xStop();
     this.speed.y = 0;
     this.turnIntoAPerson();
   }
@@ -79,12 +88,12 @@ Pigeon.prototype.checkForHammer = function () {
         mover.soft <= 0) {
       mover.ricochet();
       mover.soft = 8;
-      this.transmogrify();
+      this.transmogrify(true);
     }
   }.bind(this));
 };
 
-Pigeon.prototype.determineAction = function () {
+Pigeon.prototype.act = function () {
   if (players[0].age > 12) {
     this.animateTransformation();
   }
@@ -103,13 +112,13 @@ Pigeon.prototype.determineAction = function () {
   }
   if (Util.typeCount("hammer", movers) > 0) {
     var hammer = Util.findByType("hammer", movers);
-    if (Util.distanceBetween(this.pos, hammer.pos) < this.sightRange) {
+    if (hammer && Util.distanceBetween(this.pos, hammer.pos) < this.stats.sightRange) {
       this.dodgeHammer();
     }
   }
   if (Util.typeCount("boneheap", movers) > 0 && Math.random()*64 < 1) {
-    var boneheap = Util.findByType("boneheap", movers);
-    Util.xChase(this, boneheap.pos, this.runSpeed);
+    var boneheap = Util.findTypeByProx("boneheap", movers, this.pos);
+    Util.xChase(this, boneheap.pos, this.stats.runSpeed);
   }
   this.checkForHammer();
   this.checkForBoneheap();
@@ -117,16 +126,18 @@ Pigeon.prototype.determineAction = function () {
 
 Pigeon.prototype.dodgeHammer = function () {
   var hammer = Util.findByType("hammer", movers);
-  var boneheap = Util.findByType("boneheap", movers);
-  this.jump();
-  this.speed.x = this.pos.x > hammer.pos.x ? this.runSpeed : 0-this.runSpeed;
+  var boneheap = Util.findTypeByProx("boneheap", movers, this.pos);
+  if (Math.round(Math.random())) {
+    this.jump();
+  }
+  this.speed.x = this.pos.x > hammer.pos.x ? this.stats.runSpeed : 0-this.stats.runSpeed;
   if (boneheap && !Math.round(Math.random()*2)) {
-    this.speed.x = this.pos.x < boneheap.pos.x ? this.runSpeed : 0-this.runSpeed;
+    this.speed.x = this.pos.x < boneheap.pos.x ? this.stats.runSpeed : 0-this.stats.runSpeed;
   }
 };
 
 Pigeon.prototype.jump = function () {
-  this.speed.y = 0-this.jumpPower;
+  this.speed.y = 0-this.stats.jumpPower/3;
 };
 
 Pigeon.prototype.setExtraSprites = function () {
@@ -134,9 +145,13 @@ Pigeon.prototype.setExtraSprites = function () {
   this.sprites.jumping_left = this.sprites.running_left;
 };
 
-Pigeon.prototype.transmogrify = function () {
+Pigeon.prototype.transmogrify = function (kill) {
   var Wizard = require('./wizard.js');
-  movers[this.index] = new Wizard (this.index, this.pos.x, this.pos.y);
+  var wizard = new Wizard (this.index, this.pos.x, this.pos.y, this.stats);
+  movers[this.index] = wizard;
+  if (kill) {
+    wizard.die();
+  }
 };
 
 Pigeon.prototype.turnIntoAPerson = function () {
@@ -148,7 +163,7 @@ Pigeon.prototype.turnIntoAPerson = function () {
 Pigeon.prototype.wander = function () {
   if (!Math.floor(Math.random()*128)) {
     this.facing = this.facing === "right" ? "left" : "right";
-    this.speed.x = 0;
+    this.xStop();
   }
 };
 

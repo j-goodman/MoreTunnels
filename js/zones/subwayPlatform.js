@@ -5,11 +5,11 @@ var subwayPlatform = new Zone ([
   "------------*----------------------!---------*!---------",
   "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
   "--------------------------------------------!-----------",
-  "--------------------------------------------#!----------",
+  "---------------------------------------------!----------",
   "-----------------FF----FTF-----------------FTF----F-----",
   "--------------------------------------------------------",
   "--------------------------------!---------------------!-",
-  "XXXXXXXXXXXXXXXXXXXXXXXXX----XXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
 ],[
@@ -17,11 +17,11 @@ var subwayPlatform = new Zone ([
   "------------}----{-----------<----#}----{{--------------",
   "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
   "--------------------------------------------------------",
-  "]----------------{}-----{>------------------{}----------[",
+  "]----------------{}-----{>-----------------#{}----------[",
   "]----------------FF----FTF-----------------FTF----F----[",
   "]------------------------------------------------------[",
   "]------------}------}--->---<-#--------->------<-------[",
-  "XXXXXXXXXXXXXXXXXXXXXXX<<---->>XXXXXXXXXXXXXXXXXXXXXXXXX",
+  "XXXXXXXXXXXXXXXXXXXXXXX<<TTTT>>XXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
 ]

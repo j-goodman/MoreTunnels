@@ -9,6 +9,8 @@ var tiles = require('../objectArrays/tiles.js');
 
 var Player = function (x, y) {
   this.age = 0;
+  this.type = "player";
+  this.spriteSize = 48;
   this.pos = {
     x: x,
     y: y
@@ -28,16 +30,20 @@ var Player = function (x, y) {
   this.sprite = this.sprites.standing_right;
 
   // STATS
-  this.runSpeed = 6;
-  this.jumpPower = 17;
-  this.throwPower = 24;
-  this.maxHealth = 8;
+  this.stats = {
+    runSpeed: 6,
+    jumpPower: 17,
+    throwPower: 24,
+    maxHealth: 8
+  };
 
   this.hasHammer = true;
 
-  this.health = this.maxHealth;
+  this.health = this.stats.maxHealth;
+  this.healthHundredth = 100;
+  this.status = "normal";
   this.damageRecover = 0;
-  
+
   this.spriteRoot = "player";
   this.setSprites(4);
   this.spriteRoot = "hammerman";
@@ -64,7 +70,34 @@ Player.prototype.drawMeter = function () {
   tiles.push( new Meter (this.pos.x, this.pos.y-64, this.health) );
 };
 
+Player.prototype.move = function () {
+  this.age++;
+  this.pos.x += this.speed.x;
+  this.pos.y += this.speed.y;
+  this.speed.x += this.accel.x;
+  this.speed.y += this.accel.y;
+  this.updateSprite();
+  this.checkCollisions();
+  if (typeof this.damageRecover !== "undefined") {
+    this.damageRecover -= 1;
+    if (this.damageRecover > 0) {
+      this.drawMeter();
+    }
+  }
+};
+
 Player.prototype.skeletonBite = function () {
+  if (this.damageRecover < 0) {
+    this.damageRecover = 64;
+    if (this.health <= 8 && this.health > 0) {
+      this.health -= 1;
+    }
+  }
+};
+
+Player.prototype.shoggothBite = Player.prototype.skeletonBite;
+
+Player.prototype.shogBeamBite = function () {
   if (this.damageRecover < 0) {
     this.damageRecover = 64;
     if (this.health <= 8 && this.health > 0) {
@@ -102,7 +135,7 @@ Player.prototype.setExtraSprites = function () {
 
 Player.prototype.throwHammer = function () {
   if (this.hammerCount() === 0) {
-    movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, (this.facing === "right" ? this.speed.x + this.throwPower : this.speed.x - this.throwPower), this.speed.y));
+    movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, (this.facing === "right" ? this.speed.x + this.stats.throwPower : this.speed.x - this.stats.throwPower), this.speed.y));
   }
 };
 

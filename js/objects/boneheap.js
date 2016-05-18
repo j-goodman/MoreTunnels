@@ -4,7 +4,7 @@ var Jumpman = require('./jumpman.js');
 var blocks = require('../objectArrays/blocks.js');
 var movers = require('../objectArrays/movers.js');
 
-var Boneheap = function (index, pos) {
+var Boneheap = function (index, pos, stats) {
   this.index = index;
   this.type = "boneheap";
   this.age = 0;
@@ -16,10 +16,26 @@ var Boneheap = function (index, pos) {
     x: 0,
     y: 0
   };
+  if (this.speed.y < 0) {
+    this.speed.y = 0;
+  }
   this.accel = {
     x: 0,
     y: Util.universals.gravity
   };
+
+  if (stats === undefined) {
+    this.stats = {
+      sightRange: Util.approximately(330),
+      runSpeed: Util.approximately(4),
+      jumpPower: Util.approximately(14),
+      jumpDistance: Util.approximately(1),
+      chasingSkill: Util.approximately(3.5)
+    };
+  } else {
+    this.stats = stats;
+  }
+
   this.setSprites();
 };
 
@@ -31,7 +47,7 @@ Boneheap.prototype.move = function () {
   this.landUnderFeet();
 };
 
-Boneheap.prototype.determineAction = function () {
+Boneheap.prototype.act = function () {
   this.age ++;
   if (this.age === this.collapseSprite.frames.length) {
     this.sprite = this.staticSprite;
@@ -44,7 +60,7 @@ Boneheap.prototype.landOnGround = Jumpman.prototype.landOnGround;
 
 Boneheap.prototype.reanimate = function () {
   var Skeleton = require('./skeleton.js');
-  movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y));
+  movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y, this.stats));
 };
 
 Boneheap.prototype.setSprites = function () {

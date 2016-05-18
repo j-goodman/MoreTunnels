@@ -7,9 +7,10 @@ var metaBlocks = require('../objectArrays/metaBlocks.js');
 var players = require('../objectArrays/players.js');
 var movers = require('../objectArrays/movers.js');
 
-var Skeleton = function (index, x, y) {
+var Skeleton = function (index, x, y, stats) {
   this.type = "skeleton";
   this.index = index;
+  this.spriteSize = 48;
   this.age = 0;
   this.pos = {
     x: x,
@@ -29,12 +30,17 @@ var Skeleton = function (index, x, y) {
   this.setSprites(5);
   this.sprite = this.sprites.standing_right;
 
-  // STATS
-  this.sightRange = Util.approximately(330);
-  this.runSpeed = Util.approximately(4);
-  this.jumpPower = Util.approximately(15);
-  this.jumpDistance = Util.approximately(1.1);
-  this.chasingSkill = Util.approximately(3.5);
+  if (stats === undefined) {
+    this.stats = {
+      sightRange: Util.approximately(330),
+      runSpeed: Util.approximately(4),
+      jumpPower: Util.approximately(14),
+      jumpDistance: Util.approximately(1),
+      chasingSkill: Util.approximately(3.5)
+    };
+  } else {
+    this.stats = stats;
+  }
 };
 
 Util.inherits(Skeleton, Jumpman);
@@ -86,14 +92,14 @@ Skeleton.prototype.checkForJumpBlock = function () {
             }
           if (metaBlock.types.includes("switchJumpRight") &&
             this.pos.y-players[0].pos.y > -48 &&
-            !(Util.distanceBetween(this.pos, players[0].pos) < this.sightRange &&
+            !(Util.distanceBetween(this.pos, players[0].pos) < this.stats.sightRange &&
             players[0].pos.x < this.pos.x) &&
             this.speed.x > 0) {
               this.jump();
             }
           if (metaBlock.types.includes("switchJumpLeft") &&
             this.pos.y-players[0].pos.y > -48 &&
-            !(Util.distanceBetween(this.pos, players[0].pos) < this.sightRange &&
+            !(Util.distanceBetween(this.pos, players[0].pos) < this.stats.sightRange &&
             players[0].pos.x > this.pos.x) &&
             this.speed.x < 0) {
               this.jump();
@@ -112,21 +118,21 @@ Skeleton.prototype.checkForJumpBlock = function () {
   }.bind(this));
 };
 
-Skeleton.prototype.determineAction = function () {
+Skeleton.prototype.act = function () {
   this.facing = (this.speed.x < 0 ? "left" : "right");
   if (this.checkUnderFeet()) {
-    while (Math.abs(this.speed.x) > this.runSpeed*this.jumpDistance) {
+    while (Math.abs(this.speed.x) > this.stats.runSpeed*this.stats.jumpDistance) {
       this.speed.x *= 0.75;
     }
-    if (Util.distanceBetween(this.pos, players[0].pos) <= this.sightRange) {
+    if (Util.distanceBetween(this.pos, players[0].pos) <= this.stats.sightRange) {
       // Chance of giving chase
-      if (Math.random()*32 <= this.chasingSkill) {
-        Util.xChase(this, players[0].pos, this.runSpeed);
+      if (Math.random()*32 <= this.stats.chasingSkill) {
+        Util.xChase(this, players[0].pos, this.stats.runSpeed);
       }
       // If the player is about to escape the skeleton's range, higher chance
-      if (Util.distanceBetween(this.pos, players[0].pos) > this.sightRange*0.9) {
-        if (Math.random()*32 <= this.chasingSkill*7) {
-          Util.xChase(this, players[0].pos, this.runSpeed);
+      if (Util.distanceBetween(this.pos, players[0].pos) > this.stats.sightRange*0.9) {
+        if (Math.random()*32 <= this.stats.chasingSkill*7) {
+          Util.xChase(this, players[0].pos, this.stats.runSpeed);
         }
       }
     } else {
@@ -143,14 +149,15 @@ Skeleton.prototype.determineAction = function () {
     this.dodgeHammer();
   }
   this.checkForHammer();
+  this.avoidRoomEdge();
 };
 
 Skeleton.prototype.dodgeHammer = function () {
   movers.forEach(function (mover) {
     if (mover.type === "hammer" &&
         Math.round(Math.random()*0.8) &&
-        Util.distanceBetween(this.pos, mover.pos) > this.sightRange/5 &&
-        Util.distanceBetween(this.pos, mover.pos) < this.sightRange/3 ) {
+        Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/5 &&
+        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/3 ) {
       this.jump();
     }
   }.bind(this));
@@ -158,11 +165,8 @@ Skeleton.prototype.dodgeHammer = function () {
 
 Skeleton.prototype.jump = function () {
   if (this.checkUnderFeet()) {
-    this.speed.y = 0-this.jumpPower;
-    this.speed.x *= this.jumpDistance;
-    if (this.pos.x < 48*7 && this.speed.x < 0) {
-      this.speed.x *= (-1);
-    }
+    this.speed.y = 0-this.stats.jumpPower;
+    this.speed.x *= this.stats.jumpDistance;
   }
 };
 
@@ -177,14 +181,14 @@ Skeleton.prototype.setExtraSprites = function () {
 };
 
 Skeleton.prototype.shatter = function () {
-  movers[this.index] = new Boneheap (this.index, this.pos);
+  movers[this.index] = new Boneheap (this.index, this.pos, this.stats);
 };
 
 Skeleton.prototype.wander = function () {
   if (Math.random()*256*(Math.abs(this.speed.x)+0.5) < 1) {
-    this.speed.x = this.runSpeed;
+    this.speed.x = this.stats.runSpeed;
   } else if (Math.random()*128 < 2) {
-    this.speed.x = 0-this.runSpeed;
+    this.speed.x = 0-this.stats.runSpeed;
   }
 };
 
