@@ -48,10 +48,10 @@
 	var Player = __webpack_require__(2);
 	var Skeleton = __webpack_require__(13);
 	var Block = __webpack_require__(16);
-	var Util = __webpack_require__(8);
+	var Util = __webpack_require__(6);
 	var View = __webpack_require__(17);
 	var keyEvents = __webpack_require__(18);
-	var blocks = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
 	var metaBlocks = __webpack_require__(15);
 	var tiles = __webpack_require__(12);
 	var movers = __webpack_require__(10);
@@ -68,13 +68,13 @@
 	players.push( new Player (8*48, 5*48) );
 	keyEvents(document, players[0]);
 	
-	var zone = __webpack_require__(31);
+	var zone = __webpack_require__(19);
 	zone.build(blocks, movers, metaBlocks);
 	
-	var backgroundBricks = __webpack_require__(25);
+	var backgroundBricks = __webpack_require__(26);
 	backgroundBricks.build(tiles);
 	
-	var backgroundPillars = __webpack_require__(28);
+	var backgroundPillars = __webpack_require__(29);
 	backgroundPillars.build(tiles, 2);
 	backgroundPillars.build(tiles, 3);
 	
@@ -152,9 +152,9 @@
 	var Sprite = __webpack_require__(3);
 	var Meter = __webpack_require__(4);
 	var Jumpman = __webpack_require__(5);
-	var Hammer = __webpack_require__(7);
-	var Util = __webpack_require__(8);
-	var blocks = __webpack_require__(6);
+	var Hammer = __webpack_require__(8);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
 	var movers = __webpack_require__(10);
 	var tiles = __webpack_require__(12);
 	
@@ -396,8 +396,8 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(8);
-	var blocks = __webpack_require__(6);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
 	
 	var Jumpman = function () {
 	};
@@ -591,19 +591,138 @@
 /* 6 */
 /***/ function(module, exports) {
 
+	var Util = {
+	  universals: {
+	    gravity: 1,
+	    canvasContext: null,
+	    view: null,
+	    roomBottomRight: {x: 0, y: 0}
+	  },
+	};
+	
+	Array.prototype.mean = function () {
+	  var sum = 0;
+	  for (var i = 0; i < this.length; i++) {
+	    sum += this[i];
+	  }
+	  return sum/this.length;
+	};
+	
+	Util.inherits = function (ChildClass, BaseClass) {
+	  function Surrogate() { this.constructor = ChildClass; }
+	  Surrogate.prototype = BaseClass.prototype;
+	  ChildClass.prototype = new Surrogate();
+	};
+	
+	Util.approximately = function (integers, normFactor, middleInt) {
+	  if (typeof integers !== "object") {
+	    integers = [integers];
+	  }
+	  if (typeof normFactor === "undefined") {
+	    normFactor = 7;
+	  }
+	  if (typeof middleInt === "undefined") {
+	    middleInt = integers[0];
+	  }
+	
+	  integers[integers.length-1] = integers[integers.length-1] +
+	  Math.random()*integers[integers.length-1] -
+	  Math.random()*integers[integers.length-1];
+	
+	  if (integers.length === normFactor) {
+	    return Math.ceil(integers.mean());
+	  } else {
+	    integers.push(middleInt);
+	    return Util.approximately(integers, normFactor, middleInt);
+	  }
+	};
+	
+	Util.distanceBetween = function (firstPos, secondPos) {
+	  xGap = Math.abs(firstPos.x - secondPos.x);
+	  yGap = Math.abs(firstPos.y - secondPos.y);
+	  return(Math.sqrt(xGap*xGap+yGap*yGap));
+	};
+	
+	Util.direction = function (xSpeed, ySpeed) {
+	  return Math.atan(ySpeed/xSpeed);
+	};
+	
+	Util.findByType = function (type, array) {
+	  var result;
+	  array.forEach(function (mover) {
+	    if (mover.type && mover.type === type) {
+	      result = mover;
+	    }
+	  });
+	  return result;
+	};
+	
+	Util.findTypeByProx = function (type, array, pos) {
+	  var result;
+	  array.forEach(function (mover) {
+	    if (mover.type && mover.type === type && !result ) {
+	      result = mover;
+	    }
+	    if (mover.type && mover.type === type &&
+	        Util.distanceBetween(mover.pos, pos) <
+	        Util.distanceBetween(result.pos, pos)) {
+	      result = mover;
+	    }
+	  });
+	  return result;
+	};
+	
+	Util.moveTowards = function (moverPos, targetPos, vectorSpeed) {
+	  var xSpeed = ((moverPos.x - targetPos.x)/(Math.sqrt(
+	    Math.pow((moverPos.x - targetPos.x), 2) + Math.pow((moverPos.y - targetPos.y), 2)
+	  )*vectorSpeed));
+	  var ySpeed = ((moverPos.y - targetPos.y)/(Math.sqrt(
+	    Math.pow((moverPos.x - targetPos.x), 2) + Math.pow((moverPos.y - targetPos.y), 2)
+	  )*vectorSpeed));
+	  return {
+	    x: xSpeed,
+	    y: ySpeed
+	  };
+	};
+	
+	Util.typeCount = function (type, array) {
+	  var increment = 0;
+	  array.forEach(function (mover) {
+	    if (mover.type && mover.type === type) {
+	      increment ++;
+	    }
+	  });
+	  return increment;
+	};
+	
+	Util.xChase = function (chaser, targetPos, speed) {
+	  if (chaser.pos.x > targetPos.x) {
+	    chaser.speed.x = 0-speed;
+	  } else if (chaser.pos.x < targetPos.x) {
+	    chaser.speed.x = speed;
+	  }
+	};
+	
+	module.exports = Util;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
 	blocks = [];
 	
 	module.exports = blocks;
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(8);
+	var Util = __webpack_require__(6);
 	var Aura = __webpack_require__(9);
-	var blocks = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
 	var movers = __webpack_require__(10);
 	var players = __webpack_require__(11);
 	
@@ -754,131 +873,12 @@
 
 
 /***/ },
-/* 8 */
-/***/ function(module, exports) {
-
-	var Util = {
-	  universals: {
-	    gravity: 1,
-	    canvasContext: null,
-	    view: null,
-	    roomBottomRight: {x: 0, y: 0}
-	  },
-	};
-	
-	Array.prototype.mean = function () {
-	  var sum = 0;
-	  for (var i = 0; i < this.length; i++) {
-	    sum += this[i];
-	  }
-	  return sum/this.length;
-	};
-	
-	Util.inherits = function (ChildClass, BaseClass) {
-	  function Surrogate() { this.constructor = ChildClass; }
-	  Surrogate.prototype = BaseClass.prototype;
-	  ChildClass.prototype = new Surrogate();
-	};
-	
-	Util.approximately = function (integers, normFactor, middleInt) {
-	  if (typeof integers !== "object") {
-	    integers = [integers];
-	  }
-	  if (typeof normFactor === "undefined") {
-	    normFactor = 7;
-	  }
-	  if (typeof middleInt === "undefined") {
-	    middleInt = integers[0];
-	  }
-	
-	  integers[integers.length-1] = integers[integers.length-1] +
-	  Math.random()*integers[integers.length-1] -
-	  Math.random()*integers[integers.length-1];
-	
-	  if (integers.length === normFactor) {
-	    return Math.ceil(integers.mean());
-	  } else {
-	    integers.push(middleInt);
-	    return Util.approximately(integers, normFactor, middleInt);
-	  }
-	};
-	
-	Util.distanceBetween = function (firstPos, secondPos) {
-	  xGap = Math.abs(firstPos.x - secondPos.x);
-	  yGap = Math.abs(firstPos.y - secondPos.y);
-	  return(Math.sqrt(xGap*xGap+yGap*yGap));
-	};
-	
-	Util.direction = function (xSpeed, ySpeed) {
-	  return Math.atan(ySpeed/xSpeed);
-	};
-	
-	Util.findByType = function (type, array) {
-	  var result;
-	  array.forEach(function (mover) {
-	    if (mover.type && mover.type === type) {
-	      result = mover;
-	    }
-	  });
-	  return result;
-	};
-	
-	Util.findTypeByProx = function (type, array, pos) {
-	  var result;
-	  array.forEach(function (mover) {
-	    if (mover.type && mover.type === type && !result ) {
-	      result = mover;
-	    }
-	    if (mover.type && mover.type === type &&
-	        Util.distanceBetween(mover.pos, pos) <
-	        Util.distanceBetween(result.pos, pos)) {
-	      result = mover;
-	    }
-	  });
-	  return result;
-	};
-	
-	Util.moveTowards = function (moverPos, targetPos, vectorSpeed) {
-	  var xSpeed = ((moverPos.x - targetPos.x)/(Math.sqrt(
-	    Math.pow((moverPos.x - targetPos.x), 2) + Math.pow((moverPos.y - targetPos.y), 2)
-	  )*vectorSpeed));
-	  var ySpeed = ((moverPos.y - targetPos.y)/(Math.sqrt(
-	    Math.pow((moverPos.x - targetPos.x), 2) + Math.pow((moverPos.y - targetPos.y), 2)
-	  )*vectorSpeed));
-	  return {
-	    x: xSpeed,
-	    y: ySpeed
-	  };
-	};
-	
-	Util.typeCount = function (type, array) {
-	  var increment = 0;
-	  array.forEach(function (mover) {
-	    if (mover.type && mover.type === type) {
-	      increment ++;
-	    }
-	  });
-	  return increment;
-	};
-	
-	Util.xChase = function (chaser, targetPos, speed) {
-	  if (chaser.pos.x > targetPos.x) {
-	    chaser.speed.x = 0-speed;
-	  } else if (chaser.pos.x < targetPos.x) {
-	    chaser.speed.x = speed;
-	  }
-	};
-	
-	module.exports = Util;
-
-
-/***/ },
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(8);
-	var blocks = __webpack_require__(6);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
 	var movers = __webpack_require__(10);
 	var players = __webpack_require__(11);
 	
@@ -950,8 +950,8 @@
 	var Sprite = __webpack_require__(3);
 	var Jumpman = __webpack_require__(5);
 	var Boneheap = __webpack_require__(14);
-	var Util = __webpack_require__(8);
-	var blocks = __webpack_require__(6);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
 	var metaBlocks = __webpack_require__(15);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
@@ -1149,9 +1149,9 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(8);
+	var Util = __webpack_require__(6);
 	var Jumpman = __webpack_require__(5);
-	var blocks = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
 	var movers = __webpack_require__(10);
 	
 	var Boneheap = function (index, pos, stats) {
@@ -1354,7 +1354,42 @@
 
 
 /***/ },
-/* 19 */,
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(20);
+	
+	var blank = new Zone ([
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "---------FTTTTTTTF---F----FTTTF----F---FTTTTTTTF--------",
+	  "--------------------------------------------------------",
+	  "-----*--------------------------------------------------",
+	  "---FTF--------------------------------------------FTF---",
+	  "--------------------------------------------------------",
+	  "----------------!-----------!---$------------!--------$-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "--------------------------------------------------------",
+	  "---------------}-----}----{---}----{---{----------------",
+	  "---------FTTTTTTTF---F----FTTTF----F---FTTTTTTTF--------",
+	  "--------------------------------------------------------",
+	  "----}----------------------------------------------{----",
+	  "---FTF--------------------------------------------FTF---",
+	  "--------------------------------------------------------",
+	  "---------{------------------$--------------!-!}*------$-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = blank;
+
+
+/***/ },
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1364,8 +1399,8 @@
 	var Skeleton = __webpack_require__(13);
 	var Shoggoth = __webpack_require__(22);
 	var Boneheap = __webpack_require__(14);
-	var Pigeon = __webpack_require__(23);
-	var Wizard = __webpack_require__(24);
+	var Pigeon = __webpack_require__(24);
+	var Wizard = __webpack_require__(25);
 	
 	var Zone = function (blueprint, metaBlueprint) {
 	  this.blueprint = blueprint;
@@ -1455,9 +1490,9 @@
 	var Sprite = __webpack_require__(3);
 	var Jumpman = __webpack_require__(5);
 	var Boneheap = __webpack_require__(14);
-	var Util = __webpack_require__(8);
-	var Sparks = __webpack_require__(30);
-	var blocks = __webpack_require__(6);
+	var Util = __webpack_require__(6);
+	var Sparks = __webpack_require__(23);
+	var blocks = __webpack_require__(7);
 	var metaBlocks = __webpack_require__(15);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
@@ -1597,10 +1632,10 @@
 	};
 	
 	Shoggoth.prototype.die = function () {
+	  this.sprite = this.sprites["shrivel_"+this.facing];
 	  this.updateSprite = function () {};
 	  this.checkForPlayer = function () {};
 	  this.speed.x = 0;
-	  this.sprite = this.sprites["shrivel_"+this.facing];
 	  this.sprite.addAnimationEndCallback(function () {
 	    this.destroy();
 	  }.bind(this));
@@ -1787,10 +1822,134 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(6);
+	var Jumpman = __webpack_require__(5);
+	var blocks = __webpack_require__(7);
+	var movers = __webpack_require__(10);
+	var players = __webpack_require__(11);
+	
+	var Sparks = function (index, pos, shoggoth) {
+	  this.type = "sparks";
+	  this.index = index;
+	  this.spriteSize = 48;
+	  this.shoggoth = shoggoth;
+	  this.pos = pos;
+	  this.speed = {
+	    x: 0,
+	    y: 0
+	  };
+	  this.accel = {
+	    x: this.shoggoth.facing === "left" ? -0.18 : 0.18,
+	    y: 1
+	  };
+	  this.setSprites();
+	  this.age = 0;
+	};
+	
+	Sparks.prototype.landUnderFeet = Jumpman.prototype.landUnderFeet;
+	Sparks.prototype.landOnGround = Jumpman.prototype.landOnGround;
+	
+	Sparks.prototype.checkLine = function (array) {
+	  if (this.shoggoth.facing === "right") {
+	    array.forEach(function (element) {
+	      if (element &&
+	        element.pos.x + element.spriteSize > this.shoggoth.eyePos().x &&
+	        element.pos.x < this.pos.x &&
+	        element.pos.y + element.spriteSize > this.shoggoth.eyePos().y &&
+	        element.pos.y < this.pos.y + this.spriteSize) {
+	          if (element.type === "player") {
+	            element.shogBeamBite();
+	          } else if (element.type === "skeleton") {
+	            element.shatter();
+	          } else if (element.type === "pigeon") {
+	            element.transmogrify();
+	          } else if (element.type === "wizard") {
+	            element.die();
+	          }
+	        }
+	      }.bind(this));
+	  } else {
+	    array.forEach(function (element) {
+	      if (element &&
+	        this.shoggoth.eyePos().x > element.pos.x &&
+	        this.pos.x < element.pos.x + element.spriteSize &&
+	        this.shoggoth.eyePos().y < element.pos.y + element.spriteSize &&
+	        this.pos.y + this.spriteSize > element.pos.y) {
+	          if (element.type === "player") {
+	            element.shogBeamBite();
+	          } else if (element.type === "skeleton") {
+	            element.shatter();
+	          } else if (element.type === "pigeon") {
+	            element.transmogrify();
+	          } else if (element.type === "wizard") {
+	            element.die();
+	          }
+	        }
+	      }.bind(this));
+	  }
+	};
+	
+	Sparks.prototype.act = function () {
+	  if (!this.shoggoth.casting) {
+	    this.destroy();
+	  }
+	};
+	
+	Sparks.prototype.destroy = function () {
+	  delete movers[this.index];
+	};
+	
+	Sparks.prototype.drawBeam = function () {
+	  var ctx = Util.universals.canvasContext;
+	  var view = Util.universals.view.topLeftPos;
+	  ctx.strokeStyle = "white";
+	  ctx.lineWidth = 3;
+	  ctx.beginPath();
+	  ctx.moveTo(this.shoggoth.eyePos().x-view.x, this.shoggoth.eyePos().y-view.y);
+	  ctx.lineTo(this.pos.x+this.spriteSize/2-view.x, this.pos.y+this.spriteSize-view.y);
+	  ctx.stroke();
+	  ctx.strokeStyle = "black";
+	  ctx.lineWidth = 1;
+	};
+	
+	Sparks.prototype.move = function () {
+	  this.age++;
+	  this.pos.x += this.speed.x;
+	  this.pos.y += this.speed.y;
+	  this.speed.x += this.accel.x;
+	  this.speed.y += this.accel.y;
+	  this.landUnderFeet();
+	  if (this.shoggoth.casting) {
+	    this.drawBeam();
+	    this.checkLine(movers);
+	    this.checkLine(players);
+	  }
+	};
+	
+	Sparks.prototype.setSprites = function () {
+	  this.sprite = new Sprite(this.spriteSize, this.spriteSize, 1, [
+	    "beam/sparks/0.gif",
+	    "beam/sparks/1.gif",
+	    "beam/sparks/2.gif",
+	    "beam/sparks/3.gif",
+	    "beam/sparks/4.gif",
+	    "beam/sparks/5.gif",
+	    "beam/sparks/6.gif"
+	  ]);
+	};
+	
+	module.exports = Sparks;
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
 	var Jumpman = __webpack_require__(5);
 	var Boneheap = __webpack_require__(14);
-	var Util = __webpack_require__(8);
-	var blocks = __webpack_require__(6);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
 	var metaBlocks = __webpack_require__(15);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
@@ -1934,7 +2093,7 @@
 	};
 	
 	Pigeon.prototype.transmogrify = function (kill) {
-	  var Wizard = __webpack_require__(24);
+	  var Wizard = __webpack_require__(25);
 	  var wizard = new Wizard (this.index, this.pos.x, this.pos.y, this.stats);
 	  movers[this.index] = wizard;
 	  if (kill) {
@@ -1959,14 +2118,14 @@
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
 	var Jumpman = __webpack_require__(5);
 	var Boneheap = __webpack_require__(14);
-	var Util = __webpack_require__(8);
-	var blocks = __webpack_require__(6);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
 	var metaBlocks = __webpack_require__(15);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
@@ -2201,7 +2360,7 @@
 	};
 	
 	Wizard.prototype.transmogrify = function () {
-	  var Pigeon = __webpack_require__(23);
+	  var Pigeon = __webpack_require__(24);
 	  movers[this.index] = new Pigeon (this.index, this.pos.x, this.pos.y, this.stats);
 	};
 	
@@ -2223,10 +2382,10 @@
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Background = __webpack_require__(26);
+	var Background = __webpack_require__(27);
 	var Sprite = __webpack_require__(3);
 	
 	var subwayPlatform = new Background ([
@@ -2253,10 +2412,10 @@
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Tile = __webpack_require__(27);
+	var Tile = __webpack_require__(28);
 	
 	var Background = function (blueprint, spriteKey) {
 	  this.blueprint = blueprint;
@@ -2277,7 +2436,7 @@
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -2295,10 +2454,10 @@
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Background = __webpack_require__(26);
+	var Background = __webpack_require__(27);
 	var Sprite = __webpack_require__(3);
 	
 	var subwayPlatform = new Background ([
@@ -2326,167 +2485,6 @@
 	  "J": {sprite: new Sprite (144, 48, 0, ["tile/sign_jay.gif"]),
 	        depth: 5}
 	});
-	
-	module.exports = subwayPlatform;
-
-
-/***/ },
-/* 29 */,
-/* 30 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(8);
-	var Jumpman = __webpack_require__(5);
-	var blocks = __webpack_require__(6);
-	var movers = __webpack_require__(10);
-	var players = __webpack_require__(11);
-	
-	var Sparks = function (index, pos, shoggoth) {
-	  this.type = "sparks";
-	  this.index = index;
-	  this.spriteSize = 48;
-	  this.shoggoth = shoggoth;
-	  this.pos = pos;
-	  this.speed = {
-	    x: 0,
-	    y: 0
-	  };
-	  this.accel = {
-	    x: this.shoggoth.facing === "left" ? -0.18 : 0.18,
-	    y: 1
-	  };
-	  this.setSprites();
-	  this.age = 0;
-	};
-	
-	Sparks.prototype.landUnderFeet = Jumpman.prototype.landUnderFeet;
-	Sparks.prototype.landOnGround = Jumpman.prototype.landOnGround;
-	
-	Sparks.prototype.checkLine = function (array) {
-	  if (this.shoggoth.facing === "right") {
-	    array.forEach(function (element) {
-	      if (element &&
-	        element.pos.x + element.spriteSize > this.shoggoth.eyePos().x &&
-	        element.pos.x < this.pos.x &&
-	        element.pos.y + element.spriteSize > this.shoggoth.eyePos().y &&
-	        element.pos.y < this.pos.y + this.spriteSize) {
-	          if (element.type === "player") {
-	            element.shogBeamBite();
-	          } else if (element.type === "skeleton") {
-	            element.shatter();
-	          } else if (element.type === "pigeon") {
-	            element.transmogrify();
-	          } else if (element.type === "wizard") {
-	            element.die();
-	          }
-	        }
-	      }.bind(this));
-	  } else {
-	    array.forEach(function (element) {
-	      if (element &&
-	        this.shoggoth.eyePos().x > element.pos.x &&
-	        this.pos.x < element.pos.x + element.spriteSize &&
-	        this.shoggoth.eyePos().y < element.pos.y + element.spriteSize &&
-	        this.pos.y + this.spriteSize > element.pos.y) {
-	          if (element.type === "player") {
-	            element.shogBeamBite();
-	          } else if (element.type === "skeleton") {
-	            element.shatter();
-	          } else if (element.type === "pigeon") {
-	            element.transmogrify();
-	          } else if (element.type === "wizard") {
-	            element.die();
-	          }
-	        }
-	      }.bind(this));
-	  }
-	};
-	
-	Sparks.prototype.act = function () {
-	  if (!this.shoggoth.casting) {
-	    this.destroy();
-	  }
-	};
-	
-	Sparks.prototype.destroy = function () {
-	  delete movers[this.index];
-	};
-	
-	Sparks.prototype.drawBeam = function () {
-	  var ctx = Util.universals.canvasContext;
-	  var view = Util.universals.view.topLeftPos;
-	  ctx.strokeStyle = "white";
-	  ctx.lineWidth = 3;
-	  ctx.beginPath();
-	  ctx.moveTo(this.shoggoth.eyePos().x-view.x, this.shoggoth.eyePos().y-view.y);
-	  ctx.lineTo(this.pos.x+this.spriteSize/2-view.x, this.pos.y+this.spriteSize-view.y);
-	  ctx.stroke();
-	  ctx.strokeStyle = "black";
-	  ctx.lineWidth = 1;
-	};
-	
-	Sparks.prototype.move = function () {
-	  this.age++;
-	  this.pos.x += this.speed.x;
-	  this.pos.y += this.speed.y;
-	  this.speed.x += this.accel.x;
-	  this.speed.y += this.accel.y;
-	  this.landUnderFeet();
-	  if (this.shoggoth.casting) {
-	    this.drawBeam();
-	    this.checkLine(movers);
-	    this.checkLine(players);
-	  }
-	};
-	
-	Sparks.prototype.setSprites = function () {
-	  this.sprite = new Sprite(this.spriteSize, this.spriteSize, 1, [
-	    "beam/sparks/0.gif",
-	    "beam/sparks/1.gif",
-	    "beam/sparks/2.gif",
-	    "beam/sparks/3.gif",
-	    "beam/sparks/4.gif",
-	    "beam/sparks/5.gif",
-	    "beam/sparks/6.gif"
-	  ]);
-	};
-	
-	module.exports = Sparks;
-
-
-/***/ },
-/* 31 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Zone = __webpack_require__(20);
-	
-	var subwayPlatform = new Zone ([
-	  "--------------------------------------------------------",
-	  "------------*----------------------!---------*!---------",
-	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
-	  "--------------------------------------------!-----------",
-	  "---------------------------------------------!----------",
-	  "-----------------FF----FTF-----------------FTF----F-----",
-	  "--------------------------------------------------------",
-	  "--------------------------------!---------------------!-",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	],[
-	  "--------------------------------------------------------",
-	  "------------}----{-----------<----#}----{{--------------",
-	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
-	  "--------------------------------------------------------",
-	  "]----------------{}-----{>-----------------#{}----------[",
-	  "]----------------FF----FTF-----------------FTF----F----[",
-	  "]------------------------------------------------------[",
-	  "]------------}------}--->---<-#--------->------<-------[",
-	  "XXXXXXXXXXXXXXXXXXXXXXX<<TTTT>>XXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	]
-	);
 	
 	module.exports = subwayPlatform;
 

@@ -143,10 +143,10 @@ Shoggoth.prototype.destroy = function () {
 };
 
 Shoggoth.prototype.die = function () {
+  this.sprite = this.sprites["shrivel_"+this.facing];
   this.updateSprite = function () {};
   this.checkForPlayer = function () {};
   this.speed.x = 0;
-  this.sprite = this.sprites["shrivel_"+this.facing];
   this.sprite.addAnimationEndCallback(function () {
     this.destroy();
   }.bind(this));
