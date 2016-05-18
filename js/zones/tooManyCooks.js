@@ -1,7 +1,7 @@
 var Zone = require("../zone.js");
 
 
-var tooManyCooks = new Zone ([
+var tooManyCooks = new Zone ("tooManyCooks", [
   "--------------------------------------------------------",
   "---------*-------*--------------------------*-----------",
   "---------F-------FTTTTF--------FTTTTF-------F-----------",

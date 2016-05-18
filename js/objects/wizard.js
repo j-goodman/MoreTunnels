@@ -32,11 +32,11 @@ var Wizard = function (index, x, y, stats) {
   if (stats === "undefined") {
     this.stats = {
       sightRange: Util.approximately(270),
-      runSpeed: Util.approximately(4),
+      runSpeed: Util.approximately(5),
       jumpPower: Util.approximately(18),
-      jumpDistance: Util.approximately(1.4),
+      jumpDistance: Util.approximately(1.6),
       chasingSkill: Util.approximately(2),
-      magicRange: Util.approximately(72),
+      magicRange: Util.approximately(96),
       castingDelay: Util.approximately(18)
     };
   } else {
@@ -177,14 +177,19 @@ Wizard.prototype.act = function () {
 
 Wizard.prototype.dodgeHammer = function () {
   movers.forEach(function (mover) {
-
     if (mover.type === "hammer" &&
         Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/24 &&
-        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 ) {
+        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 &&
+        !Math.floor(Math.random()*2)) {
       this.lowJump();
       this.turnIntoABird();
     }
   }.bind(this));
+  if (Util.distanceBetween(this.pos, players[0].pos) > this.stats.sightRange/24 &&
+      Util.distanceBetween(this.pos, players[0].pos) < this.stats.sightRange/3 &&
+      !Math.round(Math.random()*32)) {
+    Util.xChase(this, players[0].pos, 0-this.runSpeed);
+  }
 };
 
 Wizard.prototype.jump = function () {

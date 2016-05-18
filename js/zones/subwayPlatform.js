@@ -1,6 +1,6 @@
 var Zone = require("../zone.js");
 
-var subwayPlatform = new Zone ([
+var subwayPlatform = new Zone ("subwayPlatform", [
   "--------------------------------------------------------",
   "------------*----------------------!---------*!---------",
   "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",

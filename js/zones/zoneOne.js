@@ -1,6 +1,6 @@
 var Zone = require("../zone.js");
 
-var zoneOne = new Zone ([
+var zoneOne = new Zone ("zoneOne", [
   "------XXXXXXXXXXXXXXXXXXXXX----XXXXXXXX----XXXXXXXXXXXXX",
   "XX------------------------------------------------------",
   "--------------------------------------------------------",

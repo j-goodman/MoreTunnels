@@ -1,70 +1,124 @@
-var renderZone = require('./renderZone.js');
-var Player = require('./objects/player.js');
-var Skeleton = require('./objects/skeleton.js');
-var Block = require('./objects/block.js');
-var Util = require('./util/util.js');
-var View = require('./objects/view.js');
-var keyEvents = require('./keyEvents.js');
-var blocks = require('./objectArrays/blocks.js');
-var metaBlocks = require('./objectArrays/metaBlocks.js');
-var tiles = require('./objectArrays/tiles.js');
-var movers = require('./objectArrays/movers.js');
-var players = require('./objectArrays/players.js');
+Window.newGame = function () {
+  var renderZone = require('./renderZone.js');
+  var Player = require('./objects/player.js');
+  var Skeleton = require('./objects/skeleton.js');
+  var Block = require('./objects/block.js');
+  var Util = require('./util/util.js');
+  var View = require('./objects/view.js');
+  var keyEvents = require('./keyEvents.js');
+  var blocks = require('./objectArrays/blocks.js');
+  var aiHints = require('./objectArrays/metaBlocks.js');
+  var tiles = require('./objectArrays/tiles.js');
+  var movers = require('./objectArrays/movers.js');
+  var players = require('./objectArrays/players.js');
+  var Conductor = require('./objects/trains/conductor.js');
 
-window.onload = function () {
-  var canvas = document.getElementById("canvas");
+  var Game = {
+    canvas: null,
+    ctx: null,
+    players: players,
+    movers: movers,
+    tiles: tiles,
+    blocks: blocks,
+    metaBlocks: metaBlocks,
+    aiHints: aiHints,
+    keyEvents: keyEvents,
+    renderZone: renderZone,
+    Conductor: Conductor,
+    Player: Player,
+    Skeleton: Skeleton,
+    Block: Block,
+    View: View,
+    Util: Util
+  };
 
-var ctx = canvas.getContext('2d');
-Util.universals.canvasContext = ctx;
-ctx.clearRect(0, 0, canvas.width, canvas.height);
+  Game.startUpCanvas = function () {
+    window.onload = function () {
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext('2d');
+      this.canvas = canvas;
+      this.ctx = ctx;
+      Util.universals.canvasContext = ctx;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }.bind(this);
+  };
 
+  Game.buildZone = function () {
+    var zone = require('./zones/throop.js');
+    this.zone = zone;
 
-players.push( new Player (8*48, 5*48) );
-keyEvents(document, players[0]);
+    var callback = function () {
+      this.setupKeyControls();
+    }.bind(this);
 
-var zone = require('./zones/subwayPlatform.js');
-zone.build(blocks, movers, metaBlocks);
+    this.zone.build(this.blocks, this.movers, this.players, this.metaBlocks, callback);
 
-var backgroundBricks = require('./backgrounds/subwayPlatformBricks.js');
-backgroundBricks.build(tiles);
+    var backgroundBricks = require('./backgrounds/throopBricks.js');
+    backgroundBricks.build(tiles);
 
-var backgroundPillars = require('./backgrounds/subwayPlatformPillars.js');
-backgroundPillars.build(tiles, 2);
-backgroundPillars.build(tiles, 3);
+    var backgroundPillars = require('./backgrounds/throopPillars.js');
+    backgroundPillars.build(tiles, 2);
+    backgroundPillars.build(tiles, 3);
+  };
 
-var view = new View (0, 0, 640, 480, 55*48, 11*48);
-Util.universals.view = view;
-Util.universals.roomBottomRight = {x: 55*48, y: 11*48};
+  Game.setupKeyControls = function () {
+    this.keyEvents(document, this.players[0]);
+  };
 
-  setInterval(function () {
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  Game.setView = function () {
+    var view = new this.View (0, 0, 640, 480, 48*this.zone.blueprint[0].length, 48*this.zone.blueprint.length);
+    this.view = view;
+    Util.universals.view = view;
+    Util.universals.roomBottomRight = {x: 48*this.zone.blueprint[0].length, y: 48*this.zone.blueprint.length};
+  };
 
-    tiles.forEach(function(tile, idx){
-      tile.sprite.depthDraw(ctx, tile.pos, view.topLeftPos, tile.depth);
-      if (tile.isMeter) {
-        delete tiles[idx];
+  Game.playGame = function () {
+    setInterval(function () {
+      var ctx = this.ctx;
+      if (ctx) {
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
-    });
 
-    blocks.forEach(function(block){
-      block.sprite.draw(ctx, block.pos, view.topLeftPos);
-    });
+      this.tiles.forEach(function(tile, idx) {
+        tile.sprite.depthDraw(this.ctx, tile.pos, this.view.topLeftPos, tile.depth);
+        if (tile.isMeter) {
+          delete this.tiles[idx];
+        }
+      }.bind(this));
 
-    movers.forEach(function(mover){
-      mover.sprite.draw(ctx, mover.pos, view.topLeftPos);
-    });
+      var conductor = new this.Conductor (this.zone);
+      conductor.manageTrains();
 
-    players[0].sprite.draw(ctx, players[0].pos, view.topLeftPos);
+      this.blocks.forEach(function(block){
+        block.sprite.draw(this.ctx, block.pos, this.view.topLeftPos);
+      }.bind(this));
 
-    players[0].drawData(ctx);
+      this.movers.forEach(function(mover){
+        mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
+      }.bind(this));
 
-    players[0].move();
-    movers.forEach(function(mover){
-      mover.move();
-      mover.act();
-    });
+      if (this.ctx) {
+        this.players[0].sprite.draw(this.ctx, players[0].pos, this.view.topLeftPos);
+      }
 
-    view.recenter(players[0].pos);
-  }, 32);
+      this.players[0].drawData(this.ctx);
+
+      this.players[0].move();
+
+      this.movers.forEach(function(mover){
+        mover.move();
+        mover.act();
+      });
+
+      this.view.recenter(players[0].pos);
+    }.bind(this), 32);
+  };
+
+  Game.startUpCanvas();
+  Game.buildZone();
+  Game.setView();
+  Game.playGame();
 };
+
+Window.newGame();

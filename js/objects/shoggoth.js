@@ -131,6 +131,7 @@ Shoggoth.prototype.checkForPlayer = function () {
       player.pos.y + player.spriteSize >= this.pos.y &&
       player.pos.y <= this.pos.y + this.spriteSize &&
       player.checkUnderFeet() &&
+      !this.scared &&
       this.checkUnderFeet()
       ) {
     if (!Math.round(Math.random(16)))
@@ -182,7 +183,7 @@ Shoggoth.prototype.eyePos = function (pose) {
 Shoggoth.prototype.panic = function () {
   this.scared = 32*5;
   this.casting = 0;
-  this.stats.runSpeed = -6.5;
+  this.stats.runSpeed = -6.4;
   // runSpeed is negative so chase logic makes the Shoggoth run away
 };
 

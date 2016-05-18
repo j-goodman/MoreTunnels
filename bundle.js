@@ -44,76 +44,130 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var renderZone = __webpack_require__(1);
-	var Player = __webpack_require__(2);
-	var Skeleton = __webpack_require__(13);
-	var Block = __webpack_require__(16);
-	var Util = __webpack_require__(6);
-	var View = __webpack_require__(17);
-	var keyEvents = __webpack_require__(18);
-	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(15);
-	var tiles = __webpack_require__(12);
-	var movers = __webpack_require__(10);
-	var players = __webpack_require__(11);
+	Window.newGame = function () {
+	  var renderZone = __webpack_require__(1);
+	  var Player = __webpack_require__(2);
+	  var Skeleton = __webpack_require__(13);
+	  var Block = __webpack_require__(16);
+	  var Util = __webpack_require__(6);
+	  var View = __webpack_require__(17);
+	  var keyEvents = __webpack_require__(18);
+	  var blocks = __webpack_require__(7);
+	  var aiHints = __webpack_require__(15);
+	  var tiles = __webpack_require__(12);
+	  var movers = __webpack_require__(10);
+	  var players = __webpack_require__(11);
+	  var Conductor = __webpack_require__(30);
 	
-	window.onload = function () {
-	  var canvas = document.getElementById("canvas");
+	  var Game = {
+	    canvas: null,
+	    ctx: null,
+	    players: players,
+	    movers: movers,
+	    tiles: tiles,
+	    blocks: blocks,
+	    metaBlocks: metaBlocks,
+	    aiHints: aiHints,
+	    keyEvents: keyEvents,
+	    renderZone: renderZone,
+	    Conductor: Conductor,
+	    Player: Player,
+	    Skeleton: Skeleton,
+	    Block: Block,
+	    View: View,
+	    Util: Util
+	  };
 	
-	var ctx = canvas.getContext('2d');
-	Util.universals.canvasContext = ctx;
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	  Game.startUpCanvas = function () {
+	    window.onload = function () {
+	      var canvas = document.getElementById("canvas");
+	      var ctx = canvas.getContext('2d');
+	      this.canvas = canvas;
+	      this.ctx = ctx;
+	      Util.universals.canvasContext = ctx;
+	      ctx.clearRect(0, 0, canvas.width, canvas.height);
+	    }.bind(this);
+	  };
 	
+	  Game.buildZone = function () {
+	    var zone = __webpack_require__(32);
+	    this.zone = zone;
 	
-	players.push( new Player (8*48, 5*48) );
-	keyEvents(document, players[0]);
+	    var callback = function () {
+	      this.setupKeyControls();
+	    }.bind(this);
 	
-	var zone = __webpack_require__(19);
-	zone.build(blocks, movers, metaBlocks);
+	    this.zone.build(this.blocks, this.movers, this.players, this.metaBlocks, callback);
 	
-	var backgroundBricks = __webpack_require__(26);
-	backgroundBricks.build(tiles);
+	    var backgroundBricks = __webpack_require__(34);
+	    backgroundBricks.build(tiles);
 	
-	var backgroundPillars = __webpack_require__(29);
-	backgroundPillars.build(tiles, 2);
-	backgroundPillars.build(tiles, 3);
+	    var backgroundPillars = __webpack_require__(35);
+	    backgroundPillars.build(tiles, 2);
+	    backgroundPillars.build(tiles, 3);
+	  };
 	
-	var view = new View (0, 0, 640, 480, 55*48, 11*48);
-	Util.universals.view = view;
-	Util.universals.roomBottomRight = {x: 55*48, y: 11*48};
+	  Game.setupKeyControls = function () {
+	    this.keyEvents(document, this.players[0]);
+	  };
 	
-	  setInterval(function () {
-	    ctx.fillStyle = "black";
-	    ctx.fillRect(0, 0, canvas.width, canvas.height);
+	  Game.setView = function () {
+	    var view = new this.View (0, 0, 640, 480, 48*this.zone.blueprint[0].length, 48*this.zone.blueprint.length);
+	    this.view = view;
+	    Util.universals.view = view;
+	    Util.universals.roomBottomRight = {x: 48*this.zone.blueprint[0].length, y: 48*this.zone.blueprint.length};
+	  };
 	
-	    tiles.forEach(function(tile, idx){
-	      tile.sprite.depthDraw(ctx, tile.pos, view.topLeftPos, tile.depth);
-	      if (tile.isMeter) {
-	        delete tiles[idx];
+	  Game.playGame = function () {
+	    setInterval(function () {
+	      var ctx = this.ctx;
+	      if (ctx) {
+	        this.ctx.fillStyle = "black";
+	        this.ctx.fillRect(0, 0, canvas.width, canvas.height);
 	      }
-	    });
 	
-	    blocks.forEach(function(block){
-	      block.sprite.draw(ctx, block.pos, view.topLeftPos);
-	    });
+	      this.tiles.forEach(function(tile, idx) {
+	        tile.sprite.depthDraw(this.ctx, tile.pos, this.view.topLeftPos, tile.depth);
+	        if (tile.isMeter) {
+	          delete this.tiles[idx];
+	        }
+	      }.bind(this));
 	
-	    movers.forEach(function(mover){
-	      mover.sprite.draw(ctx, mover.pos, view.topLeftPos);
-	    });
+	      var conductor = new this.Conductor (this.zone);
+	      conductor.manageTrains();
 	
-	    players[0].sprite.draw(ctx, players[0].pos, view.topLeftPos);
+	      this.blocks.forEach(function(block){
+	        block.sprite.draw(this.ctx, block.pos, this.view.topLeftPos);
+	      }.bind(this));
 	
-	    players[0].drawData(ctx);
+	      this.movers.forEach(function(mover){
+	        mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
+	      }.bind(this));
 	
-	    players[0].move();
-	    movers.forEach(function(mover){
-	      mover.move();
-	      mover.act();
-	    });
+	      if (this.ctx) {
+	        this.players[0].sprite.draw(this.ctx, players[0].pos, this.view.topLeftPos);
+	      }
 	
-	    view.recenter(players[0].pos);
-	  }, 32);
+	      this.players[0].drawData(this.ctx);
+	
+	      this.players[0].move();
+	
+	      this.movers.forEach(function(mover){
+	        mover.move();
+	        mover.act();
+	      });
+	
+	      this.view.recenter(players[0].pos);
+	    }.bind(this), 32);
+	  };
+	
+	  Game.startUpCanvas();
+	  Game.buildZone();
+	  Game.setView();
+	  Game.playGame();
 	};
+	
+	Window.newGame();
 
 
 /***/ },
@@ -158,8 +212,9 @@
 	var movers = __webpack_require__(10);
 	var tiles = __webpack_require__(12);
 	
-	var Player = function (x, y) {
+	var Player = function (index, x, y) {
 	  this.age = 0;
+	  this.index = index;
 	  this.type = "player";
 	  this.spriteSize = 48;
 	  this.pos = {
@@ -1354,42 +1409,7 @@
 
 
 /***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Zone = __webpack_require__(20);
-	
-	var subwayPlatform = new Zone ([
-	  "--------------------------------------------------------",
-	  "------------*----------------------!---------*!---------",
-	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
-	  "--------------------------------------------!-----------",
-	  "---------------------------------------------!----------",
-	  "-----------------FF----FTF-----------------FTF----F-----",
-	  "--------------------------------------------------------",
-	  "--------------------------------!---------------------!-",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	],[
-	  "--------------------------------------------------------",
-	  "------------}----{-----------<----#}----{{--------------",
-	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
-	  "--------------------------------------------------------",
-	  "]----------------{}-----{>-----------------#{}----------[",
-	  "]----------------FF----FTF-----------------FTF----F----[",
-	  "]------------------------------------------------------[",
-	  "]------------}------}--->---<-#--------->------<-------[",
-	  "XXXXXXXXXXXXXXXXXXXXXXX<<TTTT>>XXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	]
-	);
-	
-	module.exports = subwayPlatform;
-
-
-/***/ },
+/* 19 */,
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1402,7 +1422,8 @@
 	var Pigeon = __webpack_require__(24);
 	var Wizard = __webpack_require__(25);
 	
-	var Zone = function (blueprint, metaBlueprint) {
+	var Zone = function (name, blueprint, metaBlueprint) {
+	  this.name = name;
 	  this.blueprint = blueprint;
 	  this.metaBlueprint = metaBlueprint;
 	};
@@ -1410,7 +1431,7 @@
 	// X Top of a platform
 	// Y Middle of a platform
 	
-	Zone.prototype.build = function (blocks, movers, metaBlocks) {
+	Zone.prototype.build = function (blocks, movers, players, metaBlocks, callback) {
 	  this.blueprint.forEach(function (yLine, yIndex) {
 	    yLine.split("").forEach(function (square, xIndex) {
 	      if (square === "X") {
@@ -1429,9 +1450,12 @@
 	        movers.push( new Shoggoth (movers.length, xIndex*48, yIndex*48) );
 	      } else if (square === "*") {
 	        movers.push( new Pigeon (movers.length, xIndex*48, yIndex*48) );
+	      } else if (square === "1") {
+	        players.push( new Player (movers.length, xIndex*48, yIndex*48) );
 	      }
 	    });
 	  });
+	
 	  if (this.metaBlueprint) {
 	    this.metaBlueprint.forEach(function (yLine, yIndex) {
 	      yLine.split("").forEach(function (square, xIndex) {
@@ -1455,8 +1479,8 @@
 	      });
 	    });
 	  }
+	  callback();
 	};
-	
 	module.exports = Zone;
 
 
@@ -1620,6 +1644,7 @@
 	      player.pos.y + player.spriteSize >= this.pos.y &&
 	      player.pos.y <= this.pos.y + this.spriteSize &&
 	      player.checkUnderFeet() &&
+	      !this.scared &&
 	      this.checkUnderFeet()
 	      ) {
 	    if (!Math.round(Math.random(16)))
@@ -1671,7 +1696,7 @@
 	Shoggoth.prototype.panic = function () {
 	  this.scared = 32*5;
 	  this.casting = 0;
-	  this.stats.runSpeed = -6.5;
+	  this.stats.runSpeed = -6.4;
 	  // runSpeed is negative so chase logic makes the Shoggoth run away
 	};
 	
@@ -2155,11 +2180,11 @@
 	  if (stats === "undefined") {
 	    this.stats = {
 	      sightRange: Util.approximately(270),
-	      runSpeed: Util.approximately(4),
+	      runSpeed: Util.approximately(5),
 	      jumpPower: Util.approximately(18),
-	      jumpDistance: Util.approximately(1.4),
+	      jumpDistance: Util.approximately(1.6),
 	      chasingSkill: Util.approximately(2),
-	      magicRange: Util.approximately(72),
+	      magicRange: Util.approximately(96),
 	      castingDelay: Util.approximately(18)
 	    };
 	  } else {
@@ -2300,14 +2325,19 @@
 	
 	Wizard.prototype.dodgeHammer = function () {
 	  movers.forEach(function (mover) {
-	
 	    if (mover.type === "hammer" &&
 	        Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/24 &&
-	        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 ) {
+	        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 &&
+	        !Math.floor(Math.random()*2)) {
 	      this.lowJump();
 	      this.turnIntoABird();
 	    }
 	  }.bind(this));
+	  if (Util.distanceBetween(this.pos, players[0].pos) > this.stats.sightRange/24 &&
+	      Util.distanceBetween(this.pos, players[0].pos) < this.stats.sightRange/3 &&
+	      !Math.round(Math.random()*32)) {
+	    Util.xChase(this, players[0].pos, 0-this.runSpeed);
+	  }
 	};
 	
 	Wizard.prototype.jump = function () {
@@ -2382,36 +2412,7 @@
 
 
 /***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Background = __webpack_require__(27);
-	var Sprite = __webpack_require__(3);
-	
-	var subwayPlatform = new Background ([
-	  "---------------------------",
-	  "---------------------------",
-	  "---------------------------",
-	  "---------------------------",
-	  "---------------------------",
-	  "===========================",
-	  "---------------------------",
-	  "---------------------------",
-	  "---------------------------",
-	  "===========================",
-	  "==========================="
-	],
-	{
-	  "-": {sprite: new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
-	        depth: 5},
-	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
-	        depth: 5}
-	});
-	
-	module.exports = subwayPlatform;
-
-
-/***/ },
+/* 26 */,
 /* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2454,24 +2455,166 @@
 
 
 /***/ },
-/* 29 */
+/* 29 */,
+/* 30 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Util = __webpack_require__(6);
+	var movers = __webpack_require__(10);
+	var A = __webpack_require__(33);
+	
+	var Conductor = function (zone) {
+	  this.zone = zone;
+	  this.movers = movers;
+	  this.time = 0;
+	};
+	
+	Conductor.prototype.manageTrains = function () {
+	  switch (this.zone.name) {
+	    case "Throop":
+	    var ATrain = __webpack_require__(33);
+	    if (Util.typeCount("skeleton", movers) === 0) {
+	      if (Util.typeCount("aTrain", movers) === 0) {
+	        this.train = new A (movers.length, -1000, this.zone.trainHeight);
+	      }
+	    }
+	    break;
+	  }
+	};
+	
+	module.exports = Conductor;
+
+
+/***/ },
+/* 31 */,
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(20);
+	
+	var throop = new Zone ("Throop", [
+	  "---------------------------------------------------------------------------",
+	  "----------*---------------------------------------------------#!*----------",
+	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
+	  "---------------------------------------------------------------------------",
+	  "---------------------*---------------------------#!-----#!-----------------",
+	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
+	  "---------------------------------------------------------------------------",
+	  "-!#-!#--!#---------------------------------------------------#!-------#!---",
+	  "XXXXXXXXXXXTTTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXTTTTTTXXXXXXXXXXX",
+	  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY",
+	  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY"
+	],[
+	  "---------------------------------------------------------------------------",
+	  "---------#*#--------------------------------------------------#!*----------",
+	  "----------FTTF-----------FTF-----------------FTTTF-----------FTTF----------",
+	  "---------------------------------------------------------------------------",
+	  "---------------{----}*--------------------------{#!{----#!}----------------",
+	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
+	  "---------------------------------------------------------------------------",
+	  "-!#-!#--!#---}--}----{--{-------------------}--}-------{----{#!-------#!---",
+	  "XXXXXXXXXXXTTTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXTTTTTTXXXXXXXXXXX",
+	  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY",
+	  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY"
+	]
+	);
+	
+	throop.trainHeight = 8;
+	module.exports = throop;
+
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Util = __webpack_require__(6);
+	var Figure = __webpack_require__(36);
+	
+	var A = function (index, x, y, xSpeed, xAccel) {
+	  this.index = index;
+	  this.type = "aTrain";
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.speed = {
+	    x: xSpeed,
+	    y: 0
+	  };
+	  this.accel = {
+	    x: xAccel,
+	    y: 0
+	  };
+	  this.setSprites();
+	};
+	
+	A.prototype.move = function () {
+	  this.pos.x += this.speed.x;
+	  this.pos.y += this.speed.y;
+	  this.speed.x += this.accel.x;
+	  this.speed.y += this.accel.y;
+	};
+	
+	A.prototype.act = function () {
+	
+	};
+	
+	A.prototype.setSprites = function () {
+	  this.sprite = new Figure ();
+	};
+	
+	module.exports = A;
+
+
+/***/ },
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Background = __webpack_require__(27);
 	var Sprite = __webpack_require__(3);
 	
-	var subwayPlatform = new Background ([
-	  "=======================================",
-	  "=======================================",
-	  "=======================================",
-	  "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFF",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    ",
-	  "    I     I     I     I     I     I    "
+	var throopBricks = new Background ([
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "=====================================",
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "=====================================",
+	  "====================================="
+	],
+	{
+	  "-": {sprite: new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
+	        depth: 5},
+	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
+	        depth: 5}
+	});
+	
+	module.exports = throopBricks;
+
+
+/***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(27);
+	var Sprite = __webpack_require__(3);
+	
+	var throopPillars = new Background ([
+	  "=====================================================",
+	  "=====================================================",
+	  "=====================================================",
+	  "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL ",
+	  "    I     I     I     I     I     I     I     I     I",
+	  "    I     I     I   K I     I     I     I     I     I",
+	  "    I     I     I     I     I     I     I     I     I",
+	  "    I     I     I     I     I     I     I     I     I",
+	  "    I     I     I     I     I     I     I     I     I",
+	  "    I     I     I     I     I     I     I     I     I",
+	  "    I     I     I     I     I     I     I     I     I"
 	],
 	{
 	  "I": {sprite: new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
@@ -2482,11 +2625,17 @@
 	        depth: 2},
 	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
 	        depth: 2},
-	  "J": {sprite: new Sprite (144, 48, 0, ["tile/sign_jay.gif"]),
+	  "K": {sprite: new Sprite (96, 48, 0, ["tile/sign_kthroop.gif"]),
 	        depth: 5}
 	});
 	
-	module.exports = subwayPlatform;
+	module.exports = throopPillars;
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports) {
+
 
 
 /***/ }

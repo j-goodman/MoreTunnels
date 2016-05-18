@@ -1,6 +1,6 @@
 var Zone = require("../zone.js");
 
-var blank = new Zone ([
+var shoggothBrawl = new Zone ( "shoggothBrawl", [
   "--------------------------------------------------------",
   "--------------------------------------------------------",
   "---------FTTTTTTTF---F----FTTTF----F---FTTTTTTTF--------",
@@ -27,4 +27,4 @@ var blank = new Zone ([
 ]
 );
 
-module.exports = blank;
+module.exports = shoggothBrawl;

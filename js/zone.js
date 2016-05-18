@@ -7,7 +7,8 @@ var Boneheap = require("./objects/boneheap.js");
 var Pigeon = require("./objects/pigeon.js");
 var Wizard = require("./objects/wizard.js");
 
-var Zone = function (blueprint, metaBlueprint) {
+var Zone = function (name, blueprint, metaBlueprint) {
+  this.name = name;
   this.blueprint = blueprint;
   this.metaBlueprint = metaBlueprint;
 };
@@ -15,7 +16,7 @@ var Zone = function (blueprint, metaBlueprint) {
 // X Top of a platform
 // Y Middle of a platform
 
-Zone.prototype.build = function (blocks, movers, metaBlocks) {
+Zone.prototype.build = function (blocks, movers, players, metaBlocks, callback) {
   this.blueprint.forEach(function (yLine, yIndex) {
     yLine.split("").forEach(function (square, xIndex) {
       if (square === "X") {
@@ -34,9 +35,12 @@ Zone.prototype.build = function (blocks, movers, metaBlocks) {
         movers.push( new Shoggoth (movers.length, xIndex*48, yIndex*48) );
       } else if (square === "*") {
         movers.push( new Pigeon (movers.length, xIndex*48, yIndex*48) );
+      } else if (square === "1") {
+        players.push( new Player (movers.length, xIndex*48, yIndex*48) );
       }
     });
   });
+
   if (this.metaBlueprint) {
     this.metaBlueprint.forEach(function (yLine, yIndex) {
       yLine.split("").forEach(function (square, xIndex) {
@@ -60,6 +64,6 @@ Zone.prototype.build = function (blocks, movers, metaBlocks) {
       });
     });
   }
+  callback();
 };
-
 module.exports = Zone;

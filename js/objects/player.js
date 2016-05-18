@@ -7,8 +7,9 @@ var blocks = require('../objectArrays/blocks.js');
 var movers = require('../objectArrays/movers.js');
 var tiles = require('../objectArrays/tiles.js');
 
-var Player = function (x, y) {
+var Player = function (index, x, y) {
   this.age = 0;
+  this.index = index;
   this.type = "player";
   this.spriteSize = 48;
   this.pos = {

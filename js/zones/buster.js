@@ -1,7 +1,7 @@
 var Zone = require("../zone.js");
 
 
-var tooManyCooks = new Zone ([
+var buster = new Zone ("buster", [
   "--------------------------------------------------------",
   "---------*-----------H----------H---*-------*-----------",
   "---------F-------FTTTTF--------FTTTTF-------F-----------",
@@ -28,4 +28,4 @@ var tooManyCooks = new Zone ([
 ]
 );
 
-module.exports = tooManyCooks;
+module.exports = buster;
