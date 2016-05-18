@@ -22,7 +22,7 @@ ctx.clearRect(0, 0, canvas.width, canvas.height);
 players.push( new Player (8*48, 5*48) );
 keyEvents(document, players[0]);
 
-var zone = require('./zones/shoggothBattle.js');
+var zone = require('./zones/subwayPlatform.js');
 zone.build(blocks, movers, metaBlocks);
 
 var backgroundBricks = require('./backgrounds/subwayPlatformBricks.js');

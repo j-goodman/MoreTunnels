@@ -1359,34 +1359,34 @@
 
 	var Zone = __webpack_require__(20);
 	
-	var blank = new Zone ([
+	var subwayPlatform = new Zone ([
 	  "--------------------------------------------------------",
+	  "------------*----------------------!---------*!---------",
+	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
+	  "--------------------------------------------!-----------",
+	  "---------------------------------------------!----------",
+	  "-----------------FF----FTF-----------------FTF----F-----",
 	  "--------------------------------------------------------",
-	  "---------FTTTTTTTF---F----FTTTF----F---FTTTTTTTF--------",
-	  "--------------------------------------------------------",
-	  "-----*--------------------------------------------------",
-	  "---FTF--------------------------------------------FTF---",
-	  "--------------------------------------------------------",
-	  "----------------!-----------!---$------------!--------$-",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	  "--------------------------------!---------------------!-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
 	],[
 	  "--------------------------------------------------------",
-	  "---------------}-----}----{---}----{---{----------------",
-	  "---------FTTTTTTTF---F----FTTTF----F---FTTTTTTTF--------",
+	  "------------}----{-----------<----#}----{{--------------",
+	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
 	  "--------------------------------------------------------",
-	  "----}----------------------------------------------{----",
-	  "---FTF--------------------------------------------FTF---",
-	  "--------------------------------------------------------",
-	  "---------{------------------$--------------!-!}*------$-",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	  "]----------------{}-----{>-----------------#{}----------[",
+	  "]----------------FF----FTF-----------------FTF----F----[",
+	  "]------------------------------------------------------[",
+	  "]------------}------}--->---<-#--------->------<-------[",
+	  "XXXXXXXXXXXXXXXXXXXXXXX<<TTTT>>XXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
 	]
 	);
 	
-	module.exports = blank;
+	module.exports = subwayPlatform;
 
 
 /***/ },
