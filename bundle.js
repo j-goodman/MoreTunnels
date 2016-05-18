@@ -55,7 +55,9 @@
 	  var blocks = __webpack_require__(7);
 	  var aiHints = __webpack_require__(15);
 	  var tiles = __webpack_require__(12);
+	  var overlays = __webpack_require__(41);
 	  var movers = __webpack_require__(10);
+	  var trains = __webpack_require__(38);
 	  var players = __webpack_require__(11);
 	  var Conductor = __webpack_require__(30);
 	
@@ -64,7 +66,9 @@
 	    ctx: null,
 	    players: players,
 	    movers: movers,
+	    trains: trains,
 	    tiles: tiles,
+	    overlays: overlays,
 	    blocks: blocks,
 	    metaBlocks: metaBlocks,
 	    aiHints: aiHints,
@@ -115,7 +119,7 @@
 	    var view = new this.View (0, 0, 640, 480, 48*this.zone.blueprint[0].length, 48*this.zone.blueprint.length);
 	    this.view = view;
 	    Util.universals.view = view;
-	    Util.universals.roomBottomRight = {x: 48*this.zone.blueprint[0].length, y: 48*this.zone.blueprint.length};
+	    Util.universals.roomBottomRight = {x: 48*(this.zone.blueprint[0].length-1), y: 48*this.zone.blueprint.length};
 	  };
 	
 	  Game.playGame = function () {
@@ -128,10 +132,8 @@
 	
 	      this.tiles.forEach(function(tile, idx) {
 	        tile.sprite.depthDraw(this.ctx, tile.pos, this.view.topLeftPos, tile.depth);
-	        if (tile.isMeter) {
-	          delete this.tiles[idx];
-	        }
 	      }.bind(this));
+	
 	
 	      var conductor = new this.Conductor (this.zone);
 	      conductor.manageTrains();
@@ -140,8 +142,25 @@
 	        block.sprite.draw(this.ctx, block.pos, this.view.topLeftPos);
 	      }.bind(this));
 	
-	      this.movers.forEach(function(mover){
-	        mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
+	      for (var i = 0; i <= this.trains.length; i++) {
+	        var train = this.trains[i];
+	        if (train) {
+	          train.sprite.draw(this.ctx, train.pos, this.view.topLeftPos);
+	        }
+	      }
+	
+	      for (var j = 0; j <= this.movers.length; j++) {
+	        var mover = this.movers[j];
+	        if (mover) {
+	          mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
+	        }
+	      }
+	
+	      this.overlays.forEach(function(overlay, idx) {
+	        overlay.sprite.depthDraw(this.ctx, overlay.pos, this.view.topLeftPos, overlay.depth);
+	        if (overlay.virtual) {
+	          delete this.overlays[idx];
+	        }
 	      }.bind(this));
 	
 	      if (this.ctx) {
@@ -155,6 +174,11 @@
 	      this.movers.forEach(function(mover){
 	        mover.move();
 	        mover.act();
+	      });
+	
+	      this.trains.forEach(function(train){
+	        train.move();
+	        train.act();
 	      });
 	
 	      this.view.recenter(players[0].pos);
@@ -208,9 +232,11 @@
 	var Jumpman = __webpack_require__(5);
 	var Hammer = __webpack_require__(8);
 	var Util = __webpack_require__(6);
+	var UpKey = __webpack_require__(40);
 	var blocks = __webpack_require__(7);
 	var movers = __webpack_require__(10);
 	var tiles = __webpack_require__(12);
+	var overlays = __webpack_require__(41);
 	
 	var Player = function (index, x, y) {
 	  this.age = 0;
@@ -272,8 +298,12 @@
 	  }
 	};
 	
+	Player.prototype.drawUpKey = function () {
+	  overlays.push( new UpKey (this.pos.x, this.pos.y-64) );
+	};
+	
 	Player.prototype.drawMeter = function () {
-	  tiles.push( new Meter (this.pos.x, this.pos.y-64, this.health) );
+	  overlays.push( new Meter (this.pos.x, this.pos.y-64, this.health) );
 	};
 	
 	Player.prototype.move = function () {
@@ -355,6 +385,16 @@
 	    this.setSprites(4);
 	  }
 	};
+	
+	Player.prototype.upKey = function () {
+	  if (this.upKeyAux) {
+	    this.upKeyAux();
+	  } else {
+	    this.speed.y = 0-this.stats.jumpPower;
+	  }
+	};
+	
+	Player.prototype.upKeyAux = null;
 	
 	module.exports = Player;
 
@@ -439,7 +479,7 @@
 	    y: y
 	  };
 	  this.depth = 1;
-	  this.isMeter = true;
+	  this.virtual = true;
 	  this.sprite = new Sprite (48, 48, 0, ["meter/"+health+".gif"]);
 	};
 	
@@ -1382,7 +1422,7 @@
 	    case 87: // w
 	    case 38: //up
 	      if (player.checkUnderFeet()) {
-	        player.speed.y = 0-player.stats.jumpPower;
+	        player.upKey();
 	      }
 	      break;
 	    case 32: //spacebar
@@ -2056,7 +2096,7 @@
 	Pigeon.prototype.checkForHammer = function () {
 	  movers.forEach(function (mover) {
 	    if (mover.type === "hammer" &&
-	        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/4 &&
+	        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
 	        mover.soft <= 0) {
 	      mover.ricochet();
 	      mover.soft = 8;
@@ -2460,11 +2500,12 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(6);
+	var trains = __webpack_require__(38);
 	var movers = __webpack_require__(10);
-	var A = __webpack_require__(33);
 	
 	var Conductor = function (zone) {
 	  this.zone = zone;
+	  this.trains = trains;
 	  this.movers = movers;
 	  this.time = 0;
 	};
@@ -2472,12 +2513,17 @@
 	Conductor.prototype.manageTrains = function () {
 	  switch (this.zone.name) {
 	    case "Throop":
-	    var ATrain = __webpack_require__(33);
-	    if (Util.typeCount("skeleton", movers) === 0) {
-	      if (Util.typeCount("aTrain", movers) === 0) {
-	        this.train = new A (movers.length, -1000, this.zone.trainHeight);
+	      var ACar = __webpack_require__(37);
+	      if (Util.typeCount("skeleton", this.movers) <= 1) {
+	        if (Util.typeCount("aCar", this.trains) === 0) {
+	          this.trains.push(new ACar (trains.length, "front", -1300, this.zone.trainY-100, 26, -0.1));
+	          this.trains.push(new ACar (trains.length, "middle", -1540, this.zone.trainY-100, 26, -0.1));
+	          this.trains.push(new ACar (trains.length, "middle", -1780, this.zone.trainY-100, 26, -0.1));
+	          this.trains.push(new ACar (trains.length, "middle", -2020, this.zone.trainY-100, 26, -0.1));
+	          this.trains.push(new ACar (trains.length, "middle", -2260, this.zone.trainY-100, 26, -0.1));
+	          this.trains.push(new ACar (trains.length, "rear", -2500, this.zone.trainY-100, 26, -0.1));
+	        }
 	      }
-	    }
 	    break;
 	  }
 	};
@@ -2494,16 +2540,16 @@
 	
 	var throop = new Zone ("Throop", [
 	  "---------------------------------------------------------------------------",
-	  "----------*---------------------------------------------------#!*----------",
+	  "----------*---------------------------------------------------#?*----------",
 	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
 	  "---------------------------------------------------------------------------",
-	  "---------------------*---------------------------#!-----#!-----------------",
+	  "---------------------*---------------------------#?-----#?-----------------",
 	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
 	  "---------------------------------------------------------------------------",
-	  "-!#-!#--!#---------------------------------------------------#!-------#!---",
-	  "XXXXXXXXXXXTTTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXTTTTTTXXXXXXXXXXX",
-	  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY",
-	  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY"
+	  "-?#-?#--?#---------------------------------------------------#!-------#!---",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
 	],[
 	  "---------------------------------------------------------------------------",
 	  "---------#*#--------------------------------------------------#!*----------",
@@ -2513,60 +2559,18 @@
 	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
 	  "---------------------------------------------------------------------------",
 	  "-!#-!#--!#---}--}----{--{-------------------}--}-------{----{#!-------#!---",
-	  "XXXXXXXXXXXTTTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXTTTTTTXXXXXXXXXXX",
-	  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY",
-	  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY"
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
 	]
 	);
 	
-	throop.trainHeight = 8;
+	throop.trainY = 8*48;
 	module.exports = throop;
 
 
 /***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Util = __webpack_require__(6);
-	var Figure = __webpack_require__(36);
-	
-	var A = function (index, x, y, xSpeed, xAccel) {
-	  this.index = index;
-	  this.type = "aTrain";
-	  this.pos = {
-	    x: x,
-	    y: y
-	  };
-	  this.speed = {
-	    x: xSpeed,
-	    y: 0
-	  };
-	  this.accel = {
-	    x: xAccel,
-	    y: 0
-	  };
-	  this.setSprites();
-	};
-	
-	A.prototype.move = function () {
-	  this.pos.x += this.speed.x;
-	  this.pos.y += this.speed.y;
-	  this.speed.x += this.accel.x;
-	  this.speed.y += this.accel.y;
-	};
-	
-	A.prototype.act = function () {
-	
-	};
-	
-	A.prototype.setSprites = function () {
-	  this.sprite = new Figure ();
-	};
-	
-	module.exports = A;
-
-
-/***/ },
+/* 33 */,
 /* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2609,7 +2613,7 @@
 	  "=====================================================",
 	  "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL ",
 	  "    I     I     I     I     I     I     I     I     I",
-	  "    I     I     I   K I     I     I     I     I     I",
+	  "    I     I     I  K  I     I     I     I     I     I",
 	  "    I     I     I     I     I     I     I     I     I",
 	  "    I     I     I     I     I     I     I     I     I",
 	  "    I     I     I     I     I     I     I     I     I",
@@ -2633,9 +2637,165 @@
 
 
 /***/ },
-/* 36 */
+/* 36 */,
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Util = __webpack_require__(6);
+	var Sprite = __webpack_require__(3);
+	var Doors = __webpack_require__(39);
+	
+	var A = function (index, carType, x, y, xSpeed, xAccel) {
+	  this.index = index;
+	  this.type = "aCar";
+	  this.spriteHeight = 100;
+	  this.spriteWidth = 240;
+	  this.carType = carType;
+	  this.entering = true;
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.speed = {
+	    x: xSpeed,
+	    y: 0
+	  };
+	  this.accel = {
+	    x: xAccel,
+	    y: 0
+	  };
+	  this.doors = null;
+	  this.setSprites();
+	};
+	
+	A.prototype.move = function () {
+	  this.speed.x += this.accel.x;
+	  this.speed.y += this.accel.y;
+	  if (this.entering && this.speed.x < 0) {
+	    this.speed.x = 0;
+	  }
+	  this.pos.x += this.speed.x;
+	  this.pos.y += this.speed.y;
+	};
+	
+	A.prototype.act = function () {
+	  if (this.speed.x === 0 && Util.typeCount("doors", trains) <= Util.typeCount("aCar", trains)) {
+	    trains.push(new Doors (trains.length, this.pos));
+	  }
+	};
+	
+	A.prototype.setSprites = function () {
+	  switch (this.carType) {
+	    case "front":
+	      this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/front.gif"]);
+	    break;
+	    case "middle":
+	      this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/middle.gif"]);
+	    break;
+	    case "rear":
+	      this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/rear.gif"]);
+	    break;
+	  }
+	};
+	
+	module.exports = A;
+
+
+/***/ },
+/* 38 */
 /***/ function(module, exports) {
 
+	trains = [];
+	
+	module.exports = trains;
+
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Util = __webpack_require__(6);
+	var Sprite = __webpack_require__(3);
+	var players = __webpack_require__(11);
+	
+	var Doors = function (index, pos) {
+	  this.index = index;
+	  this.type = "doors";
+	  this.spriteHeight = 100;
+	  this.spriteWidth = 240;
+	  this.pos = pos;
+	  this.setSprites();
+	};
+	
+	Doors.prototype.move = function () {};
+	
+	Doors.prototype.act = function () {
+	  this.checkForPlayer();
+	};
+	
+	Doors.prototype.checkForPlayer = function () {
+	  if ((
+	      //Left Door
+	      players[0].pos.x + players[0].spriteSize > this.pos.x + 24 &&
+	      players[0].pos.x < this.pos.x + 58 &&
+	      players[0].pos.y > this.pos.y)||(
+	      //Right Door
+	      players[0].pos.x + players[0].spriteSize > this.pos.x + 186 &&
+	      players[0].pos.x < this.pos.x + 220 &&
+	      players[0].pos.y > this.pos.y)
+	      ) {
+	        players[0].drawUpKey();
+	        players[0].upKeyAux = function () {
+	
+	        };
+	      } else {
+	        players[0].upKeyAux = null;
+	      }
+	};
+	
+	Doors.prototype.setSprites = function () {
+	  this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 1,
+	    [
+	      "trains/A/cars/doorsOpening/0.gif",
+	      "trains/A/cars/doorsOpening/1.gif",
+	      "trains/A/cars/doorsOpening/2.gif",
+	      "trains/A/cars/doorsOpening/3.gif"
+	    ]
+	  );
+	  this.sprite.addAnimationEndCallback(function () {
+	    this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/openDoors.gif"]);
+	  }.bind(this));
+	};
+	
+	module.exports = Doors;
+
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	
+	var Meter = function (x, y, health) {
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.depth = 1;
+	  this.virtual = true;
+	  this.sprite = new Sprite (48, 48, 0, ["tile/up_key.gif"]);
+	};
+	
+	module.exports = Meter;
+
+
+/***/ },
+/* 41 */
+/***/ function(module, exports) {
+
+	tiles = [];
+	
+	module.exports = tiles;
 
 
 /***/ }

@@ -3,9 +3,11 @@ var Meter = require('./meter.js');
 var Jumpman = require('./jumpman.js');
 var Hammer = require('./hammer.js');
 var Util = require('../util/util.js');
+var UpKey = require('./upKey.js');
 var blocks = require('../objectArrays/blocks.js');
 var movers = require('../objectArrays/movers.js');
 var tiles = require('../objectArrays/tiles.js');
+var overlays = require('../objectArrays/overlays.js');
 
 var Player = function (index, x, y) {
   this.age = 0;
@@ -67,8 +69,12 @@ Player.prototype.drawData = function (ctx) {
   }
 };
 
+Player.prototype.drawUpKey = function () {
+  overlays.push( new UpKey (this.pos.x, this.pos.y-64) );
+};
+
 Player.prototype.drawMeter = function () {
-  tiles.push( new Meter (this.pos.x, this.pos.y-64, this.health) );
+  overlays.push( new Meter (this.pos.x, this.pos.y-64, this.health) );
 };
 
 Player.prototype.move = function () {
@@ -150,5 +156,15 @@ Player.prototype.updateSpriteRoot = function () {
     this.setSprites(4);
   }
 };
+
+Player.prototype.upKey = function () {
+  if (this.upKeyAux) {
+    this.upKeyAux();
+  } else {
+    this.speed.y = 0-this.stats.jumpPower;
+  }
+};
+
+Player.prototype.upKeyAux = null;
 
 module.exports = Player;

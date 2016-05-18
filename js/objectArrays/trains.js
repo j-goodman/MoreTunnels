@@ -1,0 +1,3 @@
+trains = [];
+
+module.exports = trains;

@@ -1,0 +1,3 @@
+tiles = [];
+
+module.exports = tiles;

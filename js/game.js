@@ -9,7 +9,9 @@ Window.newGame = function () {
   var blocks = require('./objectArrays/blocks.js');
   var aiHints = require('./objectArrays/metaBlocks.js');
   var tiles = require('./objectArrays/tiles.js');
+  var overlays = require('./objectArrays/overlays.js');
   var movers = require('./objectArrays/movers.js');
+  var trains = require('./objectArrays/trains.js');
   var players = require('./objectArrays/players.js');
   var Conductor = require('./objects/trains/conductor.js');
 
@@ -18,7 +20,9 @@ Window.newGame = function () {
     ctx: null,
     players: players,
     movers: movers,
+    trains: trains,
     tiles: tiles,
+    overlays: overlays,
     blocks: blocks,
     metaBlocks: metaBlocks,
     aiHints: aiHints,
@@ -69,7 +73,7 @@ Window.newGame = function () {
     var view = new this.View (0, 0, 640, 480, 48*this.zone.blueprint[0].length, 48*this.zone.blueprint.length);
     this.view = view;
     Util.universals.view = view;
-    Util.universals.roomBottomRight = {x: 48*this.zone.blueprint[0].length, y: 48*this.zone.blueprint.length};
+    Util.universals.roomBottomRight = {x: 48*(this.zone.blueprint[0].length-1), y: 48*this.zone.blueprint.length};
   };
 
   Game.playGame = function () {
@@ -82,10 +86,8 @@ Window.newGame = function () {
 
       this.tiles.forEach(function(tile, idx) {
         tile.sprite.depthDraw(this.ctx, tile.pos, this.view.topLeftPos, tile.depth);
-        if (tile.isMeter) {
-          delete this.tiles[idx];
-        }
       }.bind(this));
+
 
       var conductor = new this.Conductor (this.zone);
       conductor.manageTrains();
@@ -94,8 +96,25 @@ Window.newGame = function () {
         block.sprite.draw(this.ctx, block.pos, this.view.topLeftPos);
       }.bind(this));
 
-      this.movers.forEach(function(mover){
-        mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
+      for (var i = 0; i <= this.trains.length; i++) {
+        var train = this.trains[i];
+        if (train) {
+          train.sprite.draw(this.ctx, train.pos, this.view.topLeftPos);
+        }
+      }
+
+      for (var j = 0; j <= this.movers.length; j++) {
+        var mover = this.movers[j];
+        if (mover) {
+          mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
+        }
+      }
+
+      this.overlays.forEach(function(overlay, idx) {
+        overlay.sprite.depthDraw(this.ctx, overlay.pos, this.view.topLeftPos, overlay.depth);
+        if (overlay.virtual) {
+          delete this.overlays[idx];
+        }
       }.bind(this));
 
       if (this.ctx) {
@@ -109,6 +128,11 @@ Window.newGame = function () {
       this.movers.forEach(function(mover){
         mover.move();
         mover.act();
+      });
+
+      this.trains.forEach(function(train){
+        train.move();
+        train.act();
       });
 
       this.view.recenter(players[0].pos);

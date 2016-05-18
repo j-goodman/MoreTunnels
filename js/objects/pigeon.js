@@ -84,7 +84,7 @@ Pigeon.prototype.checkForBoneheap = function () {
 Pigeon.prototype.checkForHammer = function () {
   movers.forEach(function (mover) {
     if (mover.type === "hammer" &&
-        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/4 &&
+        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
         mover.soft <= 0) {
       mover.ricochet();
       mover.soft = 8;

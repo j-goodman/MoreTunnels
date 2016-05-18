@@ -2,16 +2,16 @@ var Zone = require("../zone.js");
 
 var throop = new Zone ("Throop", [
   "---------------------------------------------------------------------------",
-  "----------*---------------------------------------------------#!*----------",
+  "----------*---------------------------------------------------#?*----------",
   "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
   "---------------------------------------------------------------------------",
-  "---------------------*---------------------------#!-----#!-----------------",
+  "---------------------*---------------------------#?-----#?-----------------",
   "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
   "---------------------------------------------------------------------------",
-  "-!#-!#--!#---------------------------------------------------#!-------#!---",
-  "XXXXXXXXXXXTTTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXTTTTTTXXXXXXXXXXX",
-  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY",
-  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY"
+  "-?#-?#--?#---------------------------------------------------#!-------#!---",
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
 ],[
   "---------------------------------------------------------------------------",
   "---------#*#--------------------------------------------------#!*----------",
@@ -21,11 +21,11 @@ var throop = new Zone ("Throop", [
   "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
   "---------------------------------------------------------------------------",
   "-!#-!#--!#---}--}----{--{-------------------}--}-------{----{#!-------#!---",
-  "XXXXXXXXXXXTTTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXTTTTTTXXXXXXXXXXX",
-  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY",
-  "YYYYYYYYYYY------YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY------YYYYYYYYYYY"
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
 ]
 );
 
-throop.trainHeight = 8;
+throop.trainY = 8*48;
 module.exports = throop;

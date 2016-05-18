@@ -18,7 +18,7 @@ var keyEvents = function (document, player) {
     case 87: // w
     case 38: //up
       if (player.checkUnderFeet()) {
-        player.speed.y = 0-player.stats.jumpPower;
+        player.upKey();
       }
       break;
     case 32: //spacebar

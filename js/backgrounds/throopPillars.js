@@ -7,7 +7,7 @@ var throopPillars = new Background ([
   "=====================================================",
   "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL ",
   "    I     I     I     I     I     I     I     I     I",
-  "    I     I     I   K I     I     I     I     I     I",
+  "    I     I     I  K  I     I     I     I     I     I",
   "    I     I     I     I     I     I     I     I     I",
   "    I     I     I     I     I     I     I     I     I",
   "    I     I     I     I     I     I     I     I     I",
