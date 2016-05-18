@@ -98,7 +98,7 @@ Player.prototype.move = function () {
     }
   }
   if (this.onSubway) {
-    this.pos.x += this.onSubway.speed.x;
+    this.pos.x += Math.round(this.onSubway.speed.x);
   }
 };
 
