@@ -68,7 +68,7 @@
 	players.push( new Player (8*48, 5*48) );
 	keyEvents(document, players[0]);
 	
-	var zone = __webpack_require__(29);
+	var zone = __webpack_require__(31);
 	zone.build(blocks, movers, metaBlocks);
 	
 	var backgroundBricks = __webpack_require__(25);
@@ -2331,42 +2331,7 @@
 
 
 /***/ },
-/* 29 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Zone = __webpack_require__(20);
-	
-	var blank = new Zone ([
-	  "--------------------------------------------------------",
-	  "--------------------------------------------------------",
-	  "---------FTTTTTTTF---F----FTTTF----F---FTTTTTTTF--------",
-	  "--------------------------------------------------------",
-	  "-----*--------------------------------------------------",
-	  "---FTF--------------------------------------------FTF---",
-	  "--------------------------------------------------------",
-	  "----------------!-----------!---$------------!--------$-",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	],[
-	  "--------------------------------------------------------",
-	  "---------------}-----}----{---}----{---{----------------",
-	  "---------FTTTTTTTF---F----FTTTF----F---FTTTTTTTF--------",
-	  "--------------------------------------------------------",
-	  "----}----------------------------------------------{----",
-	  "---FTF--------------------------------------------FTF---",
-	  "--------------------------------------------------------",
-	  "---------{------------------$--------------!-!}*------$-",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	]
-	);
-	
-	module.exports = blank;
-
-
-/***/ },
+/* 29 */,
 /* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2488,6 +2453,42 @@
 	};
 	
 	module.exports = Sparks;
+
+
+/***/ },
+/* 31 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(20);
+	
+	var subwayPlatform = new Zone ([
+	  "--------------------------------------------------------",
+	  "------------*----------------------!---------*!---------",
+	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
+	  "--------------------------------------------!-----------",
+	  "---------------------------------------------!----------",
+	  "-----------------FF----FTF-----------------FTF----F-----",
+	  "--------------------------------------------------------",
+	  "--------------------------------!---------------------!-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "--------------------------------------------------------",
+	  "------------}----{-----------<----#}----{{--------------",
+	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
+	  "--------------------------------------------------------",
+	  "]----------------{}-----{>-----------------#{}----------[",
+	  "]----------------FF----FTF-----------------FTF----F----[",
+	  "]------------------------------------------------------[",
+	  "]------------}------}--->---<-#--------->------<-------[",
+	  "XXXXXXXXXXXXXXXXXXXXXXX<<TTTT>>XXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = subwayPlatform;
 
 
 /***/ }
