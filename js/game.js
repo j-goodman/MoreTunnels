@@ -120,9 +120,7 @@ Window.newGame = function () {
       if (this.ctx) {
         this.players[0].sprite.draw(this.ctx, players[0].pos, this.view.topLeftPos);
       }
-
-      this.players[0].drawData(this.ctx);
-
+      
       this.players[0].move();
 
       this.movers.forEach(function(mover){
