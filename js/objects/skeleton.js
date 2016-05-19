@@ -142,7 +142,7 @@ Skeleton.prototype.act = function () {
       this.sprite = this.sprites.rising;
     }
     if (this.speed.y > 100) {
-      this.shatter();
+      delete movers[this.index];
     }
     this.checkForJumpBlock();
     this.checkForPlayer();

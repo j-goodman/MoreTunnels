@@ -29,6 +29,7 @@ Jumpman.prototype.move = function () {
       this.drawMeter();
     }
   }
+  Util.ironWalls(this);
 };
 
 Jumpman.prototype.checkCollisions = function () {

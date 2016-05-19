@@ -126,8 +126,8 @@ Shoggoth.prototype.checkForHammer = function () {
 
 Shoggoth.prototype.checkForPlayer = function () {
   var player = players[0];
-  if (player.pos.x + player.spriteSize >= this.pos.x &&
-      player.pos.x <= this.pos.x + this.spriteSize &&
+  if (player.pos.x + player.spriteSize >= this.pos.x+16 &&
+      player.pos.x <= this.pos.x + this.spriteSize-16 &&
       player.pos.y + player.spriteSize >= this.pos.y &&
       player.pos.y <= this.pos.y + this.spriteSize &&
       player.checkUnderFeet() &&
@@ -135,7 +135,7 @@ Shoggoth.prototype.checkForPlayer = function () {
       this.checkUnderFeet()
       ) {
     if (!Math.round(Math.random(16)))
-    player.shoggothBite();
+    player.shoggothBite(this);
   }
 };
 

@@ -101,6 +101,7 @@ Sparks.prototype.move = function () {
     this.checkLine(movers);
     this.checkLine(players);
   }
+  Util.ironWalls(this);
 };
 
 Sparks.prototype.setSprites = function () {

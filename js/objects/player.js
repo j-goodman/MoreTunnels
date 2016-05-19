@@ -47,13 +47,26 @@ var Player = function (index, x, y) {
   this.status = "normal";
   this.damageRecover = 0;
 
-  this.spriteRoot = "player";
-  this.setSprites(4);
-  this.spriteRoot = "hammerman";
-  this.setSprites(4);
+  // this.spriteRoot = "player";
+  // this.setSprites(4);
+  // this.spriteRoot = "hammerman";
+  // this.setSprites(4);
 };
 
 Util.inherits(Player, Jumpman);
+
+Player.prototype.checkIfDead = function () {
+  if (this.health <= 0) {
+    this.move = function () {};
+    this.updateSprite = function () {};
+    this.updateSpriteRoot = function () {};
+    this.xStop();
+    this.sprite = this.sprites["falling_" + this.facing];
+    this.sprite.addAnimationEndCallback(function () {
+      this.sprite = this.sprites["dead_" + this.facing];
+    }.bind(this));
+  }
+};
 
 Player.prototype.drawData = function (ctx) {
   ctx.font = "12px Courier";
@@ -100,8 +113,10 @@ Player.prototype.move = function () {
     }
   }
   if (this.onSubway) {
-    this.pos.x += Math.round(this.onSubway.speed.x*1.8);
+    this.pos.x += Math.round(this.onSubway.speed.x*1.25);
   }
+  this.checkIfDead();
+  Util.ironWalls(this);
 };
 
 Player.prototype.skeletonBite = function () {
@@ -113,7 +128,17 @@ Player.prototype.skeletonBite = function () {
   }
 };
 
-Player.prototype.shoggothBite = Player.prototype.skeletonBite;
+Player.prototype.shoggothBite = function (shoggoth) {
+  if (this.damageRecover < 0) {
+    this.damageRecover = 64;
+    if (this.health <= 8 && this.health > 0) {
+      this.health -= 1;
+      this.jump();
+      this.speed.x = this.pos.x < shoggoth.pos.x ? 0-this.stats.runSpeed : this.stats.runSpeed;
+      this.speed.y *= 0.65;
+    }
+  }
+};
 
 Player.prototype.shogBeamBite = function () {
   if (this.damageRecover < 0) {
@@ -134,6 +159,10 @@ Player.prototype.hammerCount = function () {
   return increment;
 };
 
+Player.prototype.jump = function () {
+  this.speed.y = 0-this.stats.jumpPower;
+};
+
 Player.prototype.setExtraSprites = function () {
   this.sprites.throwing_right = new Sprite(48, 48, 0, [
     this.spriteRoot+"/right/throw/0.gif",
@@ -148,6 +177,20 @@ Player.prototype.setExtraSprites = function () {
     this.spriteRoot+"/left/throw/2.gif",
     this.spriteRoot+"/left/throw/3.gif",
     this.spriteRoot+"/left/throw/4.gif",
+  ]);
+  this.sprites.dead_right = new Sprite(this.spriteSize, this.spriteSize, 0, ["playerfall/right/dead.gif"]);
+  this.sprites.dead_left = new Sprite(this.spriteSize, this.spriteSize, 0, ["playerfall/left/dead.gif"]);
+  this.sprites.falling_right = new Sprite(this.spriteSize, this.spriteSize, 4, [
+    "playerfall/right/dying/0.gif",
+    "playerfall/right/dying/1.gif",
+    "playerfall/right/dying/2.gif",
+    "playerfall/right/dying/3.gif"
+  ]);
+  this.sprites.falling_left = new Sprite(this.spriteSize, this.spriteSize, 4, [
+    "playerfall/left/dying/0.gif",
+    "playerfall/left/dying/1.gif",
+    "playerfall/left/dying/2.gif",
+    "playerfall/left/dying/3.gif"
   ]);
 };
 
@@ -172,7 +215,7 @@ Player.prototype.upKey = function () {
   if (this.upKeyAux) {
     this.upKeyAux();
   } else {
-    this.speed.y = 0-this.stats.jumpPower;
+    this.jump();
   }
 };
 

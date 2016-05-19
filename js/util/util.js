@@ -21,6 +21,18 @@ Util.inherits = function (ChildClass, BaseClass) {
   ChildClass.prototype = new Surrogate();
 };
 
+Util.ironWalls = function (subject) {
+  if (subject.pos && subject.spriteSize) {
+    if (subject.pos.x > this.universals.roomBottomRight.x) {
+      subject.pos.x = this.universals.roomBottomRight.x;
+    } else if (subject.pos.x < 0) {
+      subject.pos.x = 0;
+    }
+  } else {
+    console.log("Iron walls function not compatible");
+  }
+};
+
 Util.approximately = function (integers, normFactor, middleInt) {
   if (typeof integers !== "object") {
     integers = [integers];

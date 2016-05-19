@@ -47,19 +47,19 @@
 	Window.newGame = function () {
 	  var renderZone = __webpack_require__(1);
 	  var Player = __webpack_require__(2);
-	  var Skeleton = __webpack_require__(13);
-	  var Block = __webpack_require__(16);
+	  var Skeleton = __webpack_require__(15);
+	  var Block = __webpack_require__(18);
 	  var Util = __webpack_require__(6);
-	  var View = __webpack_require__(17);
-	  var keyEvents = __webpack_require__(18);
+	  var View = __webpack_require__(19);
+	  var keyEvents = __webpack_require__(20);
 	  var blocks = __webpack_require__(7);
-	  var aiHints = __webpack_require__(15);
-	  var tiles = __webpack_require__(12);
-	  var overlays = __webpack_require__(41);
+	  var aiHints = __webpack_require__(17);
+	  var tiles = __webpack_require__(13);
+	  var overlays = __webpack_require__(14);
 	  var movers = __webpack_require__(10);
-	  var trains = __webpack_require__(38);
+	  var trains = __webpack_require__(21);
 	  var players = __webpack_require__(11);
-	  var Conductor = __webpack_require__(30);
+	  var Conductor = __webpack_require__(22);
 	
 	  var Game = {
 	    canvas: null,
@@ -94,7 +94,7 @@
 	  };
 	
 	  Game.buildZone = function () {
-	    var zone = __webpack_require__(32);
+	    var zone = __webpack_require__(25);
 	    this.zone = zone;
 	
 	    var callback = function () {
@@ -103,7 +103,7 @@
 	
 	    this.zone.build(this.blocks, this.movers, this.players, this.metaBlocks, callback);
 	
-	    var backgroundBricks = __webpack_require__(34);
+	    var backgroundBricks = __webpack_require__(32);
 	    backgroundBricks.build(tiles);
 	
 	    var backgroundPillars = __webpack_require__(35);
@@ -232,11 +232,11 @@
 	var Jumpman = __webpack_require__(5);
 	var Hammer = __webpack_require__(8);
 	var Util = __webpack_require__(6);
-	var UpKey = __webpack_require__(40);
+	var UpKey = __webpack_require__(12);
 	var blocks = __webpack_require__(7);
 	var movers = __webpack_require__(10);
-	var tiles = __webpack_require__(12);
-	var overlays = __webpack_require__(41);
+	var tiles = __webpack_require__(13);
+	var overlays = __webpack_require__(14);
 	
 	var Player = function (index, x, y) {
 	  this.age = 0;
@@ -276,13 +276,26 @@
 	  this.status = "normal";
 	  this.damageRecover = 0;
 	
-	  this.spriteRoot = "player";
-	  this.setSprites(4);
-	  this.spriteRoot = "hammerman";
-	  this.setSprites(4);
+	  // this.spriteRoot = "player";
+	  // this.setSprites(4);
+	  // this.spriteRoot = "hammerman";
+	  // this.setSprites(4);
 	};
 	
 	Util.inherits(Player, Jumpman);
+	
+	Player.prototype.checkIfDead = function () {
+	  if (this.health <= 0) {
+	    this.move = function () {};
+	    this.updateSprite = function () {};
+	    this.updateSpriteRoot = function () {};
+	    this.xStop();
+	    this.sprite = this.sprites["falling_" + this.facing];
+	    this.sprite.addAnimationEndCallback(function () {
+	      this.sprite = this.sprites["dead_" + this.facing];
+	    }.bind(this));
+	  }
+	};
 	
 	Player.prototype.drawData = function (ctx) {
 	  ctx.font = "12px Courier";
@@ -329,8 +342,10 @@
 	    }
 	  }
 	  if (this.onSubway) {
-	    this.pos.x += Math.round(this.onSubway.speed.x*1.8);
+	    this.pos.x += Math.round(this.onSubway.speed.x*1.25);
 	  }
+	  this.checkIfDead();
+	  Util.ironWalls(this);
 	};
 	
 	Player.prototype.skeletonBite = function () {
@@ -342,7 +357,17 @@
 	  }
 	};
 	
-	Player.prototype.shoggothBite = Player.prototype.skeletonBite;
+	Player.prototype.shoggothBite = function (shoggoth) {
+	  if (this.damageRecover < 0) {
+	    this.damageRecover = 64;
+	    if (this.health <= 8 && this.health > 0) {
+	      this.health -= 1;
+	      this.jump();
+	      this.speed.x = this.pos.x < shoggoth.pos.x ? 0-this.stats.runSpeed : this.stats.runSpeed;
+	      this.speed.y *= 0.65;
+	    }
+	  }
+	};
 	
 	Player.prototype.shogBeamBite = function () {
 	  if (this.damageRecover < 0) {
@@ -363,6 +388,10 @@
 	  return increment;
 	};
 	
+	Player.prototype.jump = function () {
+	  this.speed.y = 0-this.stats.jumpPower;
+	};
+	
 	Player.prototype.setExtraSprites = function () {
 	  this.sprites.throwing_right = new Sprite(48, 48, 0, [
 	    this.spriteRoot+"/right/throw/0.gif",
@@ -377,6 +406,20 @@
 	    this.spriteRoot+"/left/throw/2.gif",
 	    this.spriteRoot+"/left/throw/3.gif",
 	    this.spriteRoot+"/left/throw/4.gif",
+	  ]);
+	  this.sprites.dead_right = new Sprite(this.spriteSize, this.spriteSize, 0, ["playerfall/right/dead.gif"]);
+	  this.sprites.dead_left = new Sprite(this.spriteSize, this.spriteSize, 0, ["playerfall/left/dead.gif"]);
+	  this.sprites.falling_right = new Sprite(this.spriteSize, this.spriteSize, 4, [
+	    "playerfall/right/dying/0.gif",
+	    "playerfall/right/dying/1.gif",
+	    "playerfall/right/dying/2.gif",
+	    "playerfall/right/dying/3.gif"
+	  ]);
+	  this.sprites.falling_left = new Sprite(this.spriteSize, this.spriteSize, 4, [
+	    "playerfall/left/dying/0.gif",
+	    "playerfall/left/dying/1.gif",
+	    "playerfall/left/dying/2.gif",
+	    "playerfall/left/dying/3.gif"
 	  ]);
 	};
 	
@@ -401,7 +444,7 @@
 	  if (this.upKeyAux) {
 	    this.upKeyAux();
 	  } else {
-	    this.speed.y = 0-this.stats.jumpPower;
+	    this.jump();
 	  }
 	};
 	
@@ -532,6 +575,7 @@
 	      this.drawMeter();
 	    }
 	  }
+	  Util.ironWalls(this);
 	};
 	
 	Jumpman.prototype.checkCollisions = function () {
@@ -721,6 +765,18 @@
 	  function Surrogate() { this.constructor = ChildClass; }
 	  Surrogate.prototype = BaseClass.prototype;
 	  ChildClass.prototype = new Surrogate();
+	};
+	
+	Util.ironWalls = function (subject) {
+	  if (subject.pos && subject.spriteSize) {
+	    if (subject.pos.x > this.universals.roomBottomRight.x) {
+	      subject.pos.x = this.universals.roomBottomRight.x;
+	    } else if (subject.pos.x < 0) {
+	      subject.pos.x = 0;
+	    }
+	  } else {
+	    console.log("Iron walls function not compatible");
+	  }
 	};
 	
 	Util.approximately = function (integers, normFactor, middleInt) {
@@ -1045,6 +1101,25 @@
 
 /***/ },
 /* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	
+	var Meter = function (x, y, health) {
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.depth = 1;
+	  this.virtual = true;
+	  this.sprite = new Sprite (48, 48, 0, ["tile/up_key.gif"]);
+	};
+	
+	module.exports = Meter;
+
+
+/***/ },
+/* 13 */
 /***/ function(module, exports) {
 
 	tiles = [];
@@ -1053,15 +1128,24 @@
 
 
 /***/ },
-/* 13 */
+/* 14 */
+/***/ function(module, exports) {
+
+	tiles = [];
+	
+	module.exports = tiles;
+
+
+/***/ },
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
 	var Jumpman = __webpack_require__(5);
-	var Boneheap = __webpack_require__(14);
+	var Boneheap = __webpack_require__(16);
 	var Util = __webpack_require__(6);
 	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(15);
+	var metaBlocks = __webpack_require__(17);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
 	
@@ -1200,7 +1284,7 @@
 	      this.sprite = this.sprites.rising;
 	    }
 	    if (this.speed.y > 100) {
-	      this.shatter();
+	      delete movers[this.index];
 	    }
 	    this.checkForJumpBlock();
 	    this.checkForPlayer();
@@ -1254,7 +1338,7 @@
 
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -1318,7 +1402,7 @@
 	Boneheap.prototype.landOnGround = Jumpman.prototype.landOnGround;
 	
 	Boneheap.prototype.reanimate = function () {
-	  var Skeleton = __webpack_require__(13);
+	  var Skeleton = __webpack_require__(15);
 	  movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y, this.stats));
 	};
 	
@@ -1341,7 +1425,7 @@
 
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports) {
 
 	metaBlocks = [];
@@ -1350,7 +1434,7 @@
 
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -1381,7 +1465,7 @@
 
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports) {
 
 	var View = function (topLeftX, topLeftY, bottomRightX, bottomRightY, maxX, maxY) {
@@ -1413,7 +1497,7 @@
 
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports) {
 
 	var keyEvents = function (document, player) {
@@ -1463,18 +1547,260 @@
 
 
 /***/ },
-/* 19 */,
-/* 20 */
+/* 21 */
+/***/ function(module, exports) {
+
+	trains = [];
+	
+	module.exports = trains;
+
+
+/***/ },
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Block = __webpack_require__(16);
-	var metaBlock = __webpack_require__(21);
+	var Util = __webpack_require__(6);
+	var trains = __webpack_require__(21);
+	var movers = __webpack_require__(10);
+	
+	var Conductor = function (zone) {
+	  this.zone = zone;
+	  this.trains = trains;
+	  this.movers = movers;
+	  this.time = 0;
+	};
+	
+	Conductor.prototype.manageTrains = function () {
+	  switch (this.zone.name) {
+	    case "Throop":
+	      var ACar = __webpack_require__(23);
+	      if (Util.typeCount("skeleton", this.movers) === 0 &&
+	      Util.typeCount("shoggoth", this.movers) === 0) {
+	        if (Util.typeCount("aCar", this.trains) === 0) {
+	          this.trains.push(new ACar (trains.length, "front", -1300, this.zone.trainY-100, 26, -0.1, this));
+	          this.trains.push(new ACar (trains.length, "middle", -1540, this.zone.trainY-100, 26, -0.1, this));
+	          this.trains.push(new ACar (trains.length, "middle", -1780, this.zone.trainY-100, 26, -0.1, this));
+	          this.trains.push(new ACar (trains.length, "middle", -2020, this.zone.trainY-100, 26, -0.1, this));
+	          this.trains.push(new ACar (trains.length, "middle", -2260, this.zone.trainY-100, 26, -0.1, this));
+	          this.trains.push(new ACar (trains.length, "rear", -2500, this.zone.trainY-100, 26, -0.1, this));
+	        }
+	      }
+	    break;
+	  }
+	};
+	
+	Conductor.prototype.departTrains = function () {
+	  this.trains.forEach(function (train) {
+	    if (train.doors) {
+	      train.doors.close();
+	    }
+	  });
+	};
+	
+	module.exports = Conductor;
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Util = __webpack_require__(6);
+	var Sprite = __webpack_require__(3);
+	var Doors = __webpack_require__(24);
+	
+	var A = function (index, carType, x, y, xSpeed, xAccel, conductor) {
+	  this.index = index;
+	  this.type = "aCar";
+	  this.spriteHeight = 100;
+	  this.spriteWidth = 240;
+	  this.carType = carType;
+	  this.entering = true;
+	  this.conductor = conductor;
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.speed = {
+	    x: xSpeed,
+	    y: 0
+	  };
+	  this.accel = {
+	    x: xAccel,
+	    y: 0
+	  };
+	  this.doors = null;
+	  this.setSprites();
+	};
+	
+	A.prototype.move = function () {
+	  this.speed.x += this.accel.x;
+	  this.speed.y += this.accel.y;
+	  if (this.entering && this.speed.x < 0) {
+	    this.speed.x = 0;
+	  }
+	  this.pos.x += this.speed.x;
+	  this.pos.y += this.speed.y;
+	};
+	
+	A.prototype.act = function () {
+	  if (this.speed.x === 0 && Util.typeCount("doors", trains) < Util.typeCount("aCar", trains)) {
+	    this.doors = new Doors (trains.length, this.pos, this);
+	    trains.push(this.doors);
+	  }
+	};
+	
+	A.prototype.setSprites = function () {
+	  switch (this.carType) {
+	    case "front":
+	      this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/front.gif"]);
+	    break;
+	    case "middle":
+	      this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/middle.gif"]);
+	    break;
+	    case "rear":
+	      this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/rear.gif"]);
+	    break;
+	  }
+	};
+	
+	module.exports = A;
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Util = __webpack_require__(6);
+	var Sprite = __webpack_require__(3);
+	var players = __webpack_require__(11);
+	var trains = __webpack_require__(21);
+	
+	var Doors = function (index, pos, train) {
+	  this.index = index;
+	  this.type = "doors";
+	  this.spriteHeight = 100;
+	  this.spriteWidth = 240;
+	  this.pos = pos;
+	  this.train = train;
+	  this.setSprites();
+	};
+	
+	Doors.prototype.move = function () {};
+	
+	Doors.prototype.act = function () {
+	  this.checkForPlayer();
+	};
+	
+	Doors.prototype.checkForPlayer = function () {
+	  if (
+	      (
+	      //Left Door
+	      players[0].pos.x + players[0].spriteSize > this.pos.x + 24 &&
+	      players[0].pos.x < this.pos.x + 58 &&
+	      players[0].pos.y > this.pos.y) ||
+	      (
+	      //Right Door
+	      players[0].pos.x + players[0].spriteSize > this.pos.x + 186 &&
+	      players[0].pos.x < this.pos.x + 220 &&
+	      players[0].pos.y > this.pos.y)
+	      ) {
+	        players[0].drawUpKey();
+	        players[0].upKeyAux = function () {
+	          players[0].enterSubway(this.train);
+	          this.train.conductor.departTrains();
+	        }.bind(this);
+	      }
+	};
+	
+	Doors.prototype.close = function () {
+	  this.sprite = this.sprites.closing;
+	  this.sprite.addAnimationEndCallback(function () {
+	    this.train.accel.x = 0.1;
+	    this.destroy();
+	  }.bind(this));
+	};
+	
+	Doors.prototype.destroy = function () {
+	  delete trains[this.index];
+	};
+	
+	Doors.prototype.setSprites = function () {
+	  this.sprites = {};
+	  this.sprites.opening = new Sprite (this.spriteWidth, this.spriteHeight, 1,
+	    [
+	      "trains/A/cars/doorsOpening/0.gif",
+	      "trains/A/cars/doorsOpening/1.gif",
+	      "trains/A/cars/doorsOpening/2.gif",
+	      "trains/A/cars/doorsOpening/3.gif"
+	    ]
+	  );
+	  this.sprites.closing = new Sprite (this.spriteWidth, this.spriteHeight, 1,
+	    [
+	      "trains/A/cars/doorsOpening/3.gif",
+	      "trains/A/cars/doorsOpening/2.gif",
+	      "trains/A/cars/doorsOpening/1.gif",
+	      "trains/A/cars/doorsOpening/0.gif"
+	    ]
+	  );
+	  this.sprites.open = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/openDoors.gif"]);
+	  this.sprite = this.sprites.opening;
+	  this.sprite.addAnimationEndCallback(function () {
+	    this.sprite = this.sprites.open;
+	  }.bind(this));
+	};
+	
+	module.exports = Doors;
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(26);
+	
+	var throop = new Zone ("Throop", [
+	  "---------------------------------------------------------------------------",
+	  "----------*---------------------------------------------------#!*----------",
+	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
+	  "---------------------------------------------------------------------------",
+	  "---------------------*---------------------------#?-----#!-----------------",
+	  "-----------------FTTTF----1--------------------FTTT------TF----------------",
+	  "---------------------------------------------------------------------------",
+	  "$!#-?#--!#------------------------------------------------#?--#!-----------",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "---------------------------------------------------------------------------",
+	  "---------#*#--------------------------------------------------#!*----------",
+	  "----------FTTF-----------FTF-----------------FTTTF-----------FTTF----------",
+	  "---------------------------------------------------------------------------",
+	  "---------------{----}*--------------------------{#!{----#!}----------------",
+	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
+	  "---------------------------------------------------------------------------",
+	  "-!#-!#--!#---}--}----{--{-------------------}--}-------{----{#!-------#!---",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	throop.trainY = 8*48;
+	module.exports = throop;
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Block = __webpack_require__(18);
+	var metaBlock = __webpack_require__(27);
 	var Player = __webpack_require__(2);
-	var Skeleton = __webpack_require__(13);
-	var Shoggoth = __webpack_require__(22);
-	var Boneheap = __webpack_require__(14);
-	var Pigeon = __webpack_require__(24);
-	var Wizard = __webpack_require__(25);
+	var Skeleton = __webpack_require__(15);
+	var Shoggoth = __webpack_require__(28);
+	var Boneheap = __webpack_require__(16);
+	var Pigeon = __webpack_require__(30);
+	var Wizard = __webpack_require__(31);
 	
 	var Zone = function (name, blueprint, metaBlueprint) {
 	  this.name = name;
@@ -1539,11 +1865,11 @@
 
 
 /***/ },
-/* 21 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
-	var metaBlocks = __webpack_require__(15);
+	var metaBlocks = __webpack_require__(17);
 	
 	var MetaBlock = function (index, x, y, types) {
 	  this.index = index;
@@ -1562,16 +1888,16 @@
 
 
 /***/ },
-/* 22 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
 	var Jumpman = __webpack_require__(5);
-	var Boneheap = __webpack_require__(14);
+	var Boneheap = __webpack_require__(16);
 	var Util = __webpack_require__(6);
-	var Sparks = __webpack_require__(23);
+	var Sparks = __webpack_require__(29);
 	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(15);
+	var metaBlocks = __webpack_require__(17);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
 	
@@ -1693,8 +2019,8 @@
 	
 	Shoggoth.prototype.checkForPlayer = function () {
 	  var player = players[0];
-	  if (player.pos.x + player.spriteSize >= this.pos.x &&
-	      player.pos.x <= this.pos.x + this.spriteSize &&
+	  if (player.pos.x + player.spriteSize >= this.pos.x+16 &&
+	      player.pos.x <= this.pos.x + this.spriteSize-16 &&
 	      player.pos.y + player.spriteSize >= this.pos.y &&
 	      player.pos.y <= this.pos.y + this.spriteSize &&
 	      player.checkUnderFeet() &&
@@ -1702,7 +2028,7 @@
 	      this.checkUnderFeet()
 	      ) {
 	    if (!Math.round(Math.random(16)))
-	    player.shoggothBite();
+	    player.shoggothBite(this);
 	  }
 	};
 	
@@ -1897,7 +2223,7 @@
 
 
 /***/ },
-/* 23 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -2003,6 +2329,7 @@
 	    this.checkLine(movers);
 	    this.checkLine(players);
 	  }
+	  Util.ironWalls(this);
 	};
 	
 	Sparks.prototype.setSprites = function () {
@@ -2021,15 +2348,15 @@
 
 
 /***/ },
-/* 24 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
 	var Jumpman = __webpack_require__(5);
-	var Boneheap = __webpack_require__(14);
+	var Boneheap = __webpack_require__(16);
 	var Util = __webpack_require__(6);
 	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(15);
+	var metaBlocks = __webpack_require__(17);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
 	
@@ -2172,7 +2499,7 @@
 	};
 	
 	Pigeon.prototype.transmogrify = function (kill) {
-	  var Wizard = __webpack_require__(25);
+	  var Wizard = __webpack_require__(31);
 	  var wizard = new Wizard (this.index, this.pos.x, this.pos.y, this.stats);
 	  movers[this.index] = wizard;
 	  if (kill) {
@@ -2197,15 +2524,15 @@
 
 
 /***/ },
-/* 25 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
 	var Jumpman = __webpack_require__(5);
-	var Boneheap = __webpack_require__(14);
+	var Boneheap = __webpack_require__(16);
 	var Util = __webpack_require__(6);
 	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(15);
+	var metaBlocks = __webpack_require__(17);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
 	
@@ -2444,7 +2771,7 @@
 	};
 	
 	Wizard.prototype.transmogrify = function () {
-	  var Pigeon = __webpack_require__(24);
+	  var Pigeon = __webpack_require__(30);
 	  movers[this.index] = new Pigeon (this.index, this.pos.x, this.pos.y, this.stats);
 	};
 	
@@ -2466,138 +2793,10 @@
 
 
 /***/ },
-/* 26 */,
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Tile = __webpack_require__(28);
-	
-	var Background = function (blueprint, spriteKey) {
-	  this.blueprint = blueprint;
-	  this.spriteKey = spriteKey;
-	};
-	
-	Background.prototype.build = function (tiles, depth) {
-	  this.blueprint.forEach(function (yLine, yIndex) {
-	    yLine.split("").forEach(function (square, xIndex) {
-	      if (this.spriteKey[square]) {
-	        tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square].sprite, this.spriteKey[square].depth) );
-	      }
-	    }.bind(this));
-	  }.bind(this));
-	};
-	
-	module.exports = Background;
-
-
-/***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	
-	var Tile = function (x, y, sprite, depth) {
-	  this.pos = {
-	    x: x,
-	    y: y
-	  };
-	  this.depth = depth;
-	  this.sprite = sprite;
-	};
-	
-	module.exports = Tile;
-
-
-/***/ },
-/* 29 */,
-/* 30 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Util = __webpack_require__(6);
-	var trains = __webpack_require__(38);
-	var movers = __webpack_require__(10);
-	
-	var Conductor = function (zone) {
-	  this.zone = zone;
-	  this.trains = trains;
-	  this.movers = movers;
-	  this.time = 0;
-	};
-	
-	Conductor.prototype.manageTrains = function () {
-	  switch (this.zone.name) {
-	    case "Throop":
-	      var ACar = __webpack_require__(37);
-	      if (Util.typeCount("skeleton", this.movers) === 0 &&
-	      Util.typeCount("shoggoth", this.movers) === 0) {
-	        if (Util.typeCount("aCar", this.trains) === 0) {
-	          this.trains.push(new ACar (trains.length, "front", -1300, this.zone.trainY-100, 26, -0.1, this));
-	          this.trains.push(new ACar (trains.length, "middle", -1540, this.zone.trainY-100, 26, -0.1, this));
-	          this.trains.push(new ACar (trains.length, "middle", -1780, this.zone.trainY-100, 26, -0.1, this));
-	          this.trains.push(new ACar (trains.length, "middle", -2020, this.zone.trainY-100, 26, -0.1, this));
-	          this.trains.push(new ACar (trains.length, "middle", -2260, this.zone.trainY-100, 26, -0.1, this));
-	          this.trains.push(new ACar (trains.length, "rear", -2500, this.zone.trainY-100, 26, -0.1, this));
-	        }
-	      }
-	    break;
-	  }
-	};
-	
-	Conductor.prototype.departTrains = function () {
-	  this.trains.forEach(function (train) {
-	    if (train.doors) {
-	      train.doors.close();
-	    }
-	  });
-	};
-	
-	module.exports = Conductor;
-
-
-/***/ },
-/* 31 */,
 /* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(20);
-	
-	var throop = new Zone ("Throop", [
-	  "---------------------------------------------------------------------------",
-	  "----------*---------------------------------------------------#!*----------",
-	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
-	  "---------------------------------------------------------------------------",
-	  "---------------------*---------------------------#!-----#!-----------------",
-	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
-	  "---------------------------------------------------------------------------",
-	  "-!#-!#--!#------------------------------------------------#!--#!-----------",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	],[
-	  "---------------------------------------------------------------------------",
-	  "---------#*#--------------------------------------------------#!*----------",
-	  "----------FTTF-----------FTF-----------------FTTTF-----------FTTF----------",
-	  "---------------------------------------------------------------------------",
-	  "---------------{----}*--------------------------{#!{----#!}----------------",
-	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
-	  "---------------------------------------------------------------------------",
-	  "-!#-!#--!#---}--}----{--{-------------------}--}-------{----{#!-------#!---",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	]
-	);
-	
-	throop.trainY = 8*48;
-	module.exports = throop;
-
-
-/***/ },
-/* 33 */,
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Background = __webpack_require__(27);
+	var Background = __webpack_require__(33);
 	var Sprite = __webpack_require__(3);
 	
 	var throopBricks = new Background ([
@@ -2624,10 +2823,52 @@
 
 
 /***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Tile = __webpack_require__(34);
+	
+	var Background = function (blueprint, spriteKey) {
+	  this.blueprint = blueprint;
+	  this.spriteKey = spriteKey;
+	};
+	
+	Background.prototype.build = function (tiles, depth) {
+	  this.blueprint.forEach(function (yLine, yIndex) {
+	    yLine.split("").forEach(function (square, xIndex) {
+	      if (this.spriteKey[square]) {
+	        tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square].sprite, this.spriteKey[square].depth) );
+	      }
+	    }.bind(this));
+	  }.bind(this));
+	};
+	
+	module.exports = Background;
+
+
+/***/ },
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	
+	var Tile = function (x, y, sprite, depth) {
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.depth = depth;
+	  this.sprite = sprite;
+	};
+	
+	module.exports = Tile;
+
+
+/***/ },
 /* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Background = __webpack_require__(27);
+	var Background = __webpack_require__(33);
 	var Sprite = __webpack_require__(3);
 	
 	var throopPillars = new Background ([
@@ -2657,196 +2898,6 @@
 	});
 	
 	module.exports = throopPillars;
-
-
-/***/ },
-/* 36 */,
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Util = __webpack_require__(6);
-	var Sprite = __webpack_require__(3);
-	var Doors = __webpack_require__(39);
-	
-	var A = function (index, carType, x, y, xSpeed, xAccel, conductor) {
-	  this.index = index;
-	  this.type = "aCar";
-	  this.spriteHeight = 100;
-	  this.spriteWidth = 240;
-	  this.carType = carType;
-	  this.entering = true;
-	  this.conductor = conductor;
-	  this.pos = {
-	    x: x,
-	    y: y
-	  };
-	  this.speed = {
-	    x: xSpeed,
-	    y: 0
-	  };
-	  this.accel = {
-	    x: xAccel,
-	    y: 0
-	  };
-	  this.doors = null;
-	  this.setSprites();
-	};
-	
-	A.prototype.move = function () {
-	  this.speed.x += this.accel.x;
-	  this.speed.y += this.accel.y;
-	  if (this.entering && this.speed.x < 0) {
-	    this.speed.x = 0;
-	  }
-	  this.pos.x += this.speed.x;
-	  this.pos.y += this.speed.y;
-	};
-	
-	A.prototype.act = function () {
-	  if (this.speed.x === 0 && Util.typeCount("doors", trains) < Util.typeCount("aCar", trains)) {
-	    this.doors = new Doors (trains.length, this.pos, this);
-	    trains.push(this.doors);
-	  }
-	};
-	
-	A.prototype.setSprites = function () {
-	  switch (this.carType) {
-	    case "front":
-	      this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/front.gif"]);
-	    break;
-	    case "middle":
-	      this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/middle.gif"]);
-	    break;
-	    case "rear":
-	      this.sprite = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/rear.gif"]);
-	    break;
-	  }
-	};
-	
-	module.exports = A;
-
-
-/***/ },
-/* 38 */
-/***/ function(module, exports) {
-
-	trains = [];
-	
-	module.exports = trains;
-
-
-/***/ },
-/* 39 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Util = __webpack_require__(6);
-	var Sprite = __webpack_require__(3);
-	var players = __webpack_require__(11);
-	var trains = __webpack_require__(38);
-	
-	var Doors = function (index, pos, train) {
-	  this.index = index;
-	  this.type = "doors";
-	  this.spriteHeight = 100;
-	  this.spriteWidth = 240;
-	  this.pos = pos;
-	  this.train = train;
-	  this.setSprites();
-	};
-	
-	Doors.prototype.move = function () {};
-	
-	Doors.prototype.act = function () {
-	  this.checkForPlayer();
-	};
-	
-	Doors.prototype.checkForPlayer = function () {
-	  if (
-	      (
-	      //Left Door
-	      players[0].pos.x + players[0].spriteSize > this.pos.x + 24 &&
-	      players[0].pos.x < this.pos.x + 58 &&
-	      players[0].pos.y > this.pos.y) ||
-	      (
-	      //Right Door
-	      players[0].pos.x + players[0].spriteSize > this.pos.x + 186 &&
-	      players[0].pos.x < this.pos.x + 220 &&
-	      players[0].pos.y > this.pos.y)
-	      ) {
-	        players[0].drawUpKey();
-	        players[0].upKeyAux = function () {
-	          players[0].enterSubway(this.train);
-	          this.train.conductor.departTrains();
-	        }.bind(this);
-	      }
-	};
-	
-	Doors.prototype.close = function () {
-	  this.sprite = this.sprites.closing;
-	  this.sprite.addAnimationEndCallback(function () {
-	    this.train.accel.x = 0.1;
-	    this.destroy();
-	  }.bind(this));
-	};
-	
-	Doors.prototype.destroy = function () {
-	  delete trains[this.index];
-	};
-	
-	Doors.prototype.setSprites = function () {
-	  this.sprites = {};
-	  this.sprites.opening = new Sprite (this.spriteWidth, this.spriteHeight, 1,
-	    [
-	      "trains/A/cars/doorsOpening/0.gif",
-	      "trains/A/cars/doorsOpening/1.gif",
-	      "trains/A/cars/doorsOpening/2.gif",
-	      "trains/A/cars/doorsOpening/3.gif"
-	    ]
-	  );
-	  this.sprites.closing = new Sprite (this.spriteWidth, this.spriteHeight, 1,
-	    [
-	      "trains/A/cars/doorsOpening/3.gif",
-	      "trains/A/cars/doorsOpening/2.gif",
-	      "trains/A/cars/doorsOpening/1.gif",
-	      "trains/A/cars/doorsOpening/0.gif"
-	    ]
-	  );
-	  this.sprites.open = new Sprite (this.spriteWidth, this.spriteHeight, 0, ["trains/A/cars/openDoors.gif"]);
-	  this.sprite = this.sprites.opening;
-	  this.sprite.addAnimationEndCallback(function () {
-	    this.sprite = this.sprites.open;
-	  }.bind(this));
-	};
-	
-	module.exports = Doors;
-
-
-/***/ },
-/* 40 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	
-	var Meter = function (x, y, health) {
-	  this.pos = {
-	    x: x,
-	    y: y
-	  };
-	  this.depth = 1;
-	  this.virtual = true;
-	  this.sprite = new Sprite (48, 48, 0, ["tile/up_key.gif"]);
-	};
-	
-	module.exports = Meter;
-
-
-/***/ },
-/* 41 */
-/***/ function(module, exports) {
-
-	tiles = [];
-	
-	module.exports = tiles;
 
 
 /***/ }
