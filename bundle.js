@@ -284,7 +284,11 @@
 	
 	Player.prototype.checkIfDead = function () {
 	  if (this.health <= 0) {
+	    this.dead = true;
 	    this.move = function () {};
+	    while (!this.checkUnderFeet) {
+	      this.pos.y += 3;
+	    }
 	    this.updateSprite = function () {};
 	    this.updateSpriteRoot = function () {};
 	    this.xStop();
@@ -422,7 +426,7 @@
 	};
 	
 	Player.prototype.throwHammer = function () {
-	  if (this.hammerCount() === 0) {
+	  if (this.hammerCount() === 0 && !this.dead) {
 	    movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, (this.facing === "right" ? this.speed.x + this.stats.throwPower : this.speed.x - this.stats.throwPower), this.speed.y));
 	  }
 	};
@@ -1762,7 +1766,7 @@
 	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
 	  "---------------------------------------------------------------------------",
 	  "---------------------*---------------------------#?-----#!-----------------",
-	  "-----------------FTTTF----1--------------------FTTT------TF----------------",
+	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
 	  "---------------------------------------------------------------------------",
 	  "$!#-?#--!#------------------------------------------------#?--#!-----------",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
