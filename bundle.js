@@ -2569,7 +2569,7 @@
 	  "---------------------*---------------------------#!-----#!-----------------",
 	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
 	  "---------------------------------------------------------------------------",
-	  "$?#-?#--?#------------------------------------------------#!--#!-----------",
+	  "-!#-!#--!#------------------------------------------------#!--#!-----------",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
