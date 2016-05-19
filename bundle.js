@@ -307,6 +307,8 @@
 	};
 	
 	Player.prototype.enterSubway = function (subway) {
+	  this.speed.x = 0;
+	  this.speed.y = 0;
 	  this.invisible = true;
 	  this.onSubway = subway;
 	};
@@ -327,7 +329,7 @@
 	    }
 	  }
 	  if (this.onSubway) {
-	    this.pos.x += Math.round(this.onSubway.speed.x);
+	    this.pos.x += Math.round(this.onSubway.speed.x*1.8);
 	  }
 	};
 	
@@ -1875,7 +1877,7 @@
 	      !this.scared &&
 	      !mover.soft
 	    ) {
-	      if (Util.distanceBetween(this.spriteCenter(), mover.pos) < this.stats.shieldRange) {
+	      if (Util.distanceBetween(this.spriteCenter(), mover.pos) < this.stats.shieldRange && !mover.soft) {
 	        mover.soft = 8;
 	        mover.ricochet();
 	        mover.speed.x *= 0.8;
@@ -2526,7 +2528,8 @@
 	  switch (this.zone.name) {
 	    case "Throop":
 	      var ACar = __webpack_require__(37);
-	      if (Util.typeCount("skeleton", this.movers) <= 1) {
+	      if (Util.typeCount("skeleton", this.movers) === 0 &&
+	      Util.typeCount("shoggoth", this.movers) === 0) {
 	        if (Util.typeCount("aCar", this.trains) === 0) {
 	          this.trains.push(new ACar (trains.length, "front", -1300, this.zone.trainY-100, 26, -0.1, this));
 	          this.trains.push(new ACar (trains.length, "middle", -1540, this.zone.trainY-100, 26, -0.1, this));
@@ -2566,7 +2569,7 @@
 	  "---------------------*---------------------------#!-----#!-----------------",
 	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
 	  "---------------------------------------------------------------------------",
-	  "-!#-!#--!#------------------------------------------------#!--#!-----------",
+	  "$?#-?#--?#------------------------------------------------#!--#!-----------",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"

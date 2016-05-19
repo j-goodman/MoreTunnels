@@ -78,6 +78,8 @@ Player.prototype.drawMeter = function () {
 };
 
 Player.prototype.enterSubway = function (subway) {
+  this.speed.x = 0;
+  this.speed.y = 0;
   this.invisible = true;
   this.onSubway = subway;
 };
@@ -98,7 +100,7 @@ Player.prototype.move = function () {
     }
   }
   if (this.onSubway) {
-    this.pos.x += Math.round(this.onSubway.speed.x);
+    this.pos.x += Math.round(this.onSubway.speed.x*1.8);
   }
 };
 

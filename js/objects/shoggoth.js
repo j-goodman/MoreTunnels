@@ -310,7 +310,7 @@ Shoggoth.prototype.watchForHammer = function () {
       !this.scared &&
       !mover.soft
     ) {
-      if (Util.distanceBetween(this.spriteCenter(), mover.pos) < this.stats.shieldRange) {
+      if (Util.distanceBetween(this.spriteCenter(), mover.pos) < this.stats.shieldRange && !mover.soft) {
         mover.soft = 8;
         mover.ricochet();
         mover.speed.x *= 0.8;
