@@ -8,7 +8,7 @@ var shoggothBrawl = new Zone ( "shoggothBrawl", [
   "-----*--------------------------------------------------",
   "---FTF--------------------------------------------FTF---",
   "--------------------------------------------------------",
-  "----------------!-----------!---$------------!--------$-",
+  "----------------!-----1-----!---$------------!--------$-",
   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"

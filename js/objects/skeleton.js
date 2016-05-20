@@ -65,7 +65,10 @@ Skeleton.prototype.checkForPlayer = function () {
       this.pos.y > player.pos.y-2
     ) {
       if (this.checkUnderFeet() && player.checkUnderFeet()) {
-        player.skeletonBite();
+        // Attack the player, reverse your x speed if it's succesful
+        if (player.skeletonBite()) {
+          this.speed.x *= -1;
+        }
       }
     }
   }.bind(this));

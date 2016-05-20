@@ -14,6 +14,7 @@ Conductor.prototype.manageTrains = function () {
     case "Throop":
       var ACar = require('./aCar.js');
       if (Util.typeCount("skeleton", this.movers) === 0 &&
+      Util.typeCount("burningman", this.movers) === 0 &&
       Util.typeCount("shoggoth", this.movers) === 0) {
         if (Util.typeCount("aCar", this.trains) === 0) {
           this.trains.push(new ACar (trains.length, "front", -1300, this.zone.trainY-100, 26, -0.1, this));

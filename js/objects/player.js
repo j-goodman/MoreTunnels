@@ -42,6 +42,7 @@ var Player = function (index, x, y) {
 
   this.hasHammer = true;
 
+  this.dead = false;
   this.health = this.stats.maxHealth;
   this.healthHundredth = 100;
   this.status = "normal";
@@ -56,19 +57,15 @@ var Player = function (index, x, y) {
 Util.inherits(Player, Jumpman);
 
 Player.prototype.checkIfDead = function () {
-  if (this.health <= 0) {
-    this.dead = true;
-    this.move = function () {};
-    while (!this.checkUnderFeet) {
-      this.pos.y += 3;
-    }
-    this.updateSprite = function () {};
-    this.updateSpriteRoot = function () {};
-    this.xStop();
+  if (this.health <= 0 && !this.dead) {
     this.sprite = this.sprites["falling_" + this.facing];
     this.sprite.addAnimationEndCallback(function () {
       this.sprite = this.sprites["dead_" + this.facing];
+      this.updateSprite = function () {};
+      this.drawMeter = function () {};
+      this.dead = true;
     }.bind(this));
+    this.xStop();
   }
 };
 
@@ -128,9 +125,12 @@ Player.prototype.skeletonBite = function () {
     this.damageRecover = 64;
     if (this.health <= 8 && this.health > 0) {
       this.health -= 1;
+      return true;
     }
   }
 };
+
+Player.prototype.fireballBite = Player.prototype.skeletonBite;
 
 Player.prototype.shoggothBite = function (shoggoth) {
   if (this.damageRecover < 0) {
@@ -147,8 +147,10 @@ Player.prototype.shoggothBite = function (shoggoth) {
 Player.prototype.shogBeamBite = function () {
   if (this.damageRecover < 0) {
     this.damageRecover = 64;
-    if (this.health <= 8 && this.health > 0) {
-      this.health -= 1;
+    if (this.health <= 8 && this.health > 1) {
+      this.health -= 2;
+    } else if (this.health === 1) {
+      this.health = 0;
     }
   }
 };

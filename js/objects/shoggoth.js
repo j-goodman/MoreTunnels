@@ -79,6 +79,7 @@ Shoggoth.prototype.act = function () {
   }
   this.updateSprite();
   this.avoidRoomEdge();
+  this.checkForJumpBlock();
 };
 
 Shoggoth.prototype.cast = function () {
@@ -124,6 +125,31 @@ Shoggoth.prototype.checkForHammer = function () {
   }.bind(this));
 };
 
+Shoggoth.prototype.checkForJumpBlock = function () {
+  metaBlocks.forEach(function(metaBlock){
+    if (metaBlock && metaBlock.types.includes("horseGate") &&
+        Util.distanceBetween(players[0].pos, metaBlock.pos) < 480) {
+        metaBlock.destroy();
+    }
+    if (metaBlock && this.pos.x < metaBlock.pos.x+this.sprite.width+2 &&
+        this.pos.x > metaBlock.pos.x-2 &&
+        this.pos.y < metaBlock.pos.y+this.sprite.height+2 &&
+        this.pos.y > metaBlock.pos.y-2
+       ) {
+          if (metaBlock.types.includes("goLeft")) {
+            this.speed.x = Math.abs(this.speed.x)*(-1);
+          }
+          if (metaBlock.types.includes("goRight")) {
+            this.speed.x = Math.abs(this.speed.x);
+          }
+          if (metaBlock.types.includes("horseGate")) {
+            this.speed.x = 0;
+            this.speed.y = 0;
+          }
+        }
+  }.bind(this));
+};
+
 Shoggoth.prototype.checkForPlayer = function () {
   var player = players[0];
   if (player.pos.x + player.spriteSize >= this.pos.x+16 &&
@@ -157,12 +183,14 @@ Shoggoth.prototype.drawBeamToHammer = function (hammer) {
   var ctx = Util.universals.canvasContext;
   var view = Util.universals.view.topLeftPos;
   ctx.strokeStyle = "white";
-  ctx.lineWidth = 3;
+  ctx.globalAlpha = 0.8;
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(this.eyePos("standing").x-view.x, this.eyePos("standing").y-view.y);
   ctx.lineTo(hammer.pos.x+hammer.spriteSize/2-view.x, hammer.pos.y+hammer.spriteSize/2-view.y);
   ctx.stroke();
   ctx.strokeStyle = "black";
+  ctx.globalAlpha = 1;
   ctx.lineWidth = 1;
 };
 
@@ -184,7 +212,8 @@ Shoggoth.prototype.panic = function () {
   this.scared = 32*5;
   this.casting = 0;
   this.stats.runSpeed = -6.4;
-  // runSpeed is negative so chase logic makes the Shoggoth run away
+  this.speed.x = !Math.round(Math.random()) ? this.stats.runSpeed : 0-this.stats.runSpeed;
+  // runSpeed is negative so the Shoggoth's chase logic makes it run away
 };
 
 Shoggoth.prototype.setExtraSprites = function () {

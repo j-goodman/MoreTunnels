@@ -149,7 +149,7 @@
 	        }
 	      }
 	
-	      for (var j = 0; j <= this.movers.length; j++) {
+	      for (var j = this.movers.length-1; j >= 0; j--) {
 	        var mover = this.movers[j];
 	        if (mover) {
 	          mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
@@ -166,7 +166,7 @@
 	      if (this.ctx) {
 	        this.players[0].sprite.draw(this.ctx, players[0].pos, this.view.topLeftPos);
 	      }
-	      
+	
 	      this.players[0].move();
 	
 	      this.movers.forEach(function(mover){
@@ -269,6 +269,7 @@
 	
 	  this.hasHammer = true;
 	
+	  this.dead = false;
 	  this.health = this.stats.maxHealth;
 	  this.healthHundredth = 100;
 	  this.status = "normal";
@@ -283,19 +284,15 @@
 	Util.inherits(Player, Jumpman);
 	
 	Player.prototype.checkIfDead = function () {
-	  if (this.health <= 0) {
-	    this.dead = true;
-	    this.move = function () {};
-	    while (!this.checkUnderFeet) {
-	      this.pos.y += 3;
-	    }
-	    this.updateSprite = function () {};
-	    this.updateSpriteRoot = function () {};
-	    this.xStop();
+	  if (this.health <= 0 && !this.dead) {
 	    this.sprite = this.sprites["falling_" + this.facing];
 	    this.sprite.addAnimationEndCallback(function () {
 	      this.sprite = this.sprites["dead_" + this.facing];
+	      this.updateSprite = function () {};
+	      this.drawMeter = function () {};
+	      this.dead = true;
 	    }.bind(this));
+	    this.xStop();
 	  }
 	};
 	
@@ -355,9 +352,12 @@
 	    this.damageRecover = 64;
 	    if (this.health <= 8 && this.health > 0) {
 	      this.health -= 1;
+	      return true;
 	    }
 	  }
 	};
+	
+	Player.prototype.fireballBite = Player.prototype.skeletonBite;
 	
 	Player.prototype.shoggothBite = function (shoggoth) {
 	  if (this.damageRecover < 0) {
@@ -374,8 +374,10 @@
 	Player.prototype.shogBeamBite = function () {
 	  if (this.damageRecover < 0) {
 	    this.damageRecover = 64;
-	    if (this.health <= 8 && this.health > 0) {
-	      this.health -= 1;
+	    if (this.health <= 8 && this.health > 1) {
+	      this.health -= 2;
+	    } else if (this.health === 1) {
+	      this.health = 0;
 	    }
 	  }
 	};
@@ -865,8 +867,10 @@
 	Util.xChase = function (chaser, targetPos, speed) {
 	  if (chaser.pos.x > targetPos.x) {
 	    chaser.speed.x = 0-speed;
+	    chaser.facing = "left";
 	  } else if (chaser.pos.x < targetPos.x) {
 	    chaser.speed.x = speed;
+	    chaser.facing = "right";
 	  }
 	};
 	
@@ -1209,7 +1213,10 @@
 	      this.pos.y > player.pos.y-2
 	    ) {
 	      if (this.checkUnderFeet() && player.checkUnderFeet()) {
-	        player.skeletonBite();
+	        // Attack the player, reverse your x speed if it's succesful
+	        if (player.skeletonBite()) {
+	          this.speed.x *= -1;
+	        }
 	      }
 	    }
 	  }.bind(this));
@@ -1349,9 +1356,14 @@
 	var blocks = __webpack_require__(7);
 	var movers = __webpack_require__(10);
 	
-	var Boneheap = function (index, pos, stats) {
+	var Boneheap = function (index, pos, stats, spriteRoot) {
 	  this.index = index;
 	  this.type = "boneheap";
+	  if (!spriteRoot) {
+	    this.spriteRoot = "boneheap";
+	  } else {
+	    this.spriteRoot = spriteRoot;
+	  }
 	  this.age = 0;
 	  this.pos = {
 	    x: pos.x,
@@ -1405,19 +1417,24 @@
 	
 	Boneheap.prototype.reanimate = function () {
 	  var Skeleton = __webpack_require__(15);
-	  movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y, this.stats));
+	  var Burningman = __webpack_require__(37);
+	  if (this.spriteRoot === "boneheap") {
+	    movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y, this.stats));
+	  } else if (this.spriteRoot === "burningman/boneheap") {
+	    movers[this.index] = (new Burningman (this.index, this.pos.x, this.pos.y, this.stats));
+	  }
 	};
 	
 	Boneheap.prototype.setSprites = function () {
 	  this.collapseSprite = new Sprite (48, 48, 0, [
-	      "boneheap/collapsing/0.gif",
-	      "boneheap/collapsing/1.gif",
-	      "boneheap/collapsing/2.gif",
-	      "boneheap/collapsing/3.gif"
+	      this.spriteRoot+"/collapsing/0.gif",
+	      this.spriteRoot+"/collapsing/1.gif",
+	      this.spriteRoot+"/collapsing/2.gif",
+	      this.spriteRoot+"/collapsing/3.gif"
 	    ]
 	  );
 	  this.staticSprite = new Sprite (48, 48, 0, [
-	      "boneheap/heap.gif"
+	      this.spriteRoot+"/heap.gif"
 	    ]
 	  );
 	  this.sprite = this.collapseSprite;
@@ -1507,21 +1524,21 @@
 	    switch(e.keyCode) {
 	    case 68: // d
 	    case 39: //right
-	      if (player.checkUnderFeet()) {
+	      if (player.checkUnderFeet() && !player.dead) {
 	        player.speed.x = player.stats.runSpeed;
 	      }
 	      player.facing = "right";
 	      break;
 	    case 65: // a
 	    case 37: //left
-	      if (player.checkUnderFeet()) {
+	      if (player.checkUnderFeet() && !player.dead) {
 	        player.speed.x = 0-player.stats.runSpeed;
 	      }
 	      player.facing = "left";
 	      break;
 	    case 87: // w
 	    case 38: //up
-	      if (player.checkUnderFeet()) {
+	      if (player.checkUnderFeet() && !player.dead) {
 	        player.upKey();
 	      }
 	      break;
@@ -1577,6 +1594,7 @@
 	    case "Throop":
 	      var ACar = __webpack_require__(23);
 	      if (Util.typeCount("skeleton", this.movers) === 0 &&
+	      Util.typeCount("burningman", this.movers) === 0 &&
 	      Util.typeCount("shoggoth", this.movers) === 0) {
 	        if (Util.typeCount("aCar", this.trains) === 0) {
 	          this.trains.push(new ACar (trains.length, "front", -1300, this.zone.trainY-100, 26, -0.1, this));
@@ -1697,13 +1715,13 @@
 	  if (
 	      (
 	      //Left Door
-	      players[0].pos.x + players[0].spriteSize > this.pos.x + 24 &&
-	      players[0].pos.x < this.pos.x + 58 &&
+	      players[0].pos.x + players[0].spriteSize > this.pos.x + 24+24 &&
+	      players[0].pos.x < this.pos.x + 58-24 &&
 	      players[0].pos.y > this.pos.y) ||
 	      (
 	      //Right Door
-	      players[0].pos.x + players[0].spriteSize > this.pos.x + 186 &&
-	      players[0].pos.x < this.pos.x + 220 &&
+	      players[0].pos.x + players[0].spriteSize > this.pos.x + 186+24 &&
+	      players[0].pos.x < this.pos.x + 220-24 &&
 	      players[0].pos.y > this.pos.y)
 	      ) {
 	        players[0].drawUpKey();
@@ -1762,13 +1780,13 @@
 	
 	var throop = new Zone ("Throop", [
 	  "---------------------------------------------------------------------------",
-	  "----------*---------------------------------------------------#!*----------",
+	  "----------*---------------------------------------------------#!-----------",
 	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
 	  "---------------------------------------------------------------------------",
-	  "---------------------*---------------------------#?-----#!-----------------",
-	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
+	  "-----------------------------------------------*-#?-----#!-----------------",
+	  "-----------------FTTTF-------------------1-----FTTTTTTTTTTF----------------",
 	  "---------------------------------------------------------------------------",
-	  "$!#-?#--!#------------------------------------------------#?--#!-----------",
+	  "¡#-!#-?#--!#----------------------------------------------#?--#!-----------",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
@@ -1799,6 +1817,7 @@
 	var metaBlock = __webpack_require__(27);
 	var Player = __webpack_require__(2);
 	var Skeleton = __webpack_require__(15);
+	var Burningman = __webpack_require__(37);
 	var Shoggoth = __webpack_require__(28);
 	var Boneheap = __webpack_require__(16);
 	var Pigeon = __webpack_require__(30);
@@ -1828,6 +1847,8 @@
 	        movers.push( new Boneheap (movers.length, {x: xIndex*48, y: yIndex*48}) );
 	      } else if (square === "!") {
 	        movers.push( new Skeleton (movers.length, xIndex*48, yIndex*48) );
+	      } else if (square === "¡") {
+	        movers.push( new Burningman (movers.length, xIndex*48, yIndex*48) );
 	      } else if (square === "$") {
 	        movers.push( new Shoggoth (movers.length, xIndex*48, yIndex*48) );
 	      } else if (square === "*") {
@@ -1974,6 +1995,7 @@
 	  }
 	  this.updateSprite();
 	  this.avoidRoomEdge();
+	  this.checkForJumpBlock();
 	};
 	
 	Shoggoth.prototype.cast = function () {
@@ -2019,6 +2041,31 @@
 	  }.bind(this));
 	};
 	
+	Shoggoth.prototype.checkForJumpBlock = function () {
+	  metaBlocks.forEach(function(metaBlock){
+	    if (metaBlock && metaBlock.types.includes("horseGate") &&
+	        Util.distanceBetween(players[0].pos, metaBlock.pos) < 480) {
+	        metaBlock.destroy();
+	    }
+	    if (metaBlock && this.pos.x < metaBlock.pos.x+this.sprite.width+2 &&
+	        this.pos.x > metaBlock.pos.x-2 &&
+	        this.pos.y < metaBlock.pos.y+this.sprite.height+2 &&
+	        this.pos.y > metaBlock.pos.y-2
+	       ) {
+	          if (metaBlock.types.includes("goLeft")) {
+	            this.speed.x = Math.abs(this.speed.x)*(-1);
+	          }
+	          if (metaBlock.types.includes("goRight")) {
+	            this.speed.x = Math.abs(this.speed.x);
+	          }
+	          if (metaBlock.types.includes("horseGate")) {
+	            this.speed.x = 0;
+	            this.speed.y = 0;
+	          }
+	        }
+	  }.bind(this));
+	};
+	
 	Shoggoth.prototype.checkForPlayer = function () {
 	  var player = players[0];
 	  if (player.pos.x + player.spriteSize >= this.pos.x+16 &&
@@ -2052,12 +2099,14 @@
 	  var ctx = Util.universals.canvasContext;
 	  var view = Util.universals.view.topLeftPos;
 	  ctx.strokeStyle = "white";
-	  ctx.lineWidth = 3;
+	  ctx.globalAlpha = 0.8;
+	  ctx.lineWidth = 2;
 	  ctx.beginPath();
 	  ctx.moveTo(this.eyePos("standing").x-view.x, this.eyePos("standing").y-view.y);
 	  ctx.lineTo(hammer.pos.x+hammer.spriteSize/2-view.x, hammer.pos.y+hammer.spriteSize/2-view.y);
 	  ctx.stroke();
 	  ctx.strokeStyle = "black";
+	  ctx.globalAlpha = 1;
 	  ctx.lineWidth = 1;
 	};
 	
@@ -2079,7 +2128,8 @@
 	  this.scared = 32*5;
 	  this.casting = 0;
 	  this.stats.runSpeed = -6.4;
-	  // runSpeed is negative so chase logic makes the Shoggoth run away
+	  this.speed.x = !Math.round(Math.random()) ? this.stats.runSpeed : 0-this.stats.runSpeed;
+	  // runSpeed is negative so the Shoggoth's chase logic makes it run away
 	};
 	
 	Shoggoth.prototype.setExtraSprites = function () {
@@ -2900,6 +2950,419 @@
 	});
 	
 	module.exports = throopPillars;
+
+
+/***/ },
+/* 36 */,
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var Jumpman = __webpack_require__(5);
+	var Boneheap = __webpack_require__(16);
+	var Skeleton = __webpack_require__(15);
+	var Pyre = __webpack_require__(38);
+	var Fireball = __webpack_require__(40);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
+	var metaBlocks = __webpack_require__(17);
+	var players = __webpack_require__(11);
+	var movers = __webpack_require__(10);
+	
+	var Burningman = function (index, x, y, stats) {
+	  this.type = "burningman";
+	  this.index = index;
+	  this.spriteSize = 48;
+	  this.age = 0;
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.speed = {
+	    x: 0,
+	    y: 0
+	  };
+	  this.accel = {
+	    x: 0,
+	    y: Util.universals.gravity
+	  };
+	  this.facing = "right";
+	  this.spriteRoot = "burningman";
+	  this.setSprites(5);
+	  this.sprite = this.sprites.standing_right;
+	  this.fireballDelay = 16;
+	
+	  if (stats === undefined) {
+	    this.stats = {
+	      sightRange: Util.approximately(330),
+	      runSpeed: Util.approximately(4),
+	      jumpPower: Util.approximately(16),
+	      jumpDistance: 1,
+	      chasingSkill: 3,
+	      throwPower: Util.approximately(9)
+	    };
+	  } else {
+	    this.stats = stats;
+	  }
+	};
+	
+	Util.inherits(Burningman, Jumpman);
+	
+	Burningman.prototype.act = function () {
+	  this.checkForHammer();
+	  this.checkForPlayer();
+	  this.avoidRoomEdge();
+	  this.fireballDecision();
+	  this.dodgeHammer();
+	  if (!this.pyre && !Math.floor(Math.random()*256) || this.age === 1) {
+	    this.ignite();
+	  }
+	  if (Util.distanceBetween(this.pos, players[0].pos) <= this.stats.sightRange) {
+	    if (Math.random()*32 <= this.stats.chasingSkill) {
+	      Util.xChase(this, players[0].pos, this.stats.runSpeed);
+	    }
+	  }
+	  this.checkForJumpBlock();
+	};
+	
+	Burningman.prototype.conjureFire = function () {
+	  if (this.pyre) {
+	    this.pyre.spriteAction = true;
+	    this.pyre.sprite = this.pyre.sprites.conjuring;
+	    this.pyre.sprite.addAnimationEndCallback(function () {
+	      this.pyre.spriteAction = false;
+	      this.throwFireball();
+	    }.bind(this));
+	  }
+	};
+	
+	Burningman.prototype.checkForHammer = function () {
+	  movers.forEach(function (mover) {
+	    if (mover.type === "hammer" &&
+	        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
+	        mover.soft <= 0) {
+	      mover.ricochet();
+	      mover.soft = 4;
+	      this.shatter();
+	    }
+	  }.bind(this));
+	};
+	
+	Burningman.prototype.checkForPlayer = function () {
+	  players.forEach(function (player) {
+	    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
+	      this.pos.x > player.pos.x-2 &&
+	      this.pos.y < player.pos.y+this.sprite.height+2 &&
+	      this.pos.y > player.pos.y-2
+	    ) {
+	      if (this.checkUnderFeet() && player.checkUnderFeet()) {
+	        // Attack the player, reverse your x speed if it's succesful
+	        if (player.skeletonBite()) {
+	          this.speed.x *= -1;
+	        }
+	      }
+	    }
+	  }.bind(this));
+	};
+	
+	Burningman.prototype.checkForJumpBlock = Skeleton.prototype.checkForJumpBlock;
+	
+	Burningman.prototype.dodgeHammer = function () {
+	  movers.forEach(function (mover) {
+	    if (mover.type === "hammer" &&
+	        Math.round(Math.random()*0.8) &&
+	        Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/9 &&
+	        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 ) {
+	      this.jump();
+	    }
+	  }.bind(this));
+	};
+	
+	Burningman.prototype.predictPos = function (mover, steps) {
+	  var predictX = mover.pos.x + mover.speed.x * steps;
+	  var predictY = mover.pos.y + mover.speed.y * steps;
+	  return {
+	    x: predictX,
+	    y: predictY
+	  };
+	};
+	
+	Burningman.prototype.fireballDecision = function () {
+	  if (Math.abs(this.predictPos(this, this.fireballDelay).y - this.predictPos(players[0], this.fireballDelay).y) < 48 &&
+	  Math.abs(this.predictPos(this, this.fireballDelay).x - this.predictPos(players[0], this.fireballDelay).x) < 48*8 &&
+	  (!Math.floor(Math.random()*96) || !this.checkUnderFeet())) {
+	    this.conjureFire();
+	  }
+	};
+	
+	Burningman.prototype.fireJump = function () {
+	  if (this.pyre) {
+	    this.pyre.spriteAction = true;
+	    this.pyre.sprite = this.pyre.sprites.jump_burst;
+	    this.pyre.sprite.addAnimationEndCallback(function () {
+	      this.pyre.spriteAction = false;
+	      this.actuallyJump();
+	    }.bind(this));
+	  }
+	};
+	
+	Burningman.prototype.ignite = function () {
+	  this.pyre = new Pyre (movers.length, this);
+	  this.stats.runSpeed = Math.abs(this.stats.runSpeed);
+	  movers.push(this.pyre);
+	};
+	
+	Burningman.prototype.actuallyJump = function () {
+	  this.speed.y = 0-this.stats.jumpPower;
+	  this.speed.x *= this.stats.jumpDistance;
+	};
+	
+	Burningman.prototype.jumpAtArcPeak = function () {
+	  if (!this.checkUnderFeet() &&
+	  Math.abs(this.speed.y) < 1 &&
+	  this.pos.y > players[0].pos.y-48*2) {
+	    this.jump();
+	  }
+	};
+	
+	Burningman.prototype.jump = function () {
+	  if (this.checkUnderFeet()) {
+	    this.actuallyJump();
+	  } else {
+	    this.fireJump();
+	  }
+	};
+	
+	Burningman.prototype.setExtraSprites = function () {
+	  this.sprites.rising = new Sprite (48, 48, 2, [
+	      "burningman/boneheap/collapsing/3.gif",
+	      "burningman/boneheap/collapsing/2.gif",
+	      "burningman/boneheap/collapsing/1.gif",
+	      "burningman/boneheap/collapsing/0.gif"
+	    ]
+	  );
+	};
+	
+	Burningman.prototype.shatter = function () {
+	  if (this.pyre) {
+	    this.pyre.destroy();
+	    this.pyre = null;
+	    this.stats.runSpeed *= -0.92;
+	  } else {
+	    movers[this.index] = new Boneheap (this.index, this.pos, this.stats, "burningman/boneheap");
+	  }
+	};
+	
+	Burningman.prototype.throwFireball = function () {
+	  if (this.pyre) {
+	    this.speed.x = 0;
+	    movers.push(new Fireball (movers.length, this.pos, this.facing ==="right" ? this.stats.throwPower : 0-this.stats.throwPower));
+	  }
+	};
+	
+	Burningman.prototype.wander = function () {
+	  if (!Math.floor(Math.random()*96)) {
+	    this.speed.x *= -1;
+	  }
+	};
+	
+	module.exports = Burningman;
+
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(6);
+	var movers = __webpack_require__(10);
+	
+	var Pyre = function (index, source) {
+	  this.type = "pyre";
+	  this.index = index;
+	  this.pos = source.pos;
+	  this.source = source;
+	  this.setSprites();
+	  this.sprite = this.sprites.standing_right;
+	  this.spriteAction = false;
+	};
+	
+	Pyre.prototype.act = function () {
+	  if (!this.spriteAction) {
+	    this.sprite = this.sprites["standing_"+this.source.facing];
+	    if (this.source.speed.x !== 0) {
+	      this.sprite = this.sprites["running_"+this.source.facing];
+	    }
+	    if (this.source.speed.y !== 0) {
+	      this.sprite = this.sprites["jumping_"+this.source.facing];
+	    }
+	  }
+	};
+	
+	Pyre.prototype.destroy = function () {
+	  delete movers[this.index];
+	};
+	
+	Pyre.prototype.move = function () {
+	  this.pos = this.source.pos;
+	};
+	
+	Pyre.prototype.setSprites = function () {
+	  this.sprites = {
+	    running_right: new Sprite (48, 48, 2, [
+	        "burningman/rightPyre/running/0.gif",
+	        "burningman/rightPyre/running/1.gif",
+	        "burningman/rightPyre/running/2.gif",
+	        "burningman/rightPyre/running/3.gif"
+	      ]
+	    ),
+	    running_left: new Sprite (48, 48, 2, [
+	        "burningman/leftPyre/running/0.gif",
+	        "burningman/leftPyre/running/1.gif",
+	        "burningman/leftPyre/running/2.gif",
+	        "burningman/leftPyre/running/3.gif"
+	      ]
+	    ),
+	    jumping_right: new Sprite (48, 48, 2, [
+	        "burningman/rightPyre/jumping.gif"
+	      ]
+	    ),
+	    jumping_left: new Sprite (48, 48, 2, [
+	        "burningman/leftPyre/jumping.gif"
+	      ]
+	    ),
+	    standing_right: new Sprite (48, 48, 2, [
+	        "burningman/rightPyre/standing.gif"
+	      ]
+	    ),
+	    standing_left: new Sprite (48, 48, 2, [
+	        "burningman/leftPyre/standing.gif"
+	      ]
+	    ),
+	    jump_burst: new Sprite (48, 48, 1, [
+	        "burningman/jumpBurst/0.gif",
+	        "burningman/jumpBurst/1.gif",
+	        "burningman/jumpBurst/2.gif",
+	        "burningman/jumpBurst/3.gif",
+	        "burningman/jumpBurst/4.gif",
+	        "burningman/jumpBurst/5.gif"
+	      ]
+	    ),
+	    conjuring: new Sprite (48, 48, 4, [
+	        "burningman/flameBurst/0.gif",
+	        "burningman/flameBurst/1.gif",
+	        "burningman/flameBurst/2.gif",
+	        "burningman/flameBurst/3.gif"
+	      ]
+	    )
+	  };
+	};
+	
+	module.exports = Pyre;
+
+
+/***/ },
+/* 39 */,
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(6);
+	var Aura = __webpack_require__(9);
+	var blocks = __webpack_require__(7);
+	var movers = __webpack_require__(10);
+	var players = __webpack_require__(11);
+	
+	var Fireball = function (index, pos, xspeed) {
+	  this.type = "fireball";
+	  this.index = index;
+	  this.age = 0;
+	  this.spriteSize = 48;
+	  this.pos = Object.assign( {}, pos);
+	  this.pos.y = Math.round(this.pos.y/48) * 48;
+	  this.speed = {
+	    x: xspeed,
+	    y: 0
+	  };
+	  this.setSprites();
+	  this.age = 0;
+	};
+	
+	Fireball.prototype.act = function () {
+	  this.checkForPlayer();
+	  this.age ++;
+	  if (this.age > 64) {
+	    this.burst();
+	  }
+	};
+	
+	Fireball.prototype.burst = function () {
+	  this.sprite = this.sprites.pop;
+	  this.sprite.addAnimationEndCallback(function () {
+	    this.destroy();
+	  }.bind(this));
+	};
+	
+	Fireball.prototype.checkForPlayer = function () {
+	  players.forEach(function (player) {
+	    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
+	      this.pos.x > player.pos.x-2 &&
+	      this.pos.y < player.pos.y+this.sprite.height+2 &&
+	      this.pos.y > player.pos.y-2
+	    ) {
+	      player.fireballBite();
+	      this.burst();
+	    }
+	  }.bind(this));
+	};
+	
+	Fireball.prototype.destroy = function () {
+	  delete movers[this.index];
+	};
+	
+	Fireball.prototype.move = function () {
+	  this.pos.x += this.speed.x;
+	  this.pos.y += this.speed.y;
+	};
+	
+	Fireball.prototype.ricochet = function () {
+	  this.speed.x *= (-1);
+	  this.speed.y *= (-1);
+	};
+	
+	Fireball.prototype.setSprites = function () {
+	  this.sprites = {};
+	  this.sprites.leftSprite = new Sprite (48, 48, 1, [
+	      "burningman/fireball/left/0.gif",
+	      "burningman/fireball/left/1.gif",
+	      "burningman/fireball/left/2.gif",
+	      "burningman/fireball/left/3.gif",
+	      "burningman/fireball/left/4.gif",
+	      "burningman/fireball/left/5.gif",
+	      "burningman/fireball/left/6.gif"
+	    ]
+	  );
+	  this.sprites.rightSprite = new Sprite (48, 48, 1, [
+	      "burningman/fireball/right/0.gif",
+	      "burningman/fireball/right/1.gif",
+	      "burningman/fireball/right/2.gif",
+	      "burningman/fireball/right/3.gif",
+	      "burningman/fireball/right/4.gif",
+	      "burningman/fireball/right/5.gif",
+	      "burningman/fireball/right/6.gif"
+	    ]
+	  );
+	  this.sprites.pop = new Sprite (48, 48, 1, [
+	      "burningman/fireball/pop/0.gif",
+	      "burningman/fireball/pop/1.gif",
+	      "burningman/fireball/pop/2.gif",
+	      "burningman/fireball/pop/3.gif"
+	    ]
+	  );
+	  this.sprite = this.speed.x > 0 ? this.sprites.rightSprite : this.sprites.leftSprite;
+	};
+	
+	module.exports = Fireball;
 
 
 /***/ }

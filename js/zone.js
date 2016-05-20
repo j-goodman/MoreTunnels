@@ -2,6 +2,7 @@ var Block = require("./objects/block.js");
 var metaBlock = require("./objects/metaBlock.js");
 var Player = require("./objects/player.js");
 var Skeleton = require("./objects/skeleton.js");
+var Burningman = require("./objects/burningman.js");
 var Shoggoth = require("./objects/shoggoth.js");
 var Boneheap = require("./objects/boneheap.js");
 var Pigeon = require("./objects/pigeon.js");
@@ -31,6 +32,8 @@ Zone.prototype.build = function (blocks, movers, players, metaBlocks, callback) 
         movers.push( new Boneheap (movers.length, {x: xIndex*48, y: yIndex*48}) );
       } else if (square === "!") {
         movers.push( new Skeleton (movers.length, xIndex*48, yIndex*48) );
+      } else if (square === "¡") {
+        movers.push( new Burningman (movers.length, xIndex*48, yIndex*48) );
       } else if (square === "$") {
         movers.push( new Shoggoth (movers.length, xIndex*48, yIndex*48) );
       } else if (square === "*") {

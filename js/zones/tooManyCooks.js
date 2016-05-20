@@ -9,7 +9,7 @@ var tooManyCooks = new Zone ("tooManyCooks", [
   "-**--------------***----------------------------------*-",
   "TTF--------------FTTF------------FTTF----------------TTF",
   "--------------------------------------------------------",
-  "--------------H-----------------------------------------",
+  "--------------H--------1--------------------------------",
   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"

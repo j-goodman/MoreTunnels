@@ -4,9 +4,14 @@ var Jumpman = require('./jumpman.js');
 var blocks = require('../objectArrays/blocks.js');
 var movers = require('../objectArrays/movers.js');
 
-var Boneheap = function (index, pos, stats) {
+var Boneheap = function (index, pos, stats, spriteRoot) {
   this.index = index;
   this.type = "boneheap";
+  if (!spriteRoot) {
+    this.spriteRoot = "boneheap";
+  } else {
+    this.spriteRoot = spriteRoot;
+  }
   this.age = 0;
   this.pos = {
     x: pos.x,
@@ -60,19 +65,24 @@ Boneheap.prototype.landOnGround = Jumpman.prototype.landOnGround;
 
 Boneheap.prototype.reanimate = function () {
   var Skeleton = require('./skeleton.js');
-  movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y, this.stats));
+  var Burningman = require('./burningman.js');
+  if (this.spriteRoot === "boneheap") {
+    movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y, this.stats));
+  } else if (this.spriteRoot === "burningman/boneheap") {
+    movers[this.index] = (new Burningman (this.index, this.pos.x, this.pos.y, this.stats));
+  }
 };
 
 Boneheap.prototype.setSprites = function () {
   this.collapseSprite = new Sprite (48, 48, 0, [
-      "boneheap/collapsing/0.gif",
-      "boneheap/collapsing/1.gif",
-      "boneheap/collapsing/2.gif",
-      "boneheap/collapsing/3.gif"
+      this.spriteRoot+"/collapsing/0.gif",
+      this.spriteRoot+"/collapsing/1.gif",
+      this.spriteRoot+"/collapsing/2.gif",
+      this.spriteRoot+"/collapsing/3.gif"
     ]
   );
   this.staticSprite = new Sprite (48, 48, 0, [
-      "boneheap/heap.gif"
+      this.spriteRoot+"/heap.gif"
     ]
   );
   this.sprite = this.collapseSprite;

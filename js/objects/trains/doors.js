@@ -23,13 +23,13 @@ Doors.prototype.checkForPlayer = function () {
   if (
       (
       //Left Door
-      players[0].pos.x + players[0].spriteSize > this.pos.x + 24 &&
-      players[0].pos.x < this.pos.x + 58 &&
+      players[0].pos.x + players[0].spriteSize > this.pos.x + 24+24 &&
+      players[0].pos.x < this.pos.x + 58-24 &&
       players[0].pos.y > this.pos.y) ||
       (
       //Right Door
-      players[0].pos.x + players[0].spriteSize > this.pos.x + 186 &&
-      players[0].pos.x < this.pos.x + 220 &&
+      players[0].pos.x + players[0].spriteSize > this.pos.x + 186+24 &&
+      players[0].pos.x < this.pos.x + 220-24 &&
       players[0].pos.y > this.pos.y)
       ) {
         players[0].drawUpKey();

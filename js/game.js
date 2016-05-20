@@ -103,7 +103,7 @@ Window.newGame = function () {
         }
       }
 
-      for (var j = 0; j <= this.movers.length; j++) {
+      for (var j = this.movers.length-1; j >= 0; j--) {
         var mover = this.movers[j];
         if (mover) {
           mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
@@ -120,7 +120,7 @@ Window.newGame = function () {
       if (this.ctx) {
         this.players[0].sprite.draw(this.ctx, players[0].pos, this.view.topLeftPos);
       }
-      
+
       this.players[0].move();
 
       this.movers.forEach(function(mover){

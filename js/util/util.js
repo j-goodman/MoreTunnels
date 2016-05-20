@@ -117,8 +117,10 @@ Util.typeCount = function (type, array) {
 Util.xChase = function (chaser, targetPos, speed) {
   if (chaser.pos.x > targetPos.x) {
     chaser.speed.x = 0-speed;
+    chaser.facing = "left";
   } else if (chaser.pos.x < targetPos.x) {
     chaser.speed.x = speed;
+    chaser.facing = "right";
   }
 };
 
