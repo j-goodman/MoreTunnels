@@ -37,7 +37,7 @@ var Burningman = function (index, x, y, stats) {
     this.stats = {
       sightRange: Util.approximately(330),
       runSpeed: Util.approximately(4),
-      jumpPower: Util.approximately(16),
+      jumpPower: Util.approximately(11),
       jumpDistance: 1,
       chasingSkill: 3,
       throwPower: Util.approximately(9)

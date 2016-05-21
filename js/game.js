@@ -57,10 +57,10 @@ Window.newGame = function () {
 
     this.zone.build(this.blocks, this.movers, this.players, this.metaBlocks, callback);
 
-    var backgroundBricks = require('./backgrounds/throopBricks.js');
+    var backgroundBricks = require('./backgrounds/junctionBricks.js');
     backgroundBricks.build(tiles);
 
-    var backgroundPillars = require('./backgrounds/throopPillars.js');
+    var backgroundPillars = require('./backgrounds/junctionLamps.js');
     backgroundPillars.build(tiles, 2);
     backgroundPillars.build(tiles, 3);
   };

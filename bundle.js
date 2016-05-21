@@ -103,10 +103,10 @@
 	
 	    this.zone.build(this.blocks, this.movers, this.players, this.metaBlocks, callback);
 	
-	    var backgroundBricks = __webpack_require__(32);
+	    var backgroundBricks = __webpack_require__(43);
 	    backgroundBricks.build(tiles);
 	
-	    var backgroundPillars = __webpack_require__(35);
+	    var backgroundPillars = __webpack_require__(42);
 	    backgroundPillars.build(tiles, 2);
 	    backgroundPillars.build(tiles, 3);
 	  };
@@ -2854,36 +2854,7 @@
 
 
 /***/ },
-/* 32 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Background = __webpack_require__(33);
-	var Sprite = __webpack_require__(3);
-	
-	var throopBricks = new Background ([
-	  "-------------------------------------",
-	  "-------------------------------------",
-	  "-------------------------------------",
-	  "-------------------------------------",
-	  "-------------------------------------",
-	  "=====================================",
-	  "-------------------------------------",
-	  "-------------------------------------",
-	  "-------------------------------------",
-	  "=====================================",
-	  "====================================="
-	],
-	{
-	  "-": {sprite: new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
-	        depth: 5},
-	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
-	        depth: 5}
-	});
-	
-	module.exports = throopBricks;
-
-
-/***/ },
+/* 32 */,
 /* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2926,42 +2897,7 @@
 
 
 /***/ },
-/* 35 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Background = __webpack_require__(33);
-	var Sprite = __webpack_require__(3);
-	
-	var throopPillars = new Background ([
-	  "=====================================================",
-	  "=====================================================",
-	  "=====================================================",
-	  "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL ",
-	  "    I     I     I     I     I     I     I     I     I",
-	  "    I     I     I  K  I     I     I     I     I     I",
-	  "    I     I     I     I     I     I     I     I     I",
-	  "    I     I     I     I     I     I     I     I     I",
-	  "    I     I     I     I     I     I     I     I     I",
-	  "    I     I     I     I     I     I     I     I     I",
-	  "    I     I     I     I     I     I     I     I     I"
-	],
-	{
-	  "I": {sprite: new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
-	        depth: 2},
-	  "F": {sprite: new Sprite (48, 48, 0, ["tile/girder_top.gif"]),
-	        depth: 2},
-	  "L": {sprite: new Sprite (144, 48, 0, ["tile/pillar_head.gif"]),
-	        depth: 2},
-	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
-	        depth: 2},
-	  "K": {sprite: new Sprite (96, 48, 0, ["tile/sign_kthroop.gif"]),
-	        depth: 5}
-	});
-	
-	module.exports = throopPillars;
-
-
-/***/ },
+/* 35 */,
 /* 36 */,
 /* 37 */
 /***/ function(module, exports, __webpack_require__) {
@@ -3005,7 +2941,7 @@
 	    this.stats = {
 	      sightRange: Util.approximately(330),
 	      runSpeed: Util.approximately(4),
-	      jumpPower: Util.approximately(16),
+	      jumpPower: Util.approximately(11),
 	      jumpDistance: 1,
 	      chasingSkill: 3,
 	      throwPower: Util.approximately(9)
@@ -3377,6 +3313,72 @@
 	};
 	
 	module.exports = Fireball;
+
+
+/***/ },
+/* 41 */,
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(33);
+	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(6);
+	
+	var junctionLamps = new Background ([
+	  "                                              ",
+	  "                                              ",
+	  "  *         *         *         *         *   ",
+	  "   O         O         O         O         O  ",
+	  "   I         I         I         I         I  ",
+	  "   I         I         I         I         I  ",
+	  "   I         I         I         I         I  ",
+	  "   A         A         A         A         A  ",
+	  "                                              ",
+	  "                                              ",
+	  "                                              "
+	],
+	{
+	  "I": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_stalk.gif"]),
+	        depth: 2},
+	  "A": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_base.gif"]),
+	        depth: 2},
+	  "O": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_head.gif"]),
+	        depth: 2},
+	  "*": {sprite: new Sprite (144, 144, 0, ["tile/lamppost_halo.gif"]),
+	        depth: 2}
+	});
+	
+	module.exports = junctionLamps;
+
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(33);
+	var Sprite = __webpack_require__(3);
+	
+	var throopBricks = new Background ([
+	  "-----------------------------",
+	  "-----------------------------",
+	  "====================---------",
+	  "=====================--------",
+	  "======================-------",
+	  "=======================------",
+	  "========================-----",
+	  "=========================----",
+	  "==========================---",
+	  "===========================--",
+	  "============================-"
+	],
+	{
+	  "-": {sprite: new Sprite (48, 48, 0, ["tile/night_sky.gif"]),
+	        depth: 5},
+	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_red.gif"]),
+	        depth: 5}
+	});
+	
+	module.exports = throopBricks;
 
 
 /***/ }
