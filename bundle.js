@@ -48,18 +48,18 @@
 	  var renderZone = __webpack_require__(1);
 	  var Player = __webpack_require__(2);
 	  var Skeleton = __webpack_require__(15);
-	  var Block = __webpack_require__(18);
+	  var Block = __webpack_require__(21);
 	  var Util = __webpack_require__(6);
-	  var View = __webpack_require__(19);
-	  var keyEvents = __webpack_require__(20);
+	  var View = __webpack_require__(22);
+	  var keyEvents = __webpack_require__(23);
 	  var blocks = __webpack_require__(7);
-	  var aiHints = __webpack_require__(17);
+	  var aiHints = __webpack_require__(20);
 	  var tiles = __webpack_require__(13);
 	  var overlays = __webpack_require__(14);
 	  var movers = __webpack_require__(10);
-	  var trains = __webpack_require__(21);
+	  var trains = __webpack_require__(24);
 	  var players = __webpack_require__(11);
-	  var Conductor = __webpack_require__(22);
+	  var Conductor = __webpack_require__(25);
 	
 	  var Game = {
 	    canvas: null,
@@ -94,7 +94,7 @@
 	  };
 	
 	  Game.buildZone = function () {
-	    var zone = __webpack_require__(25);
+	    var zone = __webpack_require__(28);
 	    this.zone = zone;
 	
 	    var callback = function () {
@@ -103,10 +103,10 @@
 	
 	    this.zone.build(this.blocks, this.movers, this.players, this.metaBlocks, callback);
 	
-	    var backgroundBricks = __webpack_require__(43);
+	    var backgroundBricks = __webpack_require__(35);
 	    backgroundBricks.build(tiles);
 	
-	    var backgroundPillars = __webpack_require__(42);
+	    var backgroundPillars = __webpack_require__(38);
 	    backgroundPillars.build(tiles, 2);
 	    backgroundPillars.build(tiles, 3);
 	  };
@@ -1158,7 +1158,7 @@
 	var Boneheap = __webpack_require__(16);
 	var Util = __webpack_require__(6);
 	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(17);
+	var metaBlocks = __webpack_require__(20);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
 	
@@ -1424,7 +1424,7 @@
 	
 	Boneheap.prototype.reanimate = function () {
 	  var Skeleton = __webpack_require__(15);
-	  var Burningman = __webpack_require__(37);
+	  var Burningman = __webpack_require__(17);
 	  if (this.spriteRoot === "boneheap") {
 	    movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y, this.stats));
 	  } else if (this.spriteRoot === "burningman/boneheap") {
@@ -1454,6 +1454,422 @@
 
 /***/ },
 /* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var Jumpman = __webpack_require__(5);
+	var Boneheap = __webpack_require__(16);
+	var Skeleton = __webpack_require__(15);
+	var Pyre = __webpack_require__(18);
+	var Fireball = __webpack_require__(19);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
+	var metaBlocks = __webpack_require__(20);
+	var players = __webpack_require__(11);
+	var movers = __webpack_require__(10);
+	
+	var Burningman = function (index, x, y, stats) {
+	  this.type = "burningman";
+	  this.index = index;
+	  this.spriteSize = 48;
+	  this.age = 0;
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.speed = {
+	    x: 0,
+	    y: 0
+	  };
+	  this.accel = {
+	    x: 0,
+	    y: Util.universals.gravity
+	  };
+	  this.facing = "right";
+	  this.spriteRoot = "burningman";
+	  this.setSprites(5);
+	  this.sprite = this.sprites.standing_right;
+	  this.fireballDelay = 16;
+	
+	  if (stats === undefined) {
+	    this.stats = {
+	      sightRange: Util.approximately(330),
+	      runSpeed: Util.approximately(4),
+	      jumpPower: Util.approximately(11),
+	      jumpDistance: 1,
+	      chasingSkill: 3,
+	      throwPower: Util.approximately(9)
+	    };
+	  } else {
+	    this.stats = stats;
+	  }
+	};
+	
+	Util.inherits(Burningman, Jumpman);
+	
+	Burningman.prototype.act = function () {
+	  this.checkForHammer();
+	  this.checkForPlayer();
+	  this.avoidRoomEdge();
+	  this.fireballDecision();
+	  this.jumpAtArcPeak();
+	  this.dodgeHammer();
+	  if (!this.pyre && !Math.floor(Math.random()*256) || this.age === 1) {
+	    this.ignite();
+	  }
+	  if (Util.distanceBetween(this.pos, players[0].pos) <= this.stats.sightRange) {
+	    if (Math.random()*32 <= this.stats.chasingSkill) {
+	      Util.xChase(this, players[0].pos, this.stats.runSpeed);
+	    }
+	  }
+	  this.checkForJumpBlock();
+	};
+	
+	Burningman.prototype.conjureFire = function () {
+	  if (this.pyre) {
+	    this.pyre.spriteAction = true;
+	    this.pyre.sprite = this.pyre.sprites.conjuring;
+	    this.pyre.sprite.addAnimationEndCallback(function () {
+	      this.pyre.spriteAction = false;
+	      this.throwFireball();
+	    }.bind(this));
+	  }
+	};
+	
+	Burningman.prototype.checkForHammer = function () {
+	  movers.forEach(function (mover) {
+	    if (mover.type === "hammer" &&
+	        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
+	        mover.soft <= 0) {
+	      mover.ricochet();
+	      mover.soft = 4;
+	      this.shatter();
+	    }
+	  }.bind(this));
+	};
+	
+	Burningman.prototype.checkForPlayer = function () {
+	  players.forEach(function (player) {
+	    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
+	      this.pos.x > player.pos.x-2 &&
+	      this.pos.y < player.pos.y+this.sprite.height+2 &&
+	      this.pos.y > player.pos.y-2
+	    ) {
+	      if (this.checkUnderFeet() && player.checkUnderFeet()) {
+	        // Attack the player, reverse your x speed if it's succesful
+	        if (player.skeletonBite()) {
+	          this.speed.x *= -1;
+	        }
+	      }
+	    }
+	  }.bind(this));
+	};
+	
+	Burningman.prototype.checkForJumpBlock = Skeleton.prototype.checkForJumpBlock;
+	
+	Burningman.prototype.dodgeHammer = function () {
+	  movers.forEach(function (mover) {
+	    if (mover.type === "hammer" &&
+	        Math.round(Math.random()*0.8) &&
+	        Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/9 &&
+	        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 ) {
+	      this.jump();
+	    }
+	  }.bind(this));
+	};
+	
+	Burningman.prototype.predictPos = function (mover, steps) {
+	  var predictX = mover.pos.x + mover.speed.x * steps;
+	  var predictY = mover.pos.y + mover.speed.y * steps;
+	  return {
+	    x: predictX,
+	    y: predictY
+	  };
+	};
+	
+	Burningman.prototype.fireballDecision = function () {
+	  if (Math.abs(this.predictPos(this, this.fireballDelay).y - this.predictPos(players[0], this.fireballDelay).y) < 48 &&
+	  Math.abs(this.predictPos(this, this.fireballDelay).x - this.predictPos(players[0], this.fireballDelay).x) < 48*8 &&
+	  (!Math.floor(Math.random()*48) || !this.checkUnderFeet())) {
+	    this.conjureFire();
+	  }
+	};
+	
+	Burningman.prototype.fireJump = function () {
+	  if (this.pyre) {
+	    this.pyre.spriteAction = true;
+	    this.pyre.sprite = this.pyre.sprites.jump_burst;
+	    this.pyre.sprite.addAnimationEndCallback(function () {
+	      this.pyre.spriteAction = false;
+	      this.actuallyJump();
+	    }.bind(this));
+	  }
+	};
+	
+	Burningman.prototype.ignite = function () {
+	  this.pyre = new Pyre (movers.length, this);
+	  this.stats.runSpeed = Math.abs(this.stats.runSpeed);
+	  movers.push(this.pyre);
+	};
+	
+	Burningman.prototype.actuallyJump = function () {
+	  this.speed.y = 0-this.stats.jumpPower;
+	  this.speed.x *= this.stats.jumpDistance;
+	};
+	
+	Burningman.prototype.jumpAtArcPeak = function () {
+	  if (!this.checkUnderFeet() &&
+	  Math.abs(this.speed.y) < 1 &&
+	  this.pos.y > players[0].pos.y-48*2) {
+	    this.jump();
+	  }
+	};
+	
+	Burningman.prototype.jump = function () {
+	  if (this.checkUnderFeet()) {
+	    this.actuallyJump();
+	  } else {
+	    this.fireJump();
+	  }
+	};
+	
+	Burningman.prototype.setExtraSprites = function () {
+	  this.sprites.rising = new Sprite (48, 48, 2, [
+	      "burningman/boneheap/collapsing/3.gif",
+	      "burningman/boneheap/collapsing/2.gif",
+	      "burningman/boneheap/collapsing/1.gif",
+	      "burningman/boneheap/collapsing/0.gif"
+	    ]
+	  );
+	};
+	
+	Burningman.prototype.shatter = function () {
+	  if (this.pyre) {
+	    this.pyre.destroy();
+	    this.pyre = null;
+	    this.stats.runSpeed *= -0.92;
+	  } else {
+	    movers[this.index] = new Boneheap (this.index, this.pos, this.stats, "burningman/boneheap");
+	  }
+	};
+	
+	Burningman.prototype.throwFireball = function () {
+	  if (this.pyre) {
+	    this.speed.x = 0;
+	    movers.push(new Fireball (movers.length, this.pos, this.facing ==="right" ? this.stats.throwPower : 0-this.stats.throwPower));
+	  }
+	};
+	
+	Burningman.prototype.wander = function () {
+	  if (!Math.floor(Math.random()*96)) {
+	    this.speed.x *= -1;
+	  }
+	};
+	
+	module.exports = Burningman;
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(6);
+	var movers = __webpack_require__(10);
+	
+	var Pyre = function (index, source) {
+	  this.type = "pyre";
+	  this.index = index;
+	  this.pos = source.pos;
+	  this.source = source;
+	  this.setSprites();
+	  this.sprite = this.sprites.standing_right;
+	  this.spriteAction = false;
+	};
+	
+	Pyre.prototype.act = function () {
+	  if (!this.spriteAction) {
+	    this.sprite = this.sprites["standing_"+this.source.facing];
+	    if (this.source.speed.x !== 0) {
+	      this.sprite = this.sprites["running_"+this.source.facing];
+	    }
+	    if (this.source.speed.y !== 0) {
+	      this.sprite = this.sprites["jumping_"+this.source.facing];
+	    }
+	  }
+	};
+	
+	Pyre.prototype.destroy = function () {
+	  delete movers[this.index];
+	};
+	
+	Pyre.prototype.move = function () {
+	  this.pos = this.source.pos;
+	};
+	
+	Pyre.prototype.setSprites = function () {
+	  this.sprites = {
+	    running_right: new Sprite (48, 48, 2, [
+	        "burningman/rightPyre/running/0.gif",
+	        "burningman/rightPyre/running/1.gif",
+	        "burningman/rightPyre/running/2.gif",
+	        "burningman/rightPyre/running/3.gif"
+	      ]
+	    ),
+	    running_left: new Sprite (48, 48, 2, [
+	        "burningman/leftPyre/running/0.gif",
+	        "burningman/leftPyre/running/1.gif",
+	        "burningman/leftPyre/running/2.gif",
+	        "burningman/leftPyre/running/3.gif"
+	      ]
+	    ),
+	    jumping_right: new Sprite (48, 48, 2, [
+	        "burningman/rightPyre/jumping.gif"
+	      ]
+	    ),
+	    jumping_left: new Sprite (48, 48, 2, [
+	        "burningman/leftPyre/jumping.gif"
+	      ]
+	    ),
+	    standing_right: new Sprite (48, 48, 2, [
+	        "burningman/rightPyre/standing/0.gif",
+	        "burningman/rightPyre/standing/1.gif",
+	        "burningman/rightPyre/standing/2.gif"
+	      ]
+	    ),
+	    standing_left: new Sprite (48, 48, 2, [
+	        "burningman/leftPyre/standing/0.gif",
+	        "burningman/leftPyre/standing/1.gif",
+	        "burningman/leftPyre/standing/2.gif"
+	      ]
+	    ),
+	    jump_burst: new Sprite (48, 48, 1, [
+	        "burningman/jumpBurst/0.gif",
+	        "burningman/jumpBurst/1.gif",
+	        "burningman/jumpBurst/2.gif",
+	        "burningman/jumpBurst/3.gif",
+	        "burningman/jumpBurst/4.gif",
+	        "burningman/jumpBurst/5.gif"
+	      ]
+	    ),
+	    conjuring: new Sprite (48, 48, 4, [
+	        "burningman/flameBurst/0.gif",
+	        "burningman/flameBurst/1.gif",
+	        "burningman/flameBurst/2.gif",
+	        "burningman/flameBurst/3.gif"
+	      ]
+	    )
+	  };
+	};
+	
+	module.exports = Pyre;
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(6);
+	var Aura = __webpack_require__(9);
+	var blocks = __webpack_require__(7);
+	var movers = __webpack_require__(10);
+	var players = __webpack_require__(11);
+	
+	var Fireball = function (index, pos, xspeed) {
+	  this.type = "fireball";
+	  this.index = index;
+	  this.age = 0;
+	  this.spriteSize = 48;
+	  this.pos = Object.assign( {}, pos);
+	  this.pos.y = Math.round(this.pos.y/48) * 48;
+	  this.speed = {
+	    x: xspeed,
+	    y: 0
+	  };
+	  this.setSprites();
+	  this.age = 0;
+	};
+	
+	Fireball.prototype.act = function () {
+	  this.checkForPlayer();
+	  this.age ++;
+	  if (this.age > 64) {
+	    this.burst();
+	  }
+	};
+	
+	Fireball.prototype.burst = function () {
+	  this.sprite = this.sprites.pop;
+	  this.sprite.addAnimationEndCallback(function () {
+	    this.destroy();
+	  }.bind(this));
+	};
+	
+	Fireball.prototype.checkForPlayer = function () {
+	  players.forEach(function (player) {
+	    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
+	      this.pos.x > player.pos.x-2 &&
+	      this.pos.y < player.pos.y+this.sprite.height+2 &&
+	      this.pos.y > player.pos.y-2
+	    ) {
+	      player.fireballBite();
+	      this.burst();
+	    }
+	  }.bind(this));
+	};
+	
+	Fireball.prototype.destroy = function () {
+	  delete movers[this.index];
+	};
+	
+	Fireball.prototype.move = function () {
+	  this.pos.x += this.speed.x;
+	  this.pos.y += this.speed.y;
+	};
+	
+	Fireball.prototype.ricochet = function () {
+	  this.speed.x *= (-1);
+	  this.speed.y *= (-1);
+	};
+	
+	Fireball.prototype.setSprites = function () {
+	  this.sprites = {};
+	  this.sprites.leftSprite = new Sprite (48, 48, 1, [
+	      "burningman/fireball/left/0.gif",
+	      "burningman/fireball/left/1.gif",
+	      "burningman/fireball/left/2.gif",
+	      "burningman/fireball/left/3.gif",
+	      "burningman/fireball/left/4.gif",
+	      "burningman/fireball/left/5.gif",
+	      "burningman/fireball/left/6.gif"
+	    ]
+	  );
+	  this.sprites.rightSprite = new Sprite (48, 48, 1, [
+	      "burningman/fireball/right/0.gif",
+	      "burningman/fireball/right/1.gif",
+	      "burningman/fireball/right/2.gif",
+	      "burningman/fireball/right/3.gif",
+	      "burningman/fireball/right/4.gif",
+	      "burningman/fireball/right/5.gif",
+	      "burningman/fireball/right/6.gif"
+	    ]
+	  );
+	  this.sprites.pop = new Sprite (48, 48, 1, [
+	      "burningman/fireball/pop/0.gif",
+	      "burningman/fireball/pop/1.gif",
+	      "burningman/fireball/pop/2.gif",
+	      "burningman/fireball/pop/3.gif"
+	    ]
+	  );
+	  this.sprite = this.speed.x > 0 ? this.sprites.rightSprite : this.sprites.leftSprite;
+	};
+	
+	module.exports = Fireball;
+
+
+/***/ },
+/* 20 */
 /***/ function(module, exports) {
 
 	metaBlocks = [];
@@ -1462,7 +1878,7 @@
 
 
 /***/ },
-/* 18 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -1493,7 +1909,7 @@
 
 
 /***/ },
-/* 19 */
+/* 22 */
 /***/ function(module, exports) {
 
 	var View = function (topLeftX, topLeftY, bottomRightX, bottomRightY, maxX, maxY) {
@@ -1525,7 +1941,7 @@
 
 
 /***/ },
-/* 20 */
+/* 23 */
 /***/ function(module, exports) {
 
 	var keyEvents = function (document, player) {
@@ -1575,7 +1991,7 @@
 
 
 /***/ },
-/* 21 */
+/* 24 */
 /***/ function(module, exports) {
 
 	trains = [];
@@ -1584,11 +2000,11 @@
 
 
 /***/ },
-/* 22 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(6);
-	var trains = __webpack_require__(21);
+	var trains = __webpack_require__(24);
 	var movers = __webpack_require__(10);
 	
 	var Conductor = function (zone) {
@@ -1601,7 +2017,7 @@
 	Conductor.prototype.manageTrains = function () {
 	  switch (this.zone.name) {
 	    case "Throop":
-	      var ACar = __webpack_require__(23);
+	      var ACar = __webpack_require__(26);
 	      if (Util.typeCount("skeleton", this.movers) === 0 &&
 	      Util.typeCount("burningman", this.movers) === 0 &&
 	      Util.typeCount("shoggoth", this.movers) === 0) {
@@ -1630,12 +2046,12 @@
 
 
 /***/ },
-/* 23 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(6);
 	var Sprite = __webpack_require__(3);
-	var Doors = __webpack_require__(24);
+	var Doors = __webpack_require__(27);
 	
 	var A = function (index, carType, x, y, xSpeed, xAccel, conductor) {
 	  this.index = index;
@@ -1696,13 +2112,13 @@
 
 
 /***/ },
-/* 24 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(6);
 	var Sprite = __webpack_require__(3);
 	var players = __webpack_require__(11);
-	var trains = __webpack_require__(21);
+	var trains = __webpack_require__(24);
 	
 	var Doors = function (index, pos, train) {
 	  this.index = index;
@@ -1782,10 +2198,10 @@
 
 
 /***/ },
-/* 25 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(26);
+	var Zone = __webpack_require__(29);
 	
 	var throop = new Zone ("Throop", [
 	  "---------------------------------------------------------------------------",
@@ -1819,18 +2235,18 @@
 
 
 /***/ },
-/* 26 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Block = __webpack_require__(18);
-	var metaBlock = __webpack_require__(27);
+	var Block = __webpack_require__(21);
+	var metaBlock = __webpack_require__(30);
 	var Player = __webpack_require__(2);
 	var Skeleton = __webpack_require__(15);
-	var Burningman = __webpack_require__(37);
-	var Shoggoth = __webpack_require__(28);
+	var Burningman = __webpack_require__(17);
+	var Shoggoth = __webpack_require__(31);
 	var Boneheap = __webpack_require__(16);
-	var Pigeon = __webpack_require__(30);
-	var Wizard = __webpack_require__(31);
+	var Pigeon = __webpack_require__(33);
+	var Wizard = __webpack_require__(34);
 	
 	var Zone = function (name, blueprint, metaBlueprint) {
 	  this.name = name;
@@ -1897,11 +2313,11 @@
 
 
 /***/ },
-/* 27 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
-	var metaBlocks = __webpack_require__(17);
+	var metaBlocks = __webpack_require__(20);
 	
 	var MetaBlock = function (index, x, y, types) {
 	  this.index = index;
@@ -1920,16 +2336,16 @@
 
 
 /***/ },
-/* 28 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
 	var Jumpman = __webpack_require__(5);
 	var Boneheap = __webpack_require__(16);
 	var Util = __webpack_require__(6);
-	var Sparks = __webpack_require__(29);
+	var Sparks = __webpack_require__(32);
 	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(17);
+	var metaBlocks = __webpack_require__(20);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
 	
@@ -2282,7 +2698,7 @@
 
 
 /***/ },
-/* 29 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -2407,7 +2823,7 @@
 
 
 /***/ },
-/* 30 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -2415,7 +2831,7 @@
 	var Boneheap = __webpack_require__(16);
 	var Util = __webpack_require__(6);
 	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(17);
+	var metaBlocks = __webpack_require__(20);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
 	
@@ -2558,7 +2974,7 @@
 	};
 	
 	Pigeon.prototype.transmogrify = function (kill) {
-	  var Wizard = __webpack_require__(31);
+	  var Wizard = __webpack_require__(34);
 	  var wizard = new Wizard (this.index, this.pos.x, this.pos.y, this.stats);
 	  movers[this.index] = wizard;
 	  if (kill) {
@@ -2583,7 +2999,7 @@
 
 
 /***/ },
-/* 31 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -2591,7 +3007,7 @@
 	var Boneheap = __webpack_require__(16);
 	var Util = __webpack_require__(6);
 	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(17);
+	var metaBlocks = __webpack_require__(20);
 	var players = __webpack_require__(11);
 	var movers = __webpack_require__(10);
 	
@@ -2832,7 +3248,7 @@
 	};
 	
 	Wizard.prototype.transmogrify = function () {
-	  var Pigeon = __webpack_require__(30);
+	  var Pigeon = __webpack_require__(33);
 	  movers[this.index] = new Pigeon (this.index, this.pos.x, this.pos.y, this.stats);
 	};
 	
@@ -2854,508 +3270,10 @@
 
 
 /***/ },
-/* 32 */,
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Tile = __webpack_require__(34);
-	
-	var Background = function (blueprint, spriteKey) {
-	  this.blueprint = blueprint;
-	  this.spriteKey = spriteKey;
-	};
-	
-	Background.prototype.build = function (tiles, depth) {
-	  this.blueprint.forEach(function (yLine, yIndex) {
-	    yLine.split("").forEach(function (square, xIndex) {
-	      if (this.spriteKey[square]) {
-	        tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square].sprite, this.spriteKey[square].depth) );
-	      }
-	    }.bind(this));
-	  }.bind(this));
-	};
-	
-	module.exports = Background;
-
-
-/***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	
-	var Tile = function (x, y, sprite, depth) {
-	  this.pos = {
-	    x: x,
-	    y: y
-	  };
-	  this.depth = depth;
-	  this.sprite = sprite;
-	};
-	
-	module.exports = Tile;
-
-
-/***/ },
-/* 35 */,
-/* 36 */,
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	var Jumpman = __webpack_require__(5);
-	var Boneheap = __webpack_require__(16);
-	var Skeleton = __webpack_require__(15);
-	var Pyre = __webpack_require__(38);
-	var Fireball = __webpack_require__(40);
-	var Util = __webpack_require__(6);
-	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(17);
-	var players = __webpack_require__(11);
-	var movers = __webpack_require__(10);
-	
-	var Burningman = function (index, x, y, stats) {
-	  this.type = "burningman";
-	  this.index = index;
-	  this.spriteSize = 48;
-	  this.age = 0;
-	  this.pos = {
-	    x: x,
-	    y: y
-	  };
-	  this.speed = {
-	    x: 0,
-	    y: 0
-	  };
-	  this.accel = {
-	    x: 0,
-	    y: Util.universals.gravity
-	  };
-	  this.facing = "right";
-	  this.spriteRoot = "burningman";
-	  this.setSprites(5);
-	  this.sprite = this.sprites.standing_right;
-	  this.fireballDelay = 16;
-	
-	  if (stats === undefined) {
-	    this.stats = {
-	      sightRange: Util.approximately(330),
-	      runSpeed: Util.approximately(4),
-	      jumpPower: Util.approximately(11),
-	      jumpDistance: 1,
-	      chasingSkill: 3,
-	      throwPower: Util.approximately(9)
-	    };
-	  } else {
-	    this.stats = stats;
-	  }
-	};
-	
-	Util.inherits(Burningman, Jumpman);
-	
-	Burningman.prototype.act = function () {
-	  this.checkForHammer();
-	  this.checkForPlayer();
-	  this.avoidRoomEdge();
-	  this.fireballDecision();
-	  this.jumpAtArcPeak();
-	  this.dodgeHammer();
-	  if (!this.pyre && !Math.floor(Math.random()*256) || this.age === 1) {
-	    this.ignite();
-	  }
-	  if (Util.distanceBetween(this.pos, players[0].pos) <= this.stats.sightRange) {
-	    if (Math.random()*32 <= this.stats.chasingSkill) {
-	      Util.xChase(this, players[0].pos, this.stats.runSpeed);
-	    }
-	  }
-	  this.checkForJumpBlock();
-	};
-	
-	Burningman.prototype.conjureFire = function () {
-	  if (this.pyre) {
-	    this.pyre.spriteAction = true;
-	    this.pyre.sprite = this.pyre.sprites.conjuring;
-	    this.pyre.sprite.addAnimationEndCallback(function () {
-	      this.pyre.spriteAction = false;
-	      this.throwFireball();
-	    }.bind(this));
-	  }
-	};
-	
-	Burningman.prototype.checkForHammer = function () {
-	  movers.forEach(function (mover) {
-	    if (mover.type === "hammer" &&
-	        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
-	        mover.soft <= 0) {
-	      mover.ricochet();
-	      mover.soft = 4;
-	      this.shatter();
-	    }
-	  }.bind(this));
-	};
-	
-	Burningman.prototype.checkForPlayer = function () {
-	  players.forEach(function (player) {
-	    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
-	      this.pos.x > player.pos.x-2 &&
-	      this.pos.y < player.pos.y+this.sprite.height+2 &&
-	      this.pos.y > player.pos.y-2
-	    ) {
-	      if (this.checkUnderFeet() && player.checkUnderFeet()) {
-	        // Attack the player, reverse your x speed if it's succesful
-	        if (player.skeletonBite()) {
-	          this.speed.x *= -1;
-	        }
-	      }
-	    }
-	  }.bind(this));
-	};
-	
-	Burningman.prototype.checkForJumpBlock = Skeleton.prototype.checkForJumpBlock;
-	
-	Burningman.prototype.dodgeHammer = function () {
-	  movers.forEach(function (mover) {
-	    if (mover.type === "hammer" &&
-	        Math.round(Math.random()*0.8) &&
-	        Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/9 &&
-	        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 ) {
-	      this.jump();
-	    }
-	  }.bind(this));
-	};
-	
-	Burningman.prototype.predictPos = function (mover, steps) {
-	  var predictX = mover.pos.x + mover.speed.x * steps;
-	  var predictY = mover.pos.y + mover.speed.y * steps;
-	  return {
-	    x: predictX,
-	    y: predictY
-	  };
-	};
-	
-	Burningman.prototype.fireballDecision = function () {
-	  if (Math.abs(this.predictPos(this, this.fireballDelay).y - this.predictPos(players[0], this.fireballDelay).y) < 48 &&
-	  Math.abs(this.predictPos(this, this.fireballDelay).x - this.predictPos(players[0], this.fireballDelay).x) < 48*8 &&
-	  (!Math.floor(Math.random()*48) || !this.checkUnderFeet())) {
-	    this.conjureFire();
-	  }
-	};
-	
-	Burningman.prototype.fireJump = function () {
-	  if (this.pyre) {
-	    this.pyre.spriteAction = true;
-	    this.pyre.sprite = this.pyre.sprites.jump_burst;
-	    this.pyre.sprite.addAnimationEndCallback(function () {
-	      this.pyre.spriteAction = false;
-	      this.actuallyJump();
-	    }.bind(this));
-	  }
-	};
-	
-	Burningman.prototype.ignite = function () {
-	  this.pyre = new Pyre (movers.length, this);
-	  this.stats.runSpeed = Math.abs(this.stats.runSpeed);
-	  movers.push(this.pyre);
-	};
-	
-	Burningman.prototype.actuallyJump = function () {
-	  this.speed.y = 0-this.stats.jumpPower;
-	  this.speed.x *= this.stats.jumpDistance;
-	};
-	
-	Burningman.prototype.jumpAtArcPeak = function () {
-	  if (!this.checkUnderFeet() &&
-	  Math.abs(this.speed.y) < 1 &&
-	  this.pos.y > players[0].pos.y-48*2) {
-	    this.jump();
-	  }
-	};
-	
-	Burningman.prototype.jump = function () {
-	  if (this.checkUnderFeet()) {
-	    this.actuallyJump();
-	  } else {
-	    this.fireJump();
-	  }
-	};
-	
-	Burningman.prototype.setExtraSprites = function () {
-	  this.sprites.rising = new Sprite (48, 48, 2, [
-	      "burningman/boneheap/collapsing/3.gif",
-	      "burningman/boneheap/collapsing/2.gif",
-	      "burningman/boneheap/collapsing/1.gif",
-	      "burningman/boneheap/collapsing/0.gif"
-	    ]
-	  );
-	};
-	
-	Burningman.prototype.shatter = function () {
-	  if (this.pyre) {
-	    this.pyre.destroy();
-	    this.pyre = null;
-	    this.stats.runSpeed *= -0.92;
-	  } else {
-	    movers[this.index] = new Boneheap (this.index, this.pos, this.stats, "burningman/boneheap");
-	  }
-	};
-	
-	Burningman.prototype.throwFireball = function () {
-	  if (this.pyre) {
-	    this.speed.x = 0;
-	    movers.push(new Fireball (movers.length, this.pos, this.facing ==="right" ? this.stats.throwPower : 0-this.stats.throwPower));
-	  }
-	};
-	
-	Burningman.prototype.wander = function () {
-	  if (!Math.floor(Math.random()*96)) {
-	    this.speed.x *= -1;
-	  }
-	};
-	
-	module.exports = Burningman;
-
-
-/***/ },
-/* 38 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(6);
-	var movers = __webpack_require__(10);
-	
-	var Pyre = function (index, source) {
-	  this.type = "pyre";
-	  this.index = index;
-	  this.pos = source.pos;
-	  this.source = source;
-	  this.setSprites();
-	  this.sprite = this.sprites.standing_right;
-	  this.spriteAction = false;
-	};
-	
-	Pyre.prototype.act = function () {
-	  if (!this.spriteAction) {
-	    this.sprite = this.sprites["standing_"+this.source.facing];
-	    if (this.source.speed.x !== 0) {
-	      this.sprite = this.sprites["running_"+this.source.facing];
-	    }
-	    if (this.source.speed.y !== 0) {
-	      this.sprite = this.sprites["jumping_"+this.source.facing];
-	    }
-	  }
-	};
-	
-	Pyre.prototype.destroy = function () {
-	  delete movers[this.index];
-	};
-	
-	Pyre.prototype.move = function () {
-	  this.pos = this.source.pos;
-	};
-	
-	Pyre.prototype.setSprites = function () {
-	  this.sprites = {
-	    running_right: new Sprite (48, 48, 2, [
-	        "burningman/rightPyre/running/0.gif",
-	        "burningman/rightPyre/running/1.gif",
-	        "burningman/rightPyre/running/2.gif",
-	        "burningman/rightPyre/running/3.gif"
-	      ]
-	    ),
-	    running_left: new Sprite (48, 48, 2, [
-	        "burningman/leftPyre/running/0.gif",
-	        "burningman/leftPyre/running/1.gif",
-	        "burningman/leftPyre/running/2.gif",
-	        "burningman/leftPyre/running/3.gif"
-	      ]
-	    ),
-	    jumping_right: new Sprite (48, 48, 2, [
-	        "burningman/rightPyre/jumping.gif"
-	      ]
-	    ),
-	    jumping_left: new Sprite (48, 48, 2, [
-	        "burningman/leftPyre/jumping.gif"
-	      ]
-	    ),
-	    standing_right: new Sprite (48, 48, 2, [
-	        "burningman/rightPyre/standing/0.gif",
-	        "burningman/rightPyre/standing/1.gif",
-	        "burningman/rightPyre/standing/2.gif"
-	      ]
-	    ),
-	    standing_left: new Sprite (48, 48, 2, [
-	        "burningman/leftPyre/standing/0.gif",
-	        "burningman/leftPyre/standing/1.gif",
-	        "burningman/leftPyre/standing/2.gif"
-	      ]
-	    ),
-	    jump_burst: new Sprite (48, 48, 1, [
-	        "burningman/jumpBurst/0.gif",
-	        "burningman/jumpBurst/1.gif",
-	        "burningman/jumpBurst/2.gif",
-	        "burningman/jumpBurst/3.gif",
-	        "burningman/jumpBurst/4.gif",
-	        "burningman/jumpBurst/5.gif"
-	      ]
-	    ),
-	    conjuring: new Sprite (48, 48, 4, [
-	        "burningman/flameBurst/0.gif",
-	        "burningman/flameBurst/1.gif",
-	        "burningman/flameBurst/2.gif",
-	        "burningman/flameBurst/3.gif"
-	      ]
-	    )
-	  };
-	};
-	
-	module.exports = Pyre;
-
-
-/***/ },
-/* 39 */,
-/* 40 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(6);
-	var Aura = __webpack_require__(9);
-	var blocks = __webpack_require__(7);
-	var movers = __webpack_require__(10);
-	var players = __webpack_require__(11);
-	
-	var Fireball = function (index, pos, xspeed) {
-	  this.type = "fireball";
-	  this.index = index;
-	  this.age = 0;
-	  this.spriteSize = 48;
-	  this.pos = Object.assign( {}, pos);
-	  this.pos.y = Math.round(this.pos.y/48) * 48;
-	  this.speed = {
-	    x: xspeed,
-	    y: 0
-	  };
-	  this.setSprites();
-	  this.age = 0;
-	};
-	
-	Fireball.prototype.act = function () {
-	  this.checkForPlayer();
-	  this.age ++;
-	  if (this.age > 64) {
-	    this.burst();
-	  }
-	};
-	
-	Fireball.prototype.burst = function () {
-	  this.sprite = this.sprites.pop;
-	  this.sprite.addAnimationEndCallback(function () {
-	    this.destroy();
-	  }.bind(this));
-	};
-	
-	Fireball.prototype.checkForPlayer = function () {
-	  players.forEach(function (player) {
-	    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
-	      this.pos.x > player.pos.x-2 &&
-	      this.pos.y < player.pos.y+this.sprite.height+2 &&
-	      this.pos.y > player.pos.y-2
-	    ) {
-	      player.fireballBite();
-	      this.burst();
-	    }
-	  }.bind(this));
-	};
-	
-	Fireball.prototype.destroy = function () {
-	  delete movers[this.index];
-	};
-	
-	Fireball.prototype.move = function () {
-	  this.pos.x += this.speed.x;
-	  this.pos.y += this.speed.y;
-	};
-	
-	Fireball.prototype.ricochet = function () {
-	  this.speed.x *= (-1);
-	  this.speed.y *= (-1);
-	};
-	
-	Fireball.prototype.setSprites = function () {
-	  this.sprites = {};
-	  this.sprites.leftSprite = new Sprite (48, 48, 1, [
-	      "burningman/fireball/left/0.gif",
-	      "burningman/fireball/left/1.gif",
-	      "burningman/fireball/left/2.gif",
-	      "burningman/fireball/left/3.gif",
-	      "burningman/fireball/left/4.gif",
-	      "burningman/fireball/left/5.gif",
-	      "burningman/fireball/left/6.gif"
-	    ]
-	  );
-	  this.sprites.rightSprite = new Sprite (48, 48, 1, [
-	      "burningman/fireball/right/0.gif",
-	      "burningman/fireball/right/1.gif",
-	      "burningman/fireball/right/2.gif",
-	      "burningman/fireball/right/3.gif",
-	      "burningman/fireball/right/4.gif",
-	      "burningman/fireball/right/5.gif",
-	      "burningman/fireball/right/6.gif"
-	    ]
-	  );
-	  this.sprites.pop = new Sprite (48, 48, 1, [
-	      "burningman/fireball/pop/0.gif",
-	      "burningman/fireball/pop/1.gif",
-	      "burningman/fireball/pop/2.gif",
-	      "burningman/fireball/pop/3.gif"
-	    ]
-	  );
-	  this.sprite = this.speed.x > 0 ? this.sprites.rightSprite : this.sprites.leftSprite;
-	};
-	
-	module.exports = Fireball;
-
-
-/***/ },
-/* 41 */,
-/* 42 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Background = __webpack_require__(33);
-	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(6);
-	
-	var junctionLamps = new Background ([
-	  "                                              ",
-	  "                                              ",
-	  "  *         *         *         *         *   ",
-	  "   O         O         O         O         O  ",
-	  "   I         I         I         I         I  ",
-	  "   I         I         I         I         I  ",
-	  "   I         I         I         I         I  ",
-	  "   A         A         A         A         A  ",
-	  "                                              ",
-	  "                                              ",
-	  "                                              "
-	],
-	{
-	  "I": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_stalk.gif"]),
-	        depth: 2},
-	  "A": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_base.gif"]),
-	        depth: 2},
-	  "O": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_head.gif"]),
-	        depth: 2},
-	  "*": {sprite: new Sprite (144, 144, 0, ["tile/lamppost_halo.gif"]),
-	        depth: 2}
-	});
-	
-	module.exports = junctionLamps;
-
-
-/***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Background = __webpack_require__(33);
+	var Background = __webpack_require__(36);
 	var Sprite = __webpack_require__(3);
 	
 	var throopBricks = new Background ([
@@ -3379,6 +3297,83 @@
 	});
 	
 	module.exports = throopBricks;
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Tile = __webpack_require__(37);
+	
+	var Background = function (blueprint, spriteKey) {
+	  this.blueprint = blueprint;
+	  this.spriteKey = spriteKey;
+	};
+	
+	Background.prototype.build = function (tiles, depth) {
+	  this.blueprint.forEach(function (yLine, yIndex) {
+	    yLine.split("").forEach(function (square, xIndex) {
+	      if (this.spriteKey[square]) {
+	        tiles.push( new Tile (xIndex*48, yIndex*48, this.spriteKey[square].sprite, this.spriteKey[square].depth) );
+	      }
+	    }.bind(this));
+	  }.bind(this));
+	};
+	
+	module.exports = Background;
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	
+	var Tile = function (x, y, sprite, depth) {
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.depth = depth;
+	  this.sprite = sprite;
+	};
+	
+	module.exports = Tile;
+
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(36);
+	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(6);
+	
+	var junctionLamps = new Background ([
+	  "                                              ",
+	  "                                              ",
+	  "                                              ",
+	  "  *         *         *         *         *   ",
+	  "   O         O         O         O         O  ",
+	  "   I         I         I         I         I  ",
+	  "   I         I         I         I         I  ",
+	  "   A         A         A         A         A  ",
+	  "                                              ",
+	  "                                              ",
+	  "                                              "
+	],
+	{
+	  "I": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_stalk.gif"]),
+	        depth: 2},
+	  "A": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_base.gif"]),
+	        depth: 2},
+	  "O": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_head.gif"]),
+	        depth: 2},
+	  "*": {sprite: new Sprite (144, 144, 0, ["tile/lamppost_halo.gif"]),
+	        depth: 2},
+	});
+	
+	module.exports = junctionLamps;
 
 
 /***/ }
