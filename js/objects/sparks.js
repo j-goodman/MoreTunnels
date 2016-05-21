@@ -16,7 +16,7 @@ var Sparks = function (index, pos, shoggoth) {
     y: 0
   };
   this.accel = {
-    x: this.shoggoth.facing === "left" ? -0.18 : 0.18,
+    x: this.shoggoth.facing === "left" ? -0.17 : 0.17,
     y: 1
   };
   this.setSprites();

@@ -15,7 +15,10 @@ var Sprite = function (width, height, frameDelay, sourcePathArray) {
 Sprite.prototype.frame = 0;
 
 Sprite.prototype.addAnimationEndCallback = function (callback) {
-  this.endCallback = callback;
+  this.endCallback = function () {
+    callback();
+    this.endCallback = null;
+  }.bind(this);
 };
 
 Sprite.prototype.animate = function () {
@@ -37,26 +40,30 @@ Sprite.prototype.animate = function () {
 };
 
 Sprite.prototype.draw = function (ctx, pos, viewAnchor) {
-  ctx.drawImage(
-    this.frames[this.frame],
-    pos.x-viewAnchor.x,
-    pos.y-viewAnchor.y,
-    this.width,
-    this.height
-  );
-  this.animate();
+  if (ctx) {
+    ctx.drawImage(
+      this.frames[this.frame],
+      pos.x-viewAnchor.x,
+      pos.y-viewAnchor.y,
+      this.width,
+      this.height
+    );
+    this.animate();
+  }
 };
 
 Sprite.prototype.depthDraw = function (ctx, pos, viewAnchor, depthFactor) {
   //The depth factor should be a multiple of 0.5 between 1.5 and 5
-  ctx.drawImage(
-    this.frames[this.frame],
-    pos.x-(viewAnchor.x/depthFactor),
-    pos.y-(viewAnchor.y/depthFactor),
-    this.width,
-    this.height
-  );
-  this.animate();
+  if (ctx) {
+    ctx.drawImage(
+      this.frames[this.frame],
+      pos.x-(viewAnchor.x/depthFactor),
+      pos.y-(viewAnchor.y/depthFactor),
+      this.width,
+      this.height
+    );
+    this.animate();
+  }
 };
 
 module.exports = Sprite;

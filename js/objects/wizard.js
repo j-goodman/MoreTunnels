@@ -178,11 +178,13 @@ Wizard.prototype.act = function () {
 Wizard.prototype.dodgeHammer = function () {
   movers.forEach(function (mover) {
     if (mover.type === "hammer" &&
-        Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/24 &&
-        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 &&
-        !Math.floor(Math.random()*2)) {
+    Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/24 &&
+    Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 &&
+    !Math.round(Math.random())) {
       this.lowJump();
-      this.turnIntoABird();
+      if (!Math.round(Math.random())) {
+        this.turnIntoABird();
+      }
     }
   }.bind(this));
   if (Util.distanceBetween(this.pos, players[0].pos) > this.stats.sightRange/24 &&

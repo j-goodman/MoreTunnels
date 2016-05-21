@@ -54,6 +54,7 @@ Burningman.prototype.act = function () {
   this.checkForPlayer();
   this.avoidRoomEdge();
   this.fireballDecision();
+  this.jumpAtArcPeak();
   this.dodgeHammer();
   if (!this.pyre && !Math.floor(Math.random()*256) || this.age === 1) {
     this.ignite();
@@ -131,7 +132,7 @@ Burningman.prototype.predictPos = function (mover, steps) {
 Burningman.prototype.fireballDecision = function () {
   if (Math.abs(this.predictPos(this, this.fireballDelay).y - this.predictPos(players[0], this.fireballDelay).y) < 48 &&
   Math.abs(this.predictPos(this, this.fireballDelay).x - this.predictPos(players[0], this.fireballDelay).x) < 48*8 &&
-  (!Math.floor(Math.random()*96) || !this.checkUnderFeet())) {
+  (!Math.floor(Math.random()*48) || !this.checkUnderFeet())) {
     this.conjureFire();
   }
 };

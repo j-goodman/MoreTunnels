@@ -94,7 +94,7 @@
 	  };
 	
 	  Game.buildZone = function () {
-	    var zone = __webpack_require__(25);
+	    var zone = __webpack_require__(39);
 	    this.zone = zone;
 	
 	    var callback = function () {
@@ -478,7 +478,10 @@
 	Sprite.prototype.frame = 0;
 	
 	Sprite.prototype.addAnimationEndCallback = function (callback) {
-	  this.endCallback = callback;
+	  this.endCallback = function () {
+	    callback();
+	    this.endCallback = null;
+	  }.bind(this);
 	};
 	
 	Sprite.prototype.animate = function () {
@@ -500,26 +503,30 @@
 	};
 	
 	Sprite.prototype.draw = function (ctx, pos, viewAnchor) {
-	  ctx.drawImage(
-	    this.frames[this.frame],
-	    pos.x-viewAnchor.x,
-	    pos.y-viewAnchor.y,
-	    this.width,
-	    this.height
-	  );
-	  this.animate();
+	  if (ctx) {
+	    ctx.drawImage(
+	      this.frames[this.frame],
+	      pos.x-viewAnchor.x,
+	      pos.y-viewAnchor.y,
+	      this.width,
+	      this.height
+	    );
+	    this.animate();
+	  }
 	};
 	
 	Sprite.prototype.depthDraw = function (ctx, pos, viewAnchor, depthFactor) {
 	  //The depth factor should be a multiple of 0.5 between 1.5 and 5
-	  ctx.drawImage(
-	    this.frames[this.frame],
-	    pos.x-(viewAnchor.x/depthFactor),
-	    pos.y-(viewAnchor.y/depthFactor),
-	    this.width,
-	    this.height
-	  );
-	  this.animate();
+	  if (ctx) {
+	    ctx.drawImage(
+	      this.frames[this.frame],
+	      pos.x-(viewAnchor.x/depthFactor),
+	      pos.y-(viewAnchor.y/depthFactor),
+	      this.width,
+	      this.height
+	    );
+	    this.animate();
+	  }
 	};
 	
 	module.exports = Sprite;
@@ -1421,7 +1428,9 @@
 	  if (this.spriteRoot === "boneheap") {
 	    movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y, this.stats));
 	  } else if (this.spriteRoot === "burningman/boneheap") {
-	    movers[this.index] = (new Burningman (this.index, this.pos.x, this.pos.y, this.stats));
+	    var newBurner = (new Burningman (this.index, this.pos.x, this.pos.y, this.stats));
+	    movers[this.index] = newBurner;
+	    newBurner.age = 2;
 	  }
 	};
 	
@@ -1773,43 +1782,7 @@
 
 
 /***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Zone = __webpack_require__(26);
-	
-	var throop = new Zone ("Throop", [
-	  "---------------------------------------------------------------------------",
-	  "----------*---------------------------------------------------#!-----------",
-	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
-	  "---------------------------------------------------------------------------",
-	  "-----------------------------------------------*-#?-----#!-----------------",
-	  "-----------------FTTTF-------------------1-----FTTTTTTTTTTF----------------",
-	  "---------------------------------------------------------------------------",
-	  "¡#-!#-?#--!#----------------------------------------------#?--#!-----------",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	],[
-	  "---------------------------------------------------------------------------",
-	  "---------#*#--------------------------------------------------#!*----------",
-	  "----------FTTF-----------FTF-----------------FTTTF-----------FTTF----------",
-	  "---------------------------------------------------------------------------",
-	  "---------------{----}*--------------------------{#!{----#!}----------------",
-	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
-	  "---------------------------------------------------------------------------",
-	  "-!#-!#--!#---}--}----{--{-------------------}--}-------{----{#!-------#!---",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	]
-	);
-	
-	throop.trainY = 8*48;
-	module.exports = throop;
-
-
-/***/ },
+/* 25 */,
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2256,15 +2229,13 @@
 	      !mover.soft
 	    ) {
 	      if (Util.distanceBetween(this.spriteCenter(), mover.pos) < this.stats.shieldRange && !mover.soft) {
-	        mover.soft = 8;
+	        mover.soft = 21;
 	        mover.ricochet();
 	        mover.speed.x *= 0.8;
 	        mover.speed.y -= 24;
 	        mover.speed.y *= 1.6;
 	      }
-	      if (
-	      Util.distanceBetween(this.spriteCenter(), mover.pos) < this.stats.shieldRange * 1.5
-	      ) {
+	      if (Util.distanceBetween(this.spriteCenter(), mover.pos) < this.stats.shieldRange * 1.5) {
 	        this.drawBeamToHammer(mover);
 	      }
 	    }
@@ -2296,7 +2267,7 @@
 	    y: 0
 	  };
 	  this.accel = {
-	    x: this.shoggoth.facing === "left" ? -0.18 : 0.18,
+	    x: this.shoggoth.facing === "left" ? -0.17 : 0.17,
 	    y: 1
 	  };
 	  this.setSprites();
@@ -2759,11 +2730,13 @@
 	Wizard.prototype.dodgeHammer = function () {
 	  movers.forEach(function (mover) {
 	    if (mover.type === "hammer" &&
-	        Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/24 &&
-	        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 &&
-	        !Math.floor(Math.random()*2)) {
+	    Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/24 &&
+	    Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/2 &&
+	    !Math.round(Math.random())) {
 	      this.lowJump();
-	      this.turnIntoABird();
+	      if (!Math.round(Math.random())) {
+	        this.turnIntoABird();
+	      }
 	    }
 	  }.bind(this));
 	  if (Util.distanceBetween(this.pos, players[0].pos) > this.stats.sightRange/24 &&
@@ -3013,6 +2986,7 @@
 	  this.checkForPlayer();
 	  this.avoidRoomEdge();
 	  this.fireballDecision();
+	  this.jumpAtArcPeak();
 	  this.dodgeHammer();
 	  if (!this.pyre && !Math.floor(Math.random()*256) || this.age === 1) {
 	    this.ignite();
@@ -3090,7 +3064,7 @@
 	Burningman.prototype.fireballDecision = function () {
 	  if (Math.abs(this.predictPos(this, this.fireballDelay).y - this.predictPos(players[0], this.fireballDelay).y) < 48 &&
 	  Math.abs(this.predictPos(this, this.fireballDelay).x - this.predictPos(players[0], this.fireballDelay).x) < 48*8 &&
-	  (!Math.floor(Math.random()*96) || !this.checkUnderFeet())) {
+	  (!Math.floor(Math.random()*48) || !this.checkUnderFeet())) {
 	    this.conjureFire();
 	  }
 	};
@@ -3232,11 +3206,15 @@
 	      ]
 	    ),
 	    standing_right: new Sprite (48, 48, 2, [
-	        "burningman/rightPyre/standing.gif"
+	        "burningman/rightPyre/standing/0.gif",
+	        "burningman/rightPyre/standing/1.gif",
+	        "burningman/rightPyre/standing/2.gif"
 	      ]
 	    ),
 	    standing_left: new Sprite (48, 48, 2, [
-	        "burningman/leftPyre/standing.gif"
+	        "burningman/leftPyre/standing/0.gif",
+	        "burningman/leftPyre/standing/1.gif",
+	        "burningman/leftPyre/standing/2.gif"
 	      ]
 	    ),
 	    jump_burst: new Sprite (48, 48, 1, [
@@ -3262,7 +3240,42 @@
 
 
 /***/ },
-/* 39 */,
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(26);
+	
+	var burningMan = new Zone ( "burningMan", [
+	  "--------------------------------------------------------",
+	  "-----------*--------------------------------------------",
+	  "-----------FTTTTTF--------FTTTF--------FTTTTTF----------",
+	  "---------------------F-------------F--------------------",
+	  "---!----------------------------------------------*-----",
+	  "---FTF------FF------------FTTTF-----------FF------FTF---",
+	  "--------------------------------------------------------",
+	  "----------------!-----1-----¡--------------!-¡----------",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "--------------------------------------------------------",
+	  "-----------------}--------{---}--------{----------------",
+	  "-----------FTTTTTF--{}----FTTTF----{}--FTTTTTF----------",
+	  "---------------------F-------------F--------------------",
+	  "-----}-------}------------{---}-----------{-------{-----",
+	  "---FTF------FF------------FTTTF-----------FF------FTF---",
+	  "--------------------------------------------------------",
+	  "-}----{-{}------{-------}-----{--{------}-----{-}-----{-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = burningMan;
+
+
+/***/ },
 /* 40 */
 /***/ function(module, exports, __webpack_require__) {
 

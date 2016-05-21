@@ -69,7 +69,9 @@ Boneheap.prototype.reanimate = function () {
   if (this.spriteRoot === "boneheap") {
     movers[this.index] = (new Skeleton (this.index, this.pos.x, this.pos.y, this.stats));
   } else if (this.spriteRoot === "burningman/boneheap") {
-    movers[this.index] = (new Burningman (this.index, this.pos.x, this.pos.y, this.stats));
+    var newBurner = (new Burningman (this.index, this.pos.x, this.pos.y, this.stats));
+    movers[this.index] = newBurner;
+    newBurner.age = 2;
   }
 };
 

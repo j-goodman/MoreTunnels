@@ -57,11 +57,15 @@ Pyre.prototype.setSprites = function () {
       ]
     ),
     standing_right: new Sprite (48, 48, 2, [
-        "burningman/rightPyre/standing.gif"
+        "burningman/rightPyre/standing/0.gif",
+        "burningman/rightPyre/standing/1.gif",
+        "burningman/rightPyre/standing/2.gif"
       ]
     ),
     standing_left: new Sprite (48, 48, 2, [
-        "burningman/leftPyre/standing.gif"
+        "burningman/leftPyre/standing/0.gif",
+        "burningman/leftPyre/standing/1.gif",
+        "burningman/leftPyre/standing/2.gif"
       ]
     ),
     jump_burst: new Sprite (48, 48, 1, [

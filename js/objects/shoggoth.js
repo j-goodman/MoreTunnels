@@ -340,15 +340,13 @@ Shoggoth.prototype.watchForHammer = function () {
       !mover.soft
     ) {
       if (Util.distanceBetween(this.spriteCenter(), mover.pos) < this.stats.shieldRange && !mover.soft) {
-        mover.soft = 8;
+        mover.soft = 21;
         mover.ricochet();
         mover.speed.x *= 0.8;
         mover.speed.y -= 24;
         mover.speed.y *= 1.6;
       }
-      if (
-      Util.distanceBetween(this.spriteCenter(), mover.pos) < this.stats.shieldRange * 1.5
-      ) {
+      if (Util.distanceBetween(this.spriteCenter(), mover.pos) < this.stats.shieldRange * 1.5) {
         this.drawBeamToHammer(mover);
       }
     }

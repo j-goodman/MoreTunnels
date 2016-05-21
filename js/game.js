@@ -48,7 +48,7 @@ Window.newGame = function () {
   };
 
   Game.buildZone = function () {
-    var zone = require('./zones/throop.js');
+    var zone = require('./zones/burningMan.js');
     this.zone = zone;
 
     var callback = function () {
