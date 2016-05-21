@@ -94,7 +94,7 @@
 	  };
 	
 	  Game.buildZone = function () {
-	    var zone = __webpack_require__(39);
+	    var zone = __webpack_require__(25);
 	    this.zone = zone;
 	
 	    var callback = function () {
@@ -1782,7 +1782,43 @@
 
 
 /***/ },
-/* 25 */,
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(26);
+	
+	var throop = new Zone ("Throop", [
+	  "---------------------------------------------------------------------------",
+	  "----------*---------------------------------------------------#!-----------",
+	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
+	  "---------------------------------------------------------------------------",
+	  "-----------------------------------------------*-#?-----#!-----------------",
+	  "-----------------FTTTF-------------------1-----FTTTTTTTTTTF----------------",
+	  "---------------------------------------------------------------------------",
+	  "¡#-!#-?#--!#----------------------------------------------#?--#!-----------",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "---------------------------------------------------------------------------",
+	  "---------#*#--------------------------------------------------#!*----------",
+	  "----------FTTF-----------FTF-----------------FTTTF-----------FTTF----------",
+	  "---------------------------------------------------------------------------",
+	  "---------------{----}*--------------------------{#!{----#!}----------------",
+	  "-----------------FTTTF----1--------------------FTTTTTTTTTTF----------------",
+	  "---------------------------------------------------------------------------",
+	  "-!#-!#--!#---}--}----{--{-------------------}--}-------{----{#!-------#!---",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	throop.trainY = 8*48;
+	module.exports = throop;
+
+
+/***/ },
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -3240,42 +3276,7 @@
 
 
 /***/ },
-/* 39 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Zone = __webpack_require__(26);
-	
-	var burningMan = new Zone ( "burningMan", [
-	  "--------------------------------------------------------",
-	  "-----------*--------------------------------------------",
-	  "-----------FTTTTTF--------FTTTF--------FTTTTTF----------",
-	  "---------------------F-------------F--------------------",
-	  "---!----------------------------------------------*-----",
-	  "---FTF------FF------------FTTTF-----------FF------FTF---",
-	  "--------------------------------------------------------",
-	  "----------------!-----1-----¡--------------!-¡----------",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	],[
-	  "--------------------------------------------------------",
-	  "-----------------}--------{---}--------{----------------",
-	  "-----------FTTTTTF--{}----FTTTF----{}--FTTTTTF----------",
-	  "---------------------F-------------F--------------------",
-	  "-----}-------}------------{---}-----------{-------{-----",
-	  "---FTF------FF------------FTTTF-----------FF------FTF---",
-	  "--------------------------------------------------------",
-	  "-}----{-{}------{-------}-----{--{------}-----{-}-----{-",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	]
-	);
-	
-	module.exports = burningMan;
-
-
-/***/ },
+/* 39 */,
 /* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
