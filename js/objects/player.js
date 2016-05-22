@@ -36,7 +36,7 @@ var Player = function (index, x, y) {
   this.stats = {
     runSpeed: 6,
     jumpPower: 17,
-    throwPower: 24,
+    throwPower: 1,
     maxHealth: 8
   };
 
@@ -202,7 +202,7 @@ Player.prototype.setExtraSprites = function () {
 
 Player.prototype.throwHammer = function () {
   if (this.hammerCount() === 0 && !this.dead) {
-    movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, (this.facing === "right" ? this.speed.x + this.stats.throwPower : this.speed.x - this.stats.throwPower), this.speed.y));
+    movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, this.speed.x, this.speed.y, (this.facing === "right" ? this.stats.throwPower : -this.stats.throwPower)));
   }
 };
 
