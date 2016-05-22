@@ -201,7 +201,7 @@ Player.prototype.setExtraSprites = function () {
 };
 
 Player.prototype.throwHammer = function () {
-  if (this.hammerCount() === 0) {
+  if (this.hammerCount() === 0 && !this.dead) {
     movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, this.speed.x, this.speed.y, (this.facing === "right" ? this.stats.throwPower : -this.stats.throwPower)));
   }
 };
