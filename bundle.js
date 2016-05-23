@@ -216,6 +216,7 @@
 	        });
 	      break;
 	      case 2:
+	        this.players[0].hasHammer = true;
 	        this.playRound({
 	          name: "Broadway Junction",
 	          // Level Two, the player fights two shoggoths and some skeletons.
@@ -2297,6 +2298,8 @@
 		"./background.js": 29,
 		"./backgrounds/junctionBricks": 31,
 		"./backgrounds/junctionBricks.js": 31,
+		"./backgrounds/junctionLamps": 32,
+		"./backgrounds/junctionLamps.js": 32,
 		"./backgrounds/throopBricks": 33,
 		"./backgrounds/throopBricks.js": 33,
 		"./backgrounds/throopPillars": 34,
@@ -2475,7 +2478,46 @@
 
 
 /***/ },
-/* 32 */,
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(29);
+	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(6);
+	
+	var junctionLamps = new Background ([
+	  "                                              ",
+	  "                                              ",
+	  "                                              ",
+	  "  *         *         *         *         *   ",
+	  "   O         O         O         O         O  ",
+	  "   I         I         I         I         I  ",
+	  "   I         I        BI         I         I  ",
+	  "   A         A         A         A         A  ",
+	  "tttAtttttttttAtttttttttAtttttttttAtttttttttAtt",
+	  "                                              ",
+	  "                                              ",
+	  "                                              "
+	],
+	{
+	  "I": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_stalk.gif"]),
+	        depth: 2},
+	  "A": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_base.gif"]),
+	        depth: 2},
+	  "O": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_head.gif"]),
+	        depth: 2},
+	  "t": {sprite: new Sprite (48, 48, 0, ["tile/blue_railing.gif"]),
+	        depth: 2},
+	  "*": {sprite: new Sprite (144, 144, 0, ["tile/lamppost_halo.gif"]),
+	        depth: 2},
+	  "B": {sprite: new Sprite (192, 96, 0, ["tile/sign_bjunction.gif"]),
+	        depth: 4}
+	});
+	
+	module.exports = junctionLamps;
+
+
+/***/ },
 /* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -3859,13 +3901,13 @@
 	
 	var throop = new Zone ("Throop", [
 	  "---------------------------------------------------------------------------",
-	  "----------*---------------------------------------------------#!-----------",
+	  "----------*---------------------------------------------------#L-----------",
 	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
 	  "---------------------------------------------------------------------------",
-	  "-----------------------------------------------*-#?-----#!-----------------",
+	  "-----------------------------------------------*-#?-----#L-----------------",
 	  "-----------------FTTTF-------------------1-----FTTTTTTTTTTF----------------",
 	  "---------------------------------------------------------------------------",
-	  "¡#-!#-?#--!#----------------------------------------------#?--#!-----------",
+	  "¡#-L#-?#--L#----------------------------------------------#?--#L-----------",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"

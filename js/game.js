@@ -170,6 +170,7 @@ Window.newGame = function () {
         });
       break;
       case 2:
+        this.players[0].hasHammer = true;
         this.playRound({
           name: "Broadway Junction",
           // Level Two, the player fights two shoggoths and some skeletons.
