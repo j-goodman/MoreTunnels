@@ -202,6 +202,7 @@
 	      this.trains = [];
 	      players[0].invisible = false;
 	      players[0].onSubway = false;
+	      players[0].speed = {x: 0, y: 0};
 	    }.bind(this);
 	
 	    switch (Util.level) {
