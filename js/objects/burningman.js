@@ -203,8 +203,11 @@ Burningman.prototype.throwFireball = function () {
 };
 
 Burningman.prototype.wander = function () {
-  if (!Math.floor(Math.random()*96)) {
-    this.speed.x *= -1;
+  if (!Math.floor(Math.random()*96) &&
+  this.pos.x > Util.universals.roomBottomRight.x/2) {
+    this.speed.x = 0-this.runSpeed;
+  } else {
+    this.speed.x = this.runSpeed;
   }
 };
 

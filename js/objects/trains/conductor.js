@@ -30,11 +30,18 @@ Conductor.prototype.manageTrains = function () {
 };
 
 Conductor.prototype.departTrains = function () {
-  this.trains.forEach(function (train) {
-    if (train.doors) {
-      train.doors.close();
+  var departed = false;
+  for (var o = 0; o < this.trains.length; o++) {
+    if (this.trains[o].doors) {
+      this.trains[o].doors.close();
     }
-  });
+    if (!departed) {
+      departed = true;
+      setTimeout(function () {
+        Util.nextLevel();
+      }, 4800);
+    }
+  }
 };
 
 module.exports = Conductor;

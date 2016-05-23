@@ -93,9 +93,11 @@
 	    }.bind(this);
 	  };
 	
-	  Game.buildZone = function () {
-	    var zone = __webpack_require__(28);
+	  Game.buildZone = function (zoneObject) {
+	    var zone = __webpack_require__(41)(zoneObject.address);
 	    this.zone = zone;
+	
+	    this.setView();
 	
 	    var callback = function () {
 	      this.setupKeyControls();
@@ -103,10 +105,10 @@
 	
 	    this.zone.build(this.blocks, this.movers, this.players, this.metaBlocks, callback);
 	
-	    var backgroundBricks = __webpack_require__(35);
+	    var backgroundBricks = __webpack_require__(41)(zoneObject.backgroundA);
 	    backgroundBricks.build(tiles);
 	
-	    var backgroundPillars = __webpack_require__(38);
+	    var backgroundPillars = __webpack_require__(41)(zoneObject.backgroundB);
 	    backgroundPillars.build(tiles, 2);
 	    backgroundPillars.build(tiles, 3);
 	  };
@@ -122,71 +124,113 @@
 	    Util.universals.roomBottomRight = {x: 48*(this.zone.blueprint[0].length-1), y: 48*this.zone.blueprint.length};
 	  };
 	
-	  Game.playGame = function () {
-	    setInterval(function () {
-	      var ctx = this.ctx;
-	      if (ctx) {
-	        this.ctx.fillStyle = "black";
-	        this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+	  Game.playRound = function (zoneObject) {
+	    if (zoneObject) {
+	      console.log("START LEVEL: " + zoneObject.name);
+	      Game.buildZone(zoneObject);
+	      if (this.interval) {
+	        clearInterval(this.interval);
 	      }
-	
-	      this.tiles.forEach(function(tile, idx) {
-	        tile.sprite.depthDraw(this.ctx, tile.pos, this.view.topLeftPos, tile.depth);
-	      }.bind(this));
-	
-	
-	      var conductor = new this.Conductor (this.zone);
-	      conductor.manageTrains();
-	
-	      this.blocks.forEach(function(block){
-	        block.sprite.draw(this.ctx, block.pos, this.view.topLeftPos);
-	      }.bind(this));
-	
-	      for (var i = 0; i <= this.trains.length; i++) {
-	        var train = this.trains[i];
-	        if (train) {
-	          train.sprite.draw(this.ctx, train.pos, this.view.topLeftPos);
+	      this.interval = setInterval(function () {
+	        var ctx = this.ctx;
+	        if (ctx) {
+	          this.ctx.fillStyle = "black";
+	          this.ctx.fillRect(0, 0, canvas.width, canvas.height);
 	        }
-	      }
 	
-	      for (var j = this.movers.length-1; j >= 0; j--) {
-	        var mover = this.movers[j];
-	        if (mover) {
-	          mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
+	        this.tiles.forEach(function(tile, idx) {
+	          tile.sprite.depthDraw(this.ctx, tile.pos, this.view.topLeftPos, tile.depth);
+	        }.bind(this));
+	
+	        var conductor = new this.Conductor (this.zone);
+	        conductor.manageTrains();
+	
+	        this.blocks.forEach(function(block){
+	          block.sprite.draw(this.ctx, block.pos, this.view.topLeftPos);
+	        }.bind(this));
+	
+	        for (var i = 0; i <= this.trains.length; i++) {
+	          var train = this.trains[i];
+	          if (train) {
+	            train.sprite.draw(this.ctx, train.pos, this.view.topLeftPos);
+	          }
 	        }
-	      }
 	
-	      this.overlays.forEach(function(overlay, idx) {
-	        overlay.sprite.depthDraw(this.ctx, overlay.pos, this.view.topLeftPos, overlay.depth);
-	        if (overlay.virtual) {
-	          delete this.overlays[idx];
+	        for (var j = this.movers.length-1; j >= 0; j--) {
+	          var mover = this.movers[j];
+	          if (mover) {
+	            mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
+	          }
 	        }
-	      }.bind(this));
 	
-	      if (this.ctx) {
-	        this.players[0].sprite.draw(this.ctx, players[0].pos, this.view.topLeftPos);
+	        this.overlays.forEach(function(overlay, idx) {
+	          overlay.sprite.depthDraw(this.ctx, overlay.pos, this.view.topLeftPos, overlay.depth);
+	          if (overlay.virtual) {
+	            delete this.overlays[idx];
+	          }
+	        }.bind(this));
+	
+	        if (this.ctx) {
+	          this.players[0].sprite.draw(this.ctx, players[0].pos, this.view.topLeftPos);
+	        }
+	
+	        this.players[0].move();
+	
+	        this.movers.forEach(function(mover){
+	          mover.move();
+	          mover.act();
+	        });
+	
+	        this.trains.forEach(function(train){
+	          train.move();
+	          train.act();
+	        });
+	
+	        this.view.recenter(players[0].pos);
+	      }.bind(this), 32);
+	    }
+	  };
+	
+	  Game.playGame = function (level) {
+	    this.Util.nextLevel = function () {
+	      if (Util.level) {
+	        Util.level ++;
+	      } else {
+	        Util.level = 1;
 	      }
+	      this.playGame(Util.level);
+	      this.trains = [];
+	      players[0].invisible = false;
+	      players[0].onSubway = false;
+	    }.bind(this);
 	
-	      this.players[0].move();
-	
-	      this.movers.forEach(function(mover){
-	        mover.move();
-	        mover.act();
-	      });
-	
-	      this.trains.forEach(function(train){
-	        train.move();
-	        train.act();
-	      });
-	
-	      this.view.recenter(players[0].pos);
-	    }.bind(this), 32);
+	    switch (Util.level) {
+	      case 1:
+	        this.playRound({
+	          name: "Kingston-Throop",
+	          // Level One, the player fights wizards, skeletons, and one burningman.
+	          address: './zones/throop.js',
+	          backgroundA: './backgrounds/throopBricks.js',
+	          backgroundB: './backgrounds/throopPillars.js'
+	        });
+	      break;
+	      case 2:
+	        this.playRound({
+	          name: "Broadway Junction",
+	          // Level Two, the player fights two shoggoths and some skeletons.
+	          address: './zones/junction.js',
+	          backgroundA: './backgrounds/junctionBricks.js',
+	          backgroundB: './backgrounds/junctionLamps.js'
+	        });
+	        if (this.players.length > 1) {
+	          this.players.shift();
+	        }
+	      break;
+	    }
 	  };
 	
 	  Game.startUpCanvas();
-	  Game.buildZone();
-	  Game.setView();
-	  Game.playGame();
+	  Game.playGame(1);
 	};
 	
 	Window.newGame();
@@ -428,7 +472,7 @@
 	};
 	
 	Player.prototype.throwHammer = function () {
-	  if (this.hammerCount() === 0) {
+	  if (this.hammerCount() === 0 && !this.dead) {
 	    movers.push(new Hammer (movers.length, this.pos.x, this.pos.y, this.speed.x, this.speed.y, (this.facing === "right" ? this.stats.throwPower : -this.stats.throwPower)));
 	  }
 	};
@@ -772,6 +816,8 @@
 	  return sum/this.length;
 	};
 	
+	Util.level = 1;
+	
 	Util.inherits = function (ChildClass, BaseClass) {
 	  function Surrogate() { this.constructor = ChildClass; }
 	  Surrogate.prototype = BaseClass.prototype;
@@ -861,6 +907,8 @@
 	  };
 	};
 	
+	// Util.nextLevel is defined in game.js
+	
 	Util.typeCount = function (type, array) {
 	  var increment = 0;
 	  array.forEach(function (mover) {
@@ -912,9 +960,9 @@
 	  this.FUDGE = 5;
 	  this.MAXSPEED = 30;
 	  this.DECAY = 0.1;
-	  this.BASESPEED = 24;
+	  this.BASESPEED = 22;
 	
-	  this.attraction = 1.8;
+	  this.attraction = 1.5;
 	  this.spriteSize = 48;
 	
 	  this.pos = {
@@ -1027,8 +1075,8 @@
 	};
 	
 	Hammer.prototype.ricochet = function () {
-	  this.speed.x *= (-0.7);
-	  this.speed.y *= (-0.7);
+	  this.speed.x *= (-0.9);
+	  this.speed.y *= (-0.9);
 	};
 	
 	Hammer.prototype.setSprites = function () {
@@ -1675,8 +1723,11 @@
 	};
 	
 	Burningman.prototype.wander = function () {
-	  if (!Math.floor(Math.random()*96)) {
-	    this.speed.x *= -1;
+	  if (!Math.floor(Math.random()*96) &&
+	  this.pos.x > Util.universals.roomBottomRight.x/2) {
+	    this.speed.x = 0-this.runSpeed;
+	  } else {
+	    this.speed.x = this.runSpeed;
 	  }
 	};
 	
@@ -1936,7 +1987,6 @@
 	
 	View.prototype.recenter = function (centerPos) {
 	  this.topLeftPos.x = centerPos.x-this.width/2;
-	  this.topLeftPos.y = centerPos.y-this.height/2;
 	  if (this.topLeftPos.x+this.width > this.maxX) {
 	    this.topLeftPos.x = this.maxX-this.width;
 	  }
@@ -2049,11 +2099,18 @@
 	};
 	
 	Conductor.prototype.departTrains = function () {
-	  this.trains.forEach(function (train) {
-	    if (train.doors) {
-	      train.doors.close();
+	  var departed = false;
+	  for (var o = 0; o < this.trains.length; o++) {
+	    if (this.trains[o].doors) {
+	      this.trains[o].doors.close();
 	    }
-	  });
+	    if (!departed) {
+	      departed = true;
+	      setTimeout(function () {
+	        Util.nextLevel();
+	      }, 4800);
+	    }
+	  }
 	};
 	
 	module.exports = Conductor;
@@ -2219,13 +2276,13 @@
 	
 	var throop = new Zone ("Throop", [
 	  "---------------------------------------------------------------------------",
-	  "----------*---------------------------------------------------#!-----------",
+	  "----------*---------------------------------------------------#L-----------",
 	  "----------FTTF----------FTTF-----------------FTTTF----------FTTTF----------",
 	  "---------------------------------------------------------------------------",
-	  "-----------------------------------------------*-#?-----#!-----------------",
+	  "-----------------------------------------------*-#?-----#L-----------------",
 	  "-----------------FTTTF-------------------1-----FTTTTTTTTTTF----------------",
 	  "---------------------------------------------------------------------------",
-	  "¡#-!#-?#--!#----------------------------------------------#?--#!-----------",
+	  "M#-L#-?#--L#----------------------------------------------#?--#L-----------",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
@@ -2293,7 +2350,14 @@
 	      } else if (square === "*") {
 	        movers.push( new Pigeon (movers.length, xIndex*48, yIndex*48) );
 	      } else if (square === "1") {
-	        players.push( new Player (movers.length, xIndex*48, yIndex*48) );
+	        if (!players[0]) {
+	          players.push( new Player (movers.length, xIndex*48, yIndex*48) );
+	        } else {
+	          players[0].pos = {
+	            x: xIndex*48,
+	            y: yIndex*48
+	          };
+	        }
 	      }
 	    });
 	  });
@@ -3370,7 +3434,7 @@
 	  "   O         O         O         O         O  ",
 	  "   I         I         I         I         I  ",
 	  "   I         I         I         I         I  ",
-	  "   I         I         I         I         I  ",
+	  "   I         I        BI         I         I  ",
 	  "   A         A         A         A         A  ",
 	  "                                              ",
 	  "                                              ",
@@ -3384,10 +3448,468 @@
 	  "O": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_head.gif"]),
 	        depth: 2},
 	  "*": {sprite: new Sprite (144, 144, 0, ["tile/lamppost_halo.gif"]),
-	        depth: 2}
+	        depth: 2},
+	  "B": {sprite: new Sprite (192, 96, 0, ["tile/sign_bjunction.gif"]),
+	        depth: 1.5}
 	});
 	
 	module.exports = junctionLamps;
+
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(36);
+	var Sprite = __webpack_require__(3);
+	
+	var throopBricks = new Background ([
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "=====================================",
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "-------------------------------------",
+	  "=====================================",
+	  "====================================="
+	],
+	{
+	  "-": {sprite: new Sprite (48, 48, 0, ["tile/brick_light.gif"]),
+	        depth: 5},
+	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
+	        depth: 5}
+	});
+	
+	module.exports = throopBricks;
+
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Background = __webpack_require__(36);
+	var Sprite = __webpack_require__(3);
+	
+	var throopPillars = new Background ([
+	  "=====================================================",
+	  "=====================================================",
+	  "=====================================================",
+	  "FFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL FFFFL ",
+	  "    I     I     I     I     I     I     I     I     I",
+	  "    I     I     I  K  I     I     I     I     I     I",
+	  "    I     I     I     I     I     I     I     I     I",
+	  "    I     I     I     I     I     I     I     I     I",
+	  "    I     I     I     I     I     I     I     I     I",
+	  "    I     I     I     I     I     I     I     I     I",
+	  "    I     I     I     I     I     I     I     I     I"
+	],
+	{
+	  "I": {sprite: new Sprite (48, 48, 0, ["tile/pillar_middle.gif"]),
+	        depth: 2},
+	  "F": {sprite: new Sprite (48, 48, 0, ["tile/girder_top.gif"]),
+	        depth: 2},
+	  "L": {sprite: new Sprite (144, 48, 0, ["tile/pillar_head.gif"]),
+	        depth: 2},
+	  "=": {sprite: new Sprite (48, 48, 0, ["tile/brick_dark.gif"]),
+	        depth: 2},
+	  "K": {sprite: new Sprite (96, 48, 0, ["tile/sign_kthroop.gif"]),
+	        depth: 5}
+	});
+	
+	module.exports = throopPillars;
+
+
+/***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./background": 36,
+		"./background.js": 36,
+		"./backgrounds/junctionBricks": 35,
+		"./backgrounds/junctionBricks.js": 35,
+		"./backgrounds/junctionLamps": 38,
+		"./backgrounds/junctionLamps.js": 38,
+		"./backgrounds/throopBricks": 39,
+		"./backgrounds/throopBricks.js": 39,
+		"./backgrounds/throopPillars": 40,
+		"./backgrounds/throopPillars.js": 40,
+		"./keyEvents": 23,
+		"./keyEvents.js": 23,
+		"./objectArrays/blocks": 7,
+		"./objectArrays/blocks.js": 7,
+		"./objectArrays/metaBlocks": 20,
+		"./objectArrays/metaBlocks.js": 20,
+		"./objectArrays/movers": 10,
+		"./objectArrays/movers.js": 10,
+		"./objectArrays/overlays": 14,
+		"./objectArrays/overlays.js": 14,
+		"./objectArrays/players": 11,
+		"./objectArrays/players.js": 11,
+		"./objectArrays/tiles": 13,
+		"./objectArrays/tiles.js": 13,
+		"./objectArrays/trains": 24,
+		"./objectArrays/trains.js": 24,
+		"./objects/aura": 9,
+		"./objects/aura.js": 9,
+		"./objects/block": 21,
+		"./objects/block.js": 21,
+		"./objects/boneheap": 16,
+		"./objects/boneheap.js": 16,
+		"./objects/burningman": 17,
+		"./objects/burningman.js": 17,
+		"./objects/fireball": 19,
+		"./objects/fireball.js": 19,
+		"./objects/hammer": 8,
+		"./objects/hammer.js": 8,
+		"./objects/jumpman": 5,
+		"./objects/jumpman.js": 5,
+		"./objects/metaBlock": 30,
+		"./objects/metaBlock.js": 30,
+		"./objects/meter": 4,
+		"./objects/meter.js": 4,
+		"./objects/pigeon": 33,
+		"./objects/pigeon.js": 33,
+		"./objects/player": 2,
+		"./objects/player.js": 2,
+		"./objects/pyre": 18,
+		"./objects/pyre.js": 18,
+		"./objects/shoggoth": 31,
+		"./objects/shoggoth.js": 31,
+		"./objects/skeleton": 15,
+		"./objects/skeleton.js": 15,
+		"./objects/sparks": 32,
+		"./objects/sparks.js": 32,
+		"./objects/tile": 37,
+		"./objects/tile.js": 37,
+		"./objects/trains/aCar": 26,
+		"./objects/trains/aCar.js": 26,
+		"./objects/trains/conductor": 25,
+		"./objects/trains/conductor.js": 25,
+		"./objects/trains/doors": 27,
+		"./objects/trains/doors.js": 27,
+		"./objects/upKey": 12,
+		"./objects/upKey.js": 12,
+		"./objects/view": 22,
+		"./objects/view.js": 22,
+		"./objects/wizard": 34,
+		"./objects/wizard.js": 34,
+		"./renderZone": 1,
+		"./renderZone.js": 1,
+		"./sprite": 3,
+		"./sprite.js": 3,
+		"./util/util": 6,
+		"./util/util.js": 6,
+		"./zone": 29,
+		"./zone.js": 29,
+		"./zones/blank": 42,
+		"./zones/blank.js": 42,
+		"./zones/extras/burningMan": 50,
+		"./zones/extras/burningMan.js": 50,
+		"./zones/extras/buster": 51,
+		"./zones/extras/buster.js": 51,
+		"./zones/extras/shoggothBrawl": 52,
+		"./zones/extras/shoggothBrawl.js": 52,
+		"./zones/extras/subwayPlatform": 53,
+		"./zones/extras/subwayPlatform.js": 53,
+		"./zones/extras/tooManyCooks": 54,
+		"./zones/extras/tooManyCooks.js": 54,
+		"./zones/extras/zoneOne": 55,
+		"./zones/extras/zoneOne.js": 55,
+		"./zones/junction": 49,
+		"./zones/junction.js": 49,
+		"./zones/throop": 28,
+		"./zones/throop.js": 28
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 41;
+
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(29);
+	
+	var blank = new Zone ( "blank", [
+	  "---------------------------------------------------------------------------",
+	  "---------------------------------------------------------------------------",
+	  "---------------------------------------------------------------------------",
+	  "---------------------------------------------------------------------------",
+	  "---------------------------------------------------------------------------",
+	  "---------------------------------------------------------------------------",
+	  "---------------------------------------------------------------------------",
+	  "--------------------1------------------------------------------------------",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = blank;
+
+
+/***/ },
+/* 43 */,
+/* 44 */,
+/* 45 */,
+/* 46 */,
+/* 47 */,
+/* 48 */,
+/* 49 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(29);
+	
+	var junction = new Zone ( "Broadway Junction", [
+	  "-------------------------------------------------------------------",
+	  "----------------------1--------------------------------------------",
+	  "---------FTTTTTTTF---F----FTTTF------FTTTF----F---FTTTTTTTF--------",
+	  "-------------------------------------------------------------------",
+	  "-----*-------------------------------------------------------------",
+	  "---FTF-------------------------------------------------------FTF---",
+	  "-------------------------------------------------------------------",
+	  "----------------!--------------------$--!---------------!--------$-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "-------------------------------------------------------------------",
+	  "--------]-¡---!-->---<>--------------<--->---<>---<---!--!-[-------",
+	  "---------FTTTTTTTF---F----FTTTF------FTTTF----F---FTTTTTTTF--------",
+	  "-------------------------------------------------------------------",
+	  "----}---------------------------------------------------------{----",
+	  "---FTF-------------------------------------------------------FTF---",
+	  "-------------------------------------------------------------------",
+	  "---------{-----------------------------$--------------!-!}*------$-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = junction;
+
+
+/***/ },
+/* 50 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(29);
+	
+	var burningMan = new Zone ( "burningMan", [
+	  "--------------------------------------------------------",
+	  "-----------*--------------------------------------------",
+	  "-----------FTTTTTF--------FTTTF--------FTTTTTF----------",
+	  "---------------------F-------------F--------------------",
+	  "---!----------------------------------------------*-----",
+	  "---FTF------FF------------FTTTF-----------FF------FTF---",
+	  "--------------------------------------------------------",
+	  "----------------!-----1-----¡--------------!-¡----------",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "--------------------------------------------------------",
+	  "-----------------}--------{---}--------{----------------",
+	  "-----------FTTTTTF--{}----FTTTF----{}--FTTTTTF----------",
+	  "---------------------F-------------F--------------------",
+	  "-----}-------}------------{---}-----------{-------{-----",
+	  "---FTF------FF------------FTTTF-----------FF------FTF---",
+	  "--------------------------------------------------------",
+	  "-}----{-{}------{-------}-----{--{------}-----{-}-----{-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = burningMan;
+
+
+/***/ },
+/* 51 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(29);
+	
+	var buster = new Zone ("buster", [
+	  "--------------------------------------------------------",
+	  "---------------------H----------H-----------------------",
+	  "---------F-------FTTTTF--------FTTTTF-------F-----------",
+	  "--------------------------------------------------------",
+	  "-!---------------------------------!--------------------",
+	  "TTF--------------FTTF------------FTTF----------------TTF",
+	  "--------------------------------------------------------",
+	  "-$------------$H----------!--1---$-----------H----H---$-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "--------------------------------------------------------",
+	  "---------}------------}--------{------------{-----------",
+	  "]--------F-------FTTTTF--------FTTTTF-------F----------[",
+	  "]------------------------------------------------------[",
+	  "]-}---------------}----------------{-----------------{-[",
+	  "TTF--------------FTTF------------FTTF----------------TTF",
+	  "]------------------------------------------------------[",
+	  "]----------->-------------<-->----------<--#-----------[",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = buster;
+
+
+/***/ },
+/* 52 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(29);
+	
+	var shoggothBrawl = new Zone ( "shoggothBrawl", [
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "---------FTTTTTTTF---F----FTTTF----F---FTTTTTTTF--------",
+	  "--------------------------------------------------------",
+	  "-----*--------------------------------------------------",
+	  "---FTF--------------------------------------------FTF---",
+	  "--------------------------------------------------------",
+	  "----------------!-----1-----!---$------------!--------$-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "--------------------------------------------------------",
+	  "--------]-¡---!-->---<>---<--->---<>---<---!--!-[-------",
+	  "---------FTTTTTTTF---F----FTTTF----F---FTTTTTTTF--------",
+	  "--------------------------------------------------------",
+	  "----}----------------------------------------------{----",
+	  "---FTF--------------------------------------------FTF---",
+	  "--------------------------------------------------------",
+	  "---------{------------------$--------------!-!}*------$-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = shoggothBrawl;
+
+
+/***/ },
+/* 53 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(29);
+	
+	var subwayPlatform = new Zone ("subwayPlatform", [
+	  "--------------------------------------------------------",
+	  "------------*----------------------!---------*!---------",
+	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
+	  "--------------------------------------------!-----------",
+	  "---------------------------------------------!----------",
+	  "-----------------FF----FTF-----------------FTF----F-----",
+	  "--------------------------------------------------------",
+	  "--------------------------------!---------------------!-",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXTTTTXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "--------------------------------------------------------",
+	  "------------}----{-----------<----#}----{{--------------",
+	  "--------FTTTF----FTTTTF-------FTTTTF----FTTFTTF---------",
+	  "--------------------------------------------------------",
+	  "]----------------{}-----{>-----------------#{}----------[",
+	  "]----------------FF----FTF-----------------FTF----F----[",
+	  "]------------------------------------------------------[",
+	  "]------------}------}--->---<-#--------->------<-------[",
+	  "XXXXXXXXXXXXXXXXXXXXXXX<<TTTT>>XXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYY<<<---->>>YYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = subwayPlatform;
+
+
+/***/ },
+/* 54 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(29);
+	
+	
+	var tooManyCooks = new Zone ("tooManyCooks", [
+	  "--------------------------------------------------------",
+	  "---------*-------*--------------------------*-----------",
+	  "---------F-------FTTTTF--------FTTTTF-------F-----------",
+	  "--------------------------------------------------------",
+	  "-**--------------***----------------------------------*-",
+	  "TTF--------------FTTF------------FTTF----------------TTF",
+	  "--------------------------------------------------------",
+	  "--------------H--------1--------------------------------",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "--------------------------------------------------------",
+	  "---------}------------}--------{------------{-----------",
+	  "]--------F-------FTTTTF--------FTTTTF-------F----------[",
+	  "]------------------------------------------------------[",
+	  "]-}---------------}----------------{-----------------{-[",
+	  "TTF--------------FTTF------------FTTF----------------TTF",
+	  "]------------------------------------------------------[",
+	  "]----------->-------------<-->----------<--------------[",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = tooManyCooks;
+
+
+/***/ },
+/* 55 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(29);
+	
+	var zoneOne = new Zone ("zoneOne", [
+	  "------XXXXXXXXXXXXXXXXXXXXX----XXXXXXXX----XXXXXXXXXXXXX",
+	  "XX------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "-----XX-------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "--------------------------XX----------------------------",
+	  "XX----------XX----XXXXXX------X-------------------------",
+	  "-----XXXX-----------------XX------XXX-------------------",
+	  "---------------------------------------XX----XXX-X------",
+	  "-----------------------------------------------------XXX",
+	  "--------------------------------------------------------",
+	  "--------------------------------------------------------",
+	  "------------------------XXX--------------------XXXX-----",
+	  "-XXXXXXXXXXXX--XXXXXXX--------XXXXX---X---XXX-----------"
+	]);
+	
+	module.exports = zoneOne;
 
 
 /***/ }

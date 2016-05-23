@@ -1,15 +1,14 @@
-var Zone = require("../zone.js");
+var Zone = require("../../zone.js");
 
-
-var tooManyCooks = new Zone ("tooManyCooks", [
+var buster = new Zone ("buster", [
   "--------------------------------------------------------",
-  "---------*-------*--------------------------*-----------",
+  "---------------------H----------H-----------------------",
   "---------F-------FTTTTF--------FTTTTF-------F-----------",
   "--------------------------------------------------------",
-  "-**--------------***----------------------------------*-",
+  "-!---------------------------------!--------------------",
   "TTF--------------FTTF------------FTTF----------------TTF",
   "--------------------------------------------------------",
-  "--------------H--------1--------------------------------",
+  "-$------------$H----------!--1---$-----------H----H---$-",
   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
@@ -21,11 +20,11 @@ var tooManyCooks = new Zone ("tooManyCooks", [
   "]-}---------------}----------------{-----------------{-[",
   "TTF--------------FTTF------------FTTF----------------TTF",
   "]------------------------------------------------------[",
-  "]----------->-------------<-->----------<--------------[",
+  "]----------->-------------<-->----------<--#-----------[",
   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
 ]
 );
 
-module.exports = tooManyCooks;
+module.exports = buster;

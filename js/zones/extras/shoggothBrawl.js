@@ -1,4 +1,4 @@
-var Zone = require("../zone.js");
+var Zone = require("../../zone.js");
 
 var shoggothBrawl = new Zone ( "shoggothBrawl", [
   "--------------------------------------------------------",

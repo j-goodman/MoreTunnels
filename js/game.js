@@ -47,9 +47,11 @@ Window.newGame = function () {
     }.bind(this);
   };
 
-  Game.buildZone = function () {
-    var zone = require('./zones/throop.js');
+  Game.buildZone = function (zoneObject) {
+    var zone = require(zoneObject.address);
     this.zone = zone;
+
+    this.setView();
 
     var callback = function () {
       this.setupKeyControls();
@@ -57,10 +59,10 @@ Window.newGame = function () {
 
     this.zone.build(this.blocks, this.movers, this.players, this.metaBlocks, callback);
 
-    var backgroundBricks = require('./backgrounds/junctionBricks.js');
+    var backgroundBricks = require(zoneObject.backgroundA);
     backgroundBricks.build(tiles);
 
-    var backgroundPillars = require('./backgrounds/junctionLamps.js');
+    var backgroundPillars = require(zoneObject.backgroundB);
     backgroundPillars.build(tiles, 2);
     backgroundPillars.build(tiles, 3);
   };
@@ -76,71 +78,113 @@ Window.newGame = function () {
     Util.universals.roomBottomRight = {x: 48*(this.zone.blueprint[0].length-1), y: 48*this.zone.blueprint.length};
   };
 
-  Game.playGame = function () {
-    setInterval(function () {
-      var ctx = this.ctx;
-      if (ctx) {
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+  Game.playRound = function (zoneObject) {
+    if (zoneObject) {
+      console.log("START LEVEL: " + zoneObject.name);
+      Game.buildZone(zoneObject);
+      if (this.interval) {
+        clearInterval(this.interval);
       }
-
-      this.tiles.forEach(function(tile, idx) {
-        tile.sprite.depthDraw(this.ctx, tile.pos, this.view.topLeftPos, tile.depth);
-      }.bind(this));
-
-
-      var conductor = new this.Conductor (this.zone);
-      conductor.manageTrains();
-
-      this.blocks.forEach(function(block){
-        block.sprite.draw(this.ctx, block.pos, this.view.topLeftPos);
-      }.bind(this));
-
-      for (var i = 0; i <= this.trains.length; i++) {
-        var train = this.trains[i];
-        if (train) {
-          train.sprite.draw(this.ctx, train.pos, this.view.topLeftPos);
+      this.interval = setInterval(function () {
+        var ctx = this.ctx;
+        if (ctx) {
+          this.ctx.fillStyle = "black";
+          this.ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
-      }
 
-      for (var j = this.movers.length-1; j >= 0; j--) {
-        var mover = this.movers[j];
-        if (mover) {
-          mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
+        this.tiles.forEach(function(tile, idx) {
+          tile.sprite.depthDraw(this.ctx, tile.pos, this.view.topLeftPos, tile.depth);
+        }.bind(this));
+
+        var conductor = new this.Conductor (this.zone);
+        conductor.manageTrains();
+
+        this.blocks.forEach(function(block){
+          block.sprite.draw(this.ctx, block.pos, this.view.topLeftPos);
+        }.bind(this));
+
+        for (var i = 0; i <= this.trains.length; i++) {
+          var train = this.trains[i];
+          if (train) {
+            train.sprite.draw(this.ctx, train.pos, this.view.topLeftPos);
+          }
         }
-      }
 
-      this.overlays.forEach(function(overlay, idx) {
-        overlay.sprite.depthDraw(this.ctx, overlay.pos, this.view.topLeftPos, overlay.depth);
-        if (overlay.virtual) {
-          delete this.overlays[idx];
+        for (var j = this.movers.length-1; j >= 0; j--) {
+          var mover = this.movers[j];
+          if (mover) {
+            mover.sprite.draw(this.ctx, mover.pos, this.view.topLeftPos);
+          }
         }
-      }.bind(this));
 
-      if (this.ctx) {
-        this.players[0].sprite.draw(this.ctx, players[0].pos, this.view.topLeftPos);
+        this.overlays.forEach(function(overlay, idx) {
+          overlay.sprite.depthDraw(this.ctx, overlay.pos, this.view.topLeftPos, overlay.depth);
+          if (overlay.virtual) {
+            delete this.overlays[idx];
+          }
+        }.bind(this));
+
+        if (this.ctx) {
+          this.players[0].sprite.draw(this.ctx, players[0].pos, this.view.topLeftPos);
+        }
+
+        this.players[0].move();
+
+        this.movers.forEach(function(mover){
+          mover.move();
+          mover.act();
+        });
+
+        this.trains.forEach(function(train){
+          train.move();
+          train.act();
+        });
+
+        this.view.recenter(players[0].pos);
+      }.bind(this), 32);
+    }
+  };
+
+  Game.playGame = function (level) {
+    this.Util.nextLevel = function () {
+      if (Util.level) {
+        Util.level ++;
+      } else {
+        Util.level = 1;
       }
+      this.playGame(Util.level);
+      this.trains = [];
+      players[0].invisible = false;
+      players[0].onSubway = false;
+    }.bind(this);
 
-      this.players[0].move();
-
-      this.movers.forEach(function(mover){
-        mover.move();
-        mover.act();
-      });
-
-      this.trains.forEach(function(train){
-        train.move();
-        train.act();
-      });
-
-      this.view.recenter(players[0].pos);
-    }.bind(this), 32);
+    switch (Util.level) {
+      case 1:
+        this.playRound({
+          name: "Kingston-Throop",
+          // Level One, the player fights wizards, skeletons, and one burningman.
+          address: './zones/throop.js',
+          backgroundA: './backgrounds/throopBricks.js',
+          backgroundB: './backgrounds/throopPillars.js'
+        });
+      break;
+      case 2:
+        this.playRound({
+          name: "Broadway Junction",
+          // Level Two, the player fights two shoggoths and some skeletons.
+          address: './zones/junction.js',
+          backgroundA: './backgrounds/junctionBricks.js',
+          backgroundB: './backgrounds/junctionLamps.js'
+        });
+        if (this.players.length > 1) {
+          this.players.shift();
+        }
+      break;
+    }
   };
 
   Game.startUpCanvas();
-  Game.buildZone();
-  Game.setView();
-  Game.playGame();
+  Game.playGame(1);
 };
 
 Window.newGame();

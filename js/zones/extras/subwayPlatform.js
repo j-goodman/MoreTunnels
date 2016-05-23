@@ -1,4 +1,4 @@
-var Zone = require("../zone.js");
+var Zone = require("../../zone.js");
 
 var subwayPlatform = new Zone ("subwayPlatform", [
   "--------------------------------------------------------",

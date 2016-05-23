@@ -8,7 +8,6 @@ var View = function (topLeftX, topLeftY, bottomRightX, bottomRightY, maxX, maxY)
 
 View.prototype.recenter = function (centerPos) {
   this.topLeftPos.x = centerPos.x-this.width/2;
-  this.topLeftPos.y = centerPos.y-this.height/2;
   if (this.topLeftPos.x+this.width > this.maxX) {
     this.topLeftPos.x = this.maxX-this.width;
   }

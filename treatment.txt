@@ -1,21 +1,22 @@
-##Episode 1##
+The player travels from Kingston-Throop to Laffayette Avenue, encountering
+different kinds of enemies and getting new weapons in the stations along the way.
+The route is:
 
-Of seven episodes.  The first one is called *TRIALS* and starts with a man in a suit and hat walking through a subway station. He passes the MTA desk, and the camera follows the man behind it, ARJUN. If the player follows, he transitions to the a chamber that precedes the first level. In the chamber the player learns how to use the CURSED HAMMER, and must use it to get out. The level itself is a long tunnel in which the man in the suit resurrects skeletons to chase the player. You have to destroy the skeletons, but if you also destroy the wizard you get the next weapon, a fireball match box.
-
-After the skeletons are defeated you pass through a tunnel filled with onions, and meet some Warriors of the Tunnel King. As you fight them the G Train arrives every 150 seconds, and whether you defeat them or not you can get on to the next episode. You get minor treasure for beating them though.
-
-(Implement a slide when you change direction by pressing the new direction before you release the old one.)
-
-In EPISODE 2
-
-You go on to meet the Tunnel King, who lives on the Prospect Park Shuttle and, after some trials, agrees to tell you about the wizards, leading on to Episode 3, which covers the journey to the Blaster’s Camp in the LAFAYETTE AVENUE STOP.
-
-In EPISODE 3.
-
-FRANKLIN
-PROSPECT PARK
-LAFAYETTE
-JAY STREET (???)
-BROOKLYN BRIDGE (???)
-???
-???
+Kingston-Throop (Skeletons, Wizards, Burningmen) [*Cursed Hammer]
+A
+Broadway Junction (Shoggoths, Skeletons) [*Firebomb Matchbox]
+L
+Sutter Ave () []
+L
+Livonia Ave () []
+3
+Crown Heights () []
+3
+Nostrand Ave () []
+4
+Botanic Garden () []
+S
+Fulton St. () []
+A (uptown or downtown)
+Lafayette Ave () []
+ / Kingston-Throop

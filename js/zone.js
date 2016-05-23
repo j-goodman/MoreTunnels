@@ -39,7 +39,14 @@ Zone.prototype.build = function (blocks, movers, players, metaBlocks, callback) 
       } else if (square === "*") {
         movers.push( new Pigeon (movers.length, xIndex*48, yIndex*48) );
       } else if (square === "1") {
-        players.push( new Player (movers.length, xIndex*48, yIndex*48) );
+        if (!players[0]) {
+          players.push( new Player (movers.length, xIndex*48, yIndex*48) );
+        } else {
+          players[0].pos = {
+            x: xIndex*48,
+            y: yIndex*48
+          };
+        }
       }
     });
   });

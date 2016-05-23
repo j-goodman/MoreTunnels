@@ -13,9 +13,9 @@ var Hammer = function (index, x, y, xspeed, yspeed, throwPower) {
   this.FUDGE = 5;
   this.MAXSPEED = 30;
   this.DECAY = 0.1;
-  this.BASESPEED = 24;
+  this.BASESPEED = 22;
 
-  this.attraction = 1.8;
+  this.attraction = 1.5;
   this.spriteSize = 48;
 
   this.pos = {
@@ -128,8 +128,8 @@ Hammer.prototype.move = function () {
 };
 
 Hammer.prototype.ricochet = function () {
-  this.speed.x *= (-0.7);
-  this.speed.y *= (-0.7);
+  this.speed.x *= (-0.9);
+  this.speed.y *= (-0.9);
 };
 
 Hammer.prototype.setSprites = function () {

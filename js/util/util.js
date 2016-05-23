@@ -15,6 +15,8 @@ Array.prototype.mean = function () {
   return sum/this.length;
 };
 
+Util.level = 1;
+
 Util.inherits = function (ChildClass, BaseClass) {
   function Surrogate() { this.constructor = ChildClass; }
   Surrogate.prototype = BaseClass.prototype;
@@ -103,6 +105,8 @@ Util.moveTowards = function (moverPos, targetPos, vectorSpeed) {
     y: ySpeed
   };
 };
+
+// Util.nextLevel is defined in game.js
 
 Util.typeCount = function (type, array) {
   var increment = 0;

@@ -9,7 +9,7 @@ var junctionLamps = new Background ([
   "   O         O         O         O         O  ",
   "   I         I         I         I         I  ",
   "   I         I         I         I         I  ",
-  "   I         I         I         I         I  ",
+  "   I         I        BI         I         I  ",
   "   A         A         A         A         A  ",
   "                                              ",
   "                                              ",
@@ -23,7 +23,9 @@ var junctionLamps = new Background ([
   "O": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_head.gif"]),
         depth: 2},
   "*": {sprite: new Sprite (144, 144, 0, ["tile/lamppost_halo.gif"]),
-        depth: 2}
+        depth: 2},
+  "B": {sprite: new Sprite (192, 96, 0, ["tile/sign_bjunction.gif"]),
+        depth: 1.5}
 });
 
 module.exports = junctionLamps;
