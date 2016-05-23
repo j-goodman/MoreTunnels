@@ -45,6 +45,40 @@ var Skeleton = function (index, x, y, stats) {
 
 Util.inherits(Skeleton, Jumpman);
 
+Skeleton.prototype.act = function () {
+  this.facing = (this.speed.x < 0 ? "left" : "right");
+  if (this.checkUnderFeet()) {
+    while (Math.abs(this.speed.x) > this.stats.runSpeed*this.stats.jumpDistance) {
+      this.speed.x *= 0.75;
+    }
+    if (Util.distanceBetween(this.pos, players[0].pos) <= this.stats.sightRange) {
+      // Chance of giving chase
+      if (Math.random()*32 <= this.stats.chasingSkill) {
+        Util.xChase(this, players[0].pos, this.stats.runSpeed);
+      }
+      // If the player is about to escape the skeleton's range, higher chance
+      if (Util.distanceBetween(this.pos, players[0].pos) > this.stats.sightRange*0.9) {
+        if (Math.random()*32 <= this.stats.chasingSkill*7) {
+          Util.xChase(this, players[0].pos, this.stats.runSpeed);
+        }
+      }
+    } else {
+      this.wander();
+    }
+    if (this.age < 12) {
+      this.sprite = this.sprites.rising;
+    }
+    if (this.speed.y > 100) {
+      delete movers[this.index];
+    }
+    this.checkForJumpBlock();
+    this.checkForPlayer();
+    this.dodgeHammer();
+  }
+  this.checkForHammer();
+  this.avoidRoomEdge();
+};
+
 Skeleton.prototype.checkForHammer = function () {
   movers.forEach(function (mover) {
     if (mover.type === "hammer" &&
@@ -59,15 +93,19 @@ Skeleton.prototype.checkForHammer = function () {
 
 Skeleton.prototype.checkForPlayer = function () {
   players.forEach(function (player) {
-    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
-      this.pos.x > player.pos.x-2 &&
-      this.pos.y < player.pos.y+this.sprite.height+2 &&
-      this.pos.y > player.pos.y-2
+    if (this.pos.x < player.pos.x+this.sprite.width &&
+      this.pos.x+this.sprite.width > player.pos.x &&
+      this.pos.y < player.pos.y+this.sprite.height &&
+      this.pos.y+this.sprite.width > player.pos.y
     ) {
       if (this.checkUnderFeet() && player.checkUnderFeet()) {
-        // Attack the player, reverse your x speed if it's succesful
+        // Attack the player, animate if it's succesful
         if (player.skeletonBite()) {
-          this.speed.x *= -1;
+          this.spriteAction = true;
+          this.sprite = this.sprites["attack_" + this.facing];
+          this.sprite.addAnimationEndCallback(function () {
+            this.spriteAction = false;
+          }.bind(this));
         }
       }
     }
@@ -121,40 +159,6 @@ Skeleton.prototype.checkForJumpBlock = function () {
   }.bind(this));
 };
 
-Skeleton.prototype.act = function () {
-  this.facing = (this.speed.x < 0 ? "left" : "right");
-  if (this.checkUnderFeet()) {
-    while (Math.abs(this.speed.x) > this.stats.runSpeed*this.stats.jumpDistance) {
-      this.speed.x *= 0.75;
-    }
-    if (Util.distanceBetween(this.pos, players[0].pos) <= this.stats.sightRange) {
-      // Chance of giving chase
-      if (Math.random()*32 <= this.stats.chasingSkill) {
-        Util.xChase(this, players[0].pos, this.stats.runSpeed);
-      }
-      // If the player is about to escape the skeleton's range, higher chance
-      if (Util.distanceBetween(this.pos, players[0].pos) > this.stats.sightRange*0.9) {
-        if (Math.random()*32 <= this.stats.chasingSkill*7) {
-          Util.xChase(this, players[0].pos, this.stats.runSpeed);
-        }
-      }
-    } else {
-      this.wander();
-    }
-    if (this.age < 12) {
-      this.sprite = this.sprites.rising;
-    }
-    if (this.speed.y > 100) {
-      delete movers[this.index];
-    }
-    this.checkForJumpBlock();
-    this.checkForPlayer();
-    this.dodgeHammer();
-  }
-  this.checkForHammer();
-  this.avoidRoomEdge();
-};
-
 Skeleton.prototype.dodgeHammer = function () {
   movers.forEach(function (mover) {
     if (mover.type === "hammer" &&
@@ -179,6 +183,20 @@ Skeleton.prototype.setExtraSprites = function () {
       "boneheap/collapsing/2.gif",
       "boneheap/collapsing/1.gif",
       "boneheap/collapsing/0.gif"
+    ]
+  );
+  this.sprites.attack_left = new Sprite (48, 48, 2, [
+      "skeleton/left/attack/0.gif",
+      "skeleton/left/attack/1.gif",
+      "skeleton/left/attack/2.gif",
+      "skeleton/left/attack/3.gif"
+    ]
+  );
+  this.sprites.attack_right = new Sprite (48, 48, 2, [
+      "skeleton/right/attack/0.gif",
+      "skeleton/right/attack/1.gif",
+      "skeleton/right/attack/2.gif",
+      "skeleton/right/attack/3.gif"
     ]
   );
 };

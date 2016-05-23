@@ -128,25 +128,27 @@ Jumpman.prototype.spriteCenter = function () {
 };
 
 Jumpman.prototype.updateSprite = function () {
-  if (this.speed.x === 0) {
-    if (this.facing === "left") {
-      this.sprite = this.sprites.standing_left;
-    } else {
-      this.sprite = this.sprites.standing_right;
+  if (!this.spriteAction) {
+    if (this.speed.x === 0) {
+      if (this.facing === "left") {
+        this.sprite = this.sprites.standing_left;
+      } else {
+        this.sprite = this.sprites.standing_right;
+      }
+    } else if (this.speed.x > 0) {
+      this.sprite = this.sprites.running_right;
+    } else if (this.speed.x < 0) {
+      this.sprite = this.sprites.running_left;
+    } if (!this.checkUnderFeet()) {
+      if (this.facing === "left") {
+        this.sprite = this.sprites.jumping_left;
+      } else {
+        this.sprite = this.sprites.jumping_right;
+      }
     }
-  } else if (this.speed.x > 0) {
-    this.sprite = this.sprites.running_right;
-  } else if (this.speed.x < 0) {
-    this.sprite = this.sprites.running_left;
-  } if (!this.checkUnderFeet()) {
-    if (this.facing === "left") {
-      this.sprite = this.sprites.jumping_left;
-    } else {
-      this.sprite = this.sprites.jumping_right;
+    if (this.invisible) {
+      this.sprite = {draw: function () {}};
     }
-  }
-  if (this.invisible) {
-    this.sprite = {draw: function () {}};
   }
 };
 

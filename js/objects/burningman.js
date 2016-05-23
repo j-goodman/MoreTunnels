@@ -90,22 +90,7 @@ Burningman.prototype.checkForHammer = function () {
   }.bind(this));
 };
 
-Burningman.prototype.checkForPlayer = function () {
-  players.forEach(function (player) {
-    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
-      this.pos.x > player.pos.x-2 &&
-      this.pos.y < player.pos.y+this.sprite.height+2 &&
-      this.pos.y > player.pos.y-2
-    ) {
-      if (this.checkUnderFeet() && player.checkUnderFeet()) {
-        // Attack the player, reverse your x speed if it's succesful
-        if (player.skeletonBite()) {
-          this.speed.x *= -1;
-        }
-      }
-    }
-  }.bind(this));
-};
+Burningman.prototype.checkForPlayer = Skeleton.prototype.checkForPlayer;
 
 Burningman.prototype.checkForJumpBlock = Skeleton.prototype.checkForJumpBlock;
 
@@ -181,6 +166,20 @@ Burningman.prototype.setExtraSprites = function () {
       "burningman/boneheap/collapsing/2.gif",
       "burningman/boneheap/collapsing/1.gif",
       "burningman/boneheap/collapsing/0.gif"
+    ]
+  );
+  this.sprites.attack_left = new Sprite (48, 48, 2, [
+      "burningman/left/attack/0.gif",
+      "burningman/left/attack/1.gif",
+      "burningman/left/attack/2.gif",
+      "burningman/left/attack/3.gif"
+    ]
+  );
+  this.sprites.attack_right = new Sprite (48, 48, 2, [
+      "burningman/right/attack/0.gif",
+      "burningman/right/attack/1.gif",
+      "burningman/right/attack/2.gif",
+      "burningman/right/attack/3.gif"
     ]
   );
 };

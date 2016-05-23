@@ -565,7 +565,7 @@
 	    ctx.drawImage(
 	      this.frames[this.frame],
 	      pos.x-(viewAnchor.x/depthFactor),
-	      pos.y-(viewAnchor.y/depthFactor),
+	      pos.y-(viewAnchor.y),
 	      this.width,
 	      this.height
 	    );
@@ -729,25 +729,27 @@
 	};
 	
 	Jumpman.prototype.updateSprite = function () {
-	  if (this.speed.x === 0) {
-	    if (this.facing === "left") {
-	      this.sprite = this.sprites.standing_left;
-	    } else {
-	      this.sprite = this.sprites.standing_right;
+	  if (!this.spriteAction) {
+	    if (this.speed.x === 0) {
+	      if (this.facing === "left") {
+	        this.sprite = this.sprites.standing_left;
+	      } else {
+	        this.sprite = this.sprites.standing_right;
+	      }
+	    } else if (this.speed.x > 0) {
+	      this.sprite = this.sprites.running_right;
+	    } else if (this.speed.x < 0) {
+	      this.sprite = this.sprites.running_left;
+	    } if (!this.checkUnderFeet()) {
+	      if (this.facing === "left") {
+	        this.sprite = this.sprites.jumping_left;
+	      } else {
+	        this.sprite = this.sprites.jumping_right;
+	      }
 	    }
-	  } else if (this.speed.x > 0) {
-	    this.sprite = this.sprites.running_right;
-	  } else if (this.speed.x < 0) {
-	    this.sprite = this.sprites.running_left;
-	  } if (!this.checkUnderFeet()) {
-	    if (this.facing === "left") {
-	      this.sprite = this.sprites.jumping_left;
-	    } else {
-	      this.sprite = this.sprites.jumping_right;
+	    if (this.invisible) {
+	      this.sprite = {draw: function () {}};
 	    }
-	  }
-	  if (this.invisible) {
-	    this.sprite = {draw: function () {}};
 	  }
 	};
 	
@@ -1262,6 +1264,40 @@
 	
 	Util.inherits(Skeleton, Jumpman);
 	
+	Skeleton.prototype.act = function () {
+	  this.facing = (this.speed.x < 0 ? "left" : "right");
+	  if (this.checkUnderFeet()) {
+	    while (Math.abs(this.speed.x) > this.stats.runSpeed*this.stats.jumpDistance) {
+	      this.speed.x *= 0.75;
+	    }
+	    if (Util.distanceBetween(this.pos, players[0].pos) <= this.stats.sightRange) {
+	      // Chance of giving chase
+	      if (Math.random()*32 <= this.stats.chasingSkill) {
+	        Util.xChase(this, players[0].pos, this.stats.runSpeed);
+	      }
+	      // If the player is about to escape the skeleton's range, higher chance
+	      if (Util.distanceBetween(this.pos, players[0].pos) > this.stats.sightRange*0.9) {
+	        if (Math.random()*32 <= this.stats.chasingSkill*7) {
+	          Util.xChase(this, players[0].pos, this.stats.runSpeed);
+	        }
+	      }
+	    } else {
+	      this.wander();
+	    }
+	    if (this.age < 12) {
+	      this.sprite = this.sprites.rising;
+	    }
+	    if (this.speed.y > 100) {
+	      delete movers[this.index];
+	    }
+	    this.checkForJumpBlock();
+	    this.checkForPlayer();
+	    this.dodgeHammer();
+	  }
+	  this.checkForHammer();
+	  this.avoidRoomEdge();
+	};
+	
 	Skeleton.prototype.checkForHammer = function () {
 	  movers.forEach(function (mover) {
 	    if (mover.type === "hammer" &&
@@ -1276,15 +1312,19 @@
 	
 	Skeleton.prototype.checkForPlayer = function () {
 	  players.forEach(function (player) {
-	    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
-	      this.pos.x > player.pos.x-2 &&
-	      this.pos.y < player.pos.y+this.sprite.height+2 &&
-	      this.pos.y > player.pos.y-2
+	    if (this.pos.x < player.pos.x+this.sprite.width &&
+	      this.pos.x+this.sprite.width > player.pos.x &&
+	      this.pos.y < player.pos.y+this.sprite.height &&
+	      this.pos.y+this.sprite.width > player.pos.y
 	    ) {
 	      if (this.checkUnderFeet() && player.checkUnderFeet()) {
-	        // Attack the player, reverse your x speed if it's succesful
+	        // Attack the player, animate if it's succesful
 	        if (player.skeletonBite()) {
-	          this.speed.x *= -1;
+	          this.spriteAction = true;
+	          this.sprite = this.sprites["attack_" + this.facing];
+	          this.sprite.addAnimationEndCallback(function () {
+	            this.spriteAction = false;
+	          }.bind(this));
 	        }
 	      }
 	    }
@@ -1338,40 +1378,6 @@
 	  }.bind(this));
 	};
 	
-	Skeleton.prototype.act = function () {
-	  this.facing = (this.speed.x < 0 ? "left" : "right");
-	  if (this.checkUnderFeet()) {
-	    while (Math.abs(this.speed.x) > this.stats.runSpeed*this.stats.jumpDistance) {
-	      this.speed.x *= 0.75;
-	    }
-	    if (Util.distanceBetween(this.pos, players[0].pos) <= this.stats.sightRange) {
-	      // Chance of giving chase
-	      if (Math.random()*32 <= this.stats.chasingSkill) {
-	        Util.xChase(this, players[0].pos, this.stats.runSpeed);
-	      }
-	      // If the player is about to escape the skeleton's range, higher chance
-	      if (Util.distanceBetween(this.pos, players[0].pos) > this.stats.sightRange*0.9) {
-	        if (Math.random()*32 <= this.stats.chasingSkill*7) {
-	          Util.xChase(this, players[0].pos, this.stats.runSpeed);
-	        }
-	      }
-	    } else {
-	      this.wander();
-	    }
-	    if (this.age < 12) {
-	      this.sprite = this.sprites.rising;
-	    }
-	    if (this.speed.y > 100) {
-	      delete movers[this.index];
-	    }
-	    this.checkForJumpBlock();
-	    this.checkForPlayer();
-	    this.dodgeHammer();
-	  }
-	  this.checkForHammer();
-	  this.avoidRoomEdge();
-	};
-	
 	Skeleton.prototype.dodgeHammer = function () {
 	  movers.forEach(function (mover) {
 	    if (mover.type === "hammer" &&
@@ -1396,6 +1402,20 @@
 	      "boneheap/collapsing/2.gif",
 	      "boneheap/collapsing/1.gif",
 	      "boneheap/collapsing/0.gif"
+	    ]
+	  );
+	  this.sprites.attack_left = new Sprite (48, 48, 2, [
+	      "skeleton/left/attack/0.gif",
+	      "skeleton/left/attack/1.gif",
+	      "skeleton/left/attack/2.gif",
+	      "skeleton/left/attack/3.gif"
+	    ]
+	  );
+	  this.sprites.attack_right = new Sprite (48, 48, 2, [
+	      "skeleton/right/attack/0.gif",
+	      "skeleton/right/attack/1.gif",
+	      "skeleton/right/attack/2.gif",
+	      "skeleton/right/attack/3.gif"
 	    ]
 	  );
 	};
@@ -1610,22 +1630,7 @@
 	  }.bind(this));
 	};
 	
-	Burningman.prototype.checkForPlayer = function () {
-	  players.forEach(function (player) {
-	    if (this.pos.x < player.pos.x+this.sprite.width+2 &&
-	      this.pos.x > player.pos.x-2 &&
-	      this.pos.y < player.pos.y+this.sprite.height+2 &&
-	      this.pos.y > player.pos.y-2
-	    ) {
-	      if (this.checkUnderFeet() && player.checkUnderFeet()) {
-	        // Attack the player, reverse your x speed if it's succesful
-	        if (player.skeletonBite()) {
-	          this.speed.x *= -1;
-	        }
-	      }
-	    }
-	  }.bind(this));
-	};
+	Burningman.prototype.checkForPlayer = Skeleton.prototype.checkForPlayer;
 	
 	Burningman.prototype.checkForJumpBlock = Skeleton.prototype.checkForJumpBlock;
 	
@@ -1701,6 +1706,20 @@
 	      "burningman/boneheap/collapsing/2.gif",
 	      "burningman/boneheap/collapsing/1.gif",
 	      "burningman/boneheap/collapsing/0.gif"
+	    ]
+	  );
+	  this.sprites.attack_left = new Sprite (48, 48, 2, [
+	      "burningman/left/attack/0.gif",
+	      "burningman/left/attack/1.gif",
+	      "burningman/left/attack/2.gif",
+	      "burningman/left/attack/3.gif"
+	    ]
+	  );
+	  this.sprites.attack_right = new Sprite (48, 48, 2, [
+	      "burningman/right/attack/0.gif",
+	      "burningman/right/attack/1.gif",
+	      "burningman/right/attack/2.gif",
+	      "burningman/right/attack/3.gif"
 	    ]
 	  );
 	};
@@ -2277,8 +2296,6 @@
 		"./background.js": 29,
 		"./backgrounds/junctionBricks": 31,
 		"./backgrounds/junctionBricks.js": 31,
-		"./backgrounds/junctionLamps": 32,
-		"./backgrounds/junctionLamps.js": 32,
 		"./backgrounds/throopBricks": 33,
 		"./backgrounds/throopBricks.js": 33,
 		"./backgrounds/throopPillars": 34,
@@ -2457,43 +2474,7 @@
 
 
 /***/ },
-/* 32 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Background = __webpack_require__(29);
-	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(6);
-	
-	var junctionLamps = new Background ([
-	  "                                              ",
-	  "                                              ",
-	  "  *         *         *         *         *   ",
-	  "   O         O         O         O         O  ",
-	  "   I         I         I         I         I  ",
-	  "   I         I         I         I         I  ",
-	  "   I         I        BI         I         I  ",
-	  "   A         A         A         A         A  ",
-	  "                                              ",
-	  "                                              ",
-	  "                                              "
-	],
-	{
-	  "I": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_stalk.gif"]),
-	        depth: 2},
-	  "A": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_base.gif"]),
-	        depth: 2},
-	  "O": {sprite: new Sprite (48, 48, 0, ["tile/lamppost_head.gif"]),
-	        depth: 2},
-	  "*": {sprite: new Sprite (144, 144, 0, ["tile/lamppost_halo.gif"]),
-	        depth: 2},
-	  "B": {sprite: new Sprite (192, 96, 0, ["tile/sign_bjunction.gif"]),
-	        depth: 1.5}
-	});
-	
-	module.exports = junctionLamps;
-
-
-/***/ },
+/* 32 */,
 /* 33 */
 /***/ function(module, exports, __webpack_require__) {
 

@@ -58,7 +58,7 @@ Sprite.prototype.depthDraw = function (ctx, pos, viewAnchor, depthFactor) {
     ctx.drawImage(
       this.frames[this.frame],
       pos.x-(viewAnchor.x/depthFactor),
-      pos.y-(viewAnchor.y/depthFactor),
+      pos.y-(viewAnchor.y),
       this.width,
       this.height
     );
