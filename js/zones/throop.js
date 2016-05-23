@@ -8,7 +8,7 @@ var throop = new Zone ("Throop", [
   "-----------------------------------------------*-#?-----#!-----------------",
   "-----------------FTTTF-------------------1-----FTTTTTTTTTTF----------------",
   "---------------------------------------------------------------------------",
-  "M#-!#-?#--!#----------------------------------------------#?--#!-----------",
+  "¡#-!#-?#--!#----------------------------------------------#?--#!-----------",
   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
