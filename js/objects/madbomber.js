@@ -3,6 +3,7 @@ var Jumpman = require('./jumpman.js');
 var Skeleton = require('./skeleton.js');
 var Boneheap = require('./boneheap.js');
 var Firebomb = require('./firebomb.js');
+var Explosion = require('./explosion.js');
 var Util = require('../util/util.js');
 var blocks = require('../objectArrays/blocks.js');
 var metaBlocks = require('../objectArrays/metaBlocks.js');
@@ -37,9 +38,9 @@ var Madbomber = function (index, x, y, stats) {
       sightRange: Util.approximately(330),
       runSpeed: Util.approximately(6) + 0.5,
       jumpPower: Util.approximately(12),
-      throwPower: 12,
+      throwPower: Util.approximately(12),
       jumpDistance: 1,
-      chasingSkill: Util.approximately(2)
+      chasingSkill: Util.approximately(2.5)
     };
   } else {
     this.stats = stats;
@@ -58,6 +59,7 @@ Madbomber.prototype.act = function () {
   if (!Math.floor(Math.random()*16) &&
       (Math.abs(Util.distanceBetween(this.pos, players[0].pos) - this.throwDistance)) < 48) {
     this.facing = this.pos.x > players[0].pos.x ? "left" : "right";
+    this.speed.x = 0;
     this.throwFireBomb();
   }
   this.checkForHammer();
@@ -127,7 +129,7 @@ Madbomber.prototype.setExtraSprites = function () {
 };
 
 Madbomber.prototype.shatter = function () {
-  movers[this.index] = new Boneheap (this.index, this.pos, this.stats);
+  movers[this.index] = new Explosion (this.index, this.pos.x - 48, this.pos.y - 80);
 };
 
 Madbomber.prototype.wander = function () {

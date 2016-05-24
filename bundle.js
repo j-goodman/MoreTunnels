@@ -210,7 +210,7 @@
 	        this.playRound({
 	          name: "Kingston-Throop",
 	          // Level One, the player fights wizards, skeletons, and one burningman.
-	          address: './zones/throop.js',
+	          address: './zones/extras/blaster.js',
 	          backgroundA: './backgrounds/throopBricks.js',
 	          backgroundB: './backgrounds/throopPillars.js'
 	        });
@@ -3929,6 +3929,7 @@
 	var Skeleton = __webpack_require__(15);
 	var Boneheap = __webpack_require__(16);
 	var Firebomb = __webpack_require__(52);
+	var Explosion = __webpack_require__(51);
 	var Util = __webpack_require__(6);
 	var blocks = __webpack_require__(7);
 	var metaBlocks = __webpack_require__(20);
@@ -3963,9 +3964,9 @@
 	      sightRange: Util.approximately(330),
 	      runSpeed: Util.approximately(6) + 0.5,
 	      jumpPower: Util.approximately(12),
-	      throwPower: 12,
+	      throwPower: Util.approximately(12),
 	      jumpDistance: 1,
-	      chasingSkill: Util.approximately(2)
+	      chasingSkill: Util.approximately(2.5)
 	    };
 	  } else {
 	    this.stats = stats;
@@ -3984,6 +3985,7 @@
 	  if (!Math.floor(Math.random()*16) &&
 	      (Math.abs(Util.distanceBetween(this.pos, players[0].pos) - this.throwDistance)) < 48) {
 	    this.facing = this.pos.x > players[0].pos.x ? "left" : "right";
+	    this.speed.x = 0;
 	    this.throwFireBomb();
 	  }
 	  this.checkForHammer();
@@ -4053,7 +4055,7 @@
 	};
 	
 	Madbomber.prototype.shatter = function () {
-	  movers[this.index] = new Boneheap (this.index, this.pos, this.stats);
+	  movers[this.index] = new Explosion (this.index, this.pos.x - 48, this.pos.y - 80);
 	};
 	
 	Madbomber.prototype.wander = function () {
@@ -4248,10 +4250,10 @@
 	  "-----------------%%---------------%---------------------",
 	  "---------F-------FTTTTF--------FTTTTF-------F-----------",
 	  "--------------------------------------------------------",
-	  "-----------------------------------%--------------------",
+	  "-!---------------------------------%------------------!-",
 	  "TTF--------------FTTF------------FTTF----------------TTF",
 	  "--------------------------------------------------------",
-	  "---------%-------------------1------------------%-------",
+	  "---------%-----!-------------1-----------!------%-------",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
