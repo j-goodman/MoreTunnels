@@ -11,3 +11,6 @@ The fiercer cousin to the standard skeleton, the Burningman can fly and throw fi
 
 ### Shoggoth
 Eldritch subterranean monstrosities of unknown origins, the Shoggoths aren't on the wizards' side, but they're not on yours either, and their ocular beam will take out the player and other enemies alike. The beam deals two damage points, and colliding with the Shoggoth deals one. The Shoggoth is normally defensive against the hammer, but can be struck while blasting and rendered vulnerable, then taken out with another blow while they flee.
+
+### Mad Bomber
+Violently deranged explosives expert, looking to roast the player alive. The Mad Bomber tries to keep his distance from his would-be victim, hurling firebombs from afar that deal area-of-effect damage.

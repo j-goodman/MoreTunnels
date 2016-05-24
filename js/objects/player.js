@@ -144,6 +144,22 @@ Player.prototype.shoggothBite = function (shoggoth) {
   }
 };
 
+Player.prototype.explosionBite = function (explosion) {
+  if (this.damageRecover < 0) {
+    this.damageRecover = 64;
+    if (this.health <= 8 && this.health > 0) {
+      this.health -= 2;
+      this.speed.x = this.pos.x+this.sprite.width/2 < explosion.center.x ? 0-this.stats.runSpeed*1.5 : this.stats.runSpeed*1.5;
+      this.jump();
+      this.speed.y *= 1.25;
+      this.xStop();
+    }
+    if (this.health < 0) {
+      this.health = 0;
+    }
+  }
+};
+
 Player.prototype.shogBeamBite = function () {
   if (this.damageRecover < 0) {
     this.damageRecover = 64;
