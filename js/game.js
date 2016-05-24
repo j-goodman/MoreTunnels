@@ -164,7 +164,7 @@ Window.newGame = function () {
         this.playRound({
           name: "Kingston-Throop",
           // Level One, the player fights wizards, skeletons, and one burningman.
-          address: './zones/extras/blaster.js',
+          address: './zones/throop.js',
           backgroundA: './backgrounds/throopBricks.js',
           backgroundB: './backgrounds/throopPillars.js'
         });
