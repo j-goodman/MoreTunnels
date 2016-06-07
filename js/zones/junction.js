@@ -3,12 +3,12 @@ var Zone = require("../zone.js");
 var junction = new Zone ( "Broadway Junction", [
   "-------------------------------------------------------------------",
   "----------------------1--------------------------------------------",
-  "---------FTTTTTTTF---F----FTTTF------FTTTF----F---FTTTTTTTF--------",
+  "----------FTTF----------FTTFTTF-----------FTTFTTTF----------FTTTF--",
   "-------------------------------------------------------------------",
   "-----*-------------------------------------------------------------",
-  "---FTF-------------------------------------------------------FTF---",
+  "--------------------------FTF------------1-------------------------",
   "-------------------------------------------------------------------",
-  "----------------!--------------------$--!---------------!--------$-",
+  "-%--------------!------------------------------------!----!------$-",
   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
@@ -18,9 +18,9 @@ var junction = new Zone ( "Broadway Junction", [
   "---------FTTTTTTTF---F----FTTTF------FTTTF----F---FTTTTTTTF--------",
   "-------------------------------------------------------------------",
   "----}---------------------------------------------------------{----",
-  "---FTF-------------------------------------------------------FTF---",
-  "-------------------------------------------------------------------",
-  "---------{-----------------------------$--------------!-!}*------$-",
+  "-#-FTF-------------------------------------------------------FTF---",
+  "--#----------------------------------------------------------------",
+  "---#-----{-----------------------------$--------------!#!}*------$-",
   "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
   "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"

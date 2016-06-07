@@ -35,7 +35,7 @@ var Skeleton = function (index, x, y, stats) {
       sightRange: Util.approximately(330),
       runSpeed: Util.approximately(4),
       jumpPower: Util.approximately(14),
-      jumpDistance: Util.approximately(1),
+      jumpDistance: Util.approximately(12)/12,
       chasingSkill: Util.approximately(3.5)
     };
   } else {

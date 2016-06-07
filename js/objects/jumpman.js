@@ -7,9 +7,9 @@ var Jumpman = function () {
 
 Jumpman.prototype.avoidRoomEdge = function () {
   if (this.checkUnderFeet()) {
-    if (this.pos.x < Math.abs(this.stats.runSpeed) * 20) {
+    if (this.pos.x < Math.abs(this.stats.runSpeed) * 48) {
       this.speed.x = Math.abs(this.stats.runSpeed);
-    } else if (this.pos.x > Util.universals.roomBottomRight.x - Math.abs(this.stats.runSpeed * 20)) {
+    } else if (this.pos.x > Util.universals.roomBottomRight.x - Math.abs(this.stats.runSpeed * 48)) {
       this.speed.x = 0-Math.abs(this.stats.runSpeed);
     }
   }

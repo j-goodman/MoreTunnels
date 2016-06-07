@@ -59,7 +59,7 @@ Explosion.prototype.checkForMovers = function () {
           mover.shatter();
         break;
         case "madbomber":
-          mover.shatter();
+          mover.getBlasted(this);
         break;
       }
     }

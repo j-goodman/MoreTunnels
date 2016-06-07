@@ -36,11 +36,11 @@ var Madbomber = function (index, x, y, stats) {
   if (stats === undefined) {
     this.stats = {
       sightRange: Util.approximately(330),
-      runSpeed: Util.approximately(6) + 0.5,
+      runSpeed: Util.approximately(5.5) + 0.5,
       jumpPower: Util.approximately(12),
       throwPower: Util.approximately(12),
       jumpDistance: 1,
-      chasingSkill: Util.approximately(2.5)
+      chasingSkill: Util.approximately(5)
     };
   } else {
     this.stats = stats;
@@ -56,29 +56,28 @@ Madbomber.prototype.act = function () {
   } else {
     this.avoidPlayer();
   }
-  if (!Math.floor(Math.random()*16) &&
+  if (!Math.floor(Math.random()*48) &&
       (Math.abs(Util.distanceBetween(this.pos, players[0].pos) - this.throwDistance)) < 48) {
     this.facing = this.pos.x > players[0].pos.x ? "left" : "right";
     this.speed.x = 0;
     this.throwFireBomb();
   }
   this.checkForHammer();
-  this.avoidRoomEdge();
-  this.avoidRoomEdge();
   this.dodgeHammer();
   this.checkForJumpBlock();
+  this.avoidRoomEdge();
 };
 
 Madbomber.prototype.avoidPlayer = function () {
-  if (Math.random()*32 <= this.stats.chasingSkill) {
+  if (Math.random()*32 <= this.stats.chasingSkill &&
+      this.checkUnderFeet()) {
     Util.xChase(this, players[0].pos, 0-this.stats.runSpeed);
   }
 };
 
-Madbomber.prototype.avoidRoomEdge = Skeleton.prototype.avoidRoomEdge;
-
 Madbomber.prototype.chasePlayer = function () {
-  if (Math.random()*32 <= this.stats.chasingSkill) {
+  if (Math.random()*32 <= this.stats.chasingSkill &&
+      this.checkUnderFeet()) {
     Util.xChase(this, players[0].pos, this.stats.runSpeed);
   }
 };
@@ -90,7 +89,7 @@ Madbomber.prototype.checkForHammer = function () {
         mover.soft <= 0) {
       mover.ricochet();
       mover.soft = 4;
-      this.shatter();
+      this.explode();
     }
   }.bind(this));
 };
@@ -108,12 +107,26 @@ Madbomber.prototype.dodgeHammer = function () {
   }.bind(this));
 };
 
+Madbomber.prototype.getBlasted = function (explosion) {
+  this.speed.x = this.pos.x+this.sprite.width/2 < explosion.center.x ? 0-this.stats.runSpeed*1.5 : this.stats.runSpeed*1.5;
+  this.jump();
+  this.speed.y *= 1.25;
+  this.xStop();
+  if (!Math.floor(Math.random()*7)) {
+    this.explode();
+  }
+};
+
 Madbomber.prototype.throwFireBomb = function () {
+  var currentThrow = this.stats.throwPower;
+  if (!Math.floor(Math.random()*7)) {
+    currentThrow *= 0.6;
+  }
   movers.push(new Firebomb (
     movers.length,
     this.pos.x,
     this.pos.y,
-    this.facing === "right" ? this.stats.throwPower : 0-this.throwPower,
+    this.facing === "right" ? currentThrow : 0-currentThrow,
     0-this.stats.throwPower
   ));
 };
@@ -128,7 +141,7 @@ Madbomber.prototype.jump = function () {
 Madbomber.prototype.setExtraSprites = function () {
 };
 
-Madbomber.prototype.shatter = function () {
+Madbomber.prototype.explode = function () {
   movers[this.index] = new Explosion (this.index, this.pos.x - 48, this.pos.y - 80);
 };
 

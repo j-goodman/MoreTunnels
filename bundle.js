@@ -626,9 +626,9 @@
 	
 	Jumpman.prototype.avoidRoomEdge = function () {
 	  if (this.checkUnderFeet()) {
-	    if (this.pos.x < Math.abs(this.stats.runSpeed) * 20) {
+	    if (this.pos.x < Math.abs(this.stats.runSpeed) * 48) {
 	      this.speed.x = Math.abs(this.stats.runSpeed);
-	    } else if (this.pos.x > Util.universals.roomBottomRight.x - Math.abs(this.stats.runSpeed * 20)) {
+	    } else if (this.pos.x > Util.universals.roomBottomRight.x - Math.abs(this.stats.runSpeed * 48)) {
 	      this.speed.x = 0-Math.abs(this.stats.runSpeed);
 	    }
 	  }
@@ -1272,7 +1272,7 @@
 	      sightRange: Util.approximately(330),
 	      runSpeed: Util.approximately(4),
 	      jumpPower: Util.approximately(14),
-	      jumpDistance: Util.approximately(1),
+	      jumpDistance: Util.approximately(12)/12,
 	      chasingSkill: Util.approximately(3.5)
 	    };
 	  } else {
@@ -2344,34 +2344,34 @@
 		"./objects/boneheap.js": 16,
 		"./objects/burningman": 17,
 		"./objects/burningman.js": 17,
-		"./objects/explosion": 51,
-		"./objects/explosion.js": 51,
+		"./objects/explosion": 35,
+		"./objects/explosion.js": 35,
 		"./objects/fireball": 19,
 		"./objects/fireball.js": 19,
-		"./objects/firebomb": 52,
-		"./objects/firebomb.js": 52,
+		"./objects/firebomb": 36,
+		"./objects/firebomb.js": 36,
 		"./objects/hammer": 8,
 		"./objects/hammer.js": 8,
 		"./objects/jumpman": 5,
 		"./objects/jumpman.js": 5,
-		"./objects/madbomber": 50,
-		"./objects/madbomber.js": 50,
-		"./objects/metaBlock": 35,
-		"./objects/metaBlock.js": 35,
+		"./objects/madbomber": 37,
+		"./objects/madbomber.js": 37,
+		"./objects/metaBlock": 38,
+		"./objects/metaBlock.js": 38,
 		"./objects/meter": 4,
 		"./objects/meter.js": 4,
-		"./objects/pigeon": 36,
-		"./objects/pigeon.js": 36,
+		"./objects/pigeon": 39,
+		"./objects/pigeon.js": 39,
 		"./objects/player": 2,
 		"./objects/player.js": 2,
 		"./objects/pyre": 18,
 		"./objects/pyre.js": 18,
-		"./objects/shoggoth": 38,
-		"./objects/shoggoth.js": 38,
+		"./objects/shoggoth": 41,
+		"./objects/shoggoth.js": 41,
 		"./objects/skeleton": 15,
 		"./objects/skeleton.js": 15,
-		"./objects/sparks": 39,
-		"./objects/sparks.js": 39,
+		"./objects/sparks": 42,
+		"./objects/sparks.js": 42,
 		"./objects/tile": 30,
 		"./objects/tile.js": 30,
 		"./objects/trains/aCar": 26,
@@ -2384,34 +2384,34 @@
 		"./objects/upKey.js": 12,
 		"./objects/view": 22,
 		"./objects/view.js": 22,
-		"./objects/wizard": 37,
-		"./objects/wizard.js": 37,
+		"./objects/wizard": 40,
+		"./objects/wizard.js": 40,
 		"./renderZone": 1,
 		"./renderZone.js": 1,
 		"./sprite": 3,
 		"./sprite.js": 3,
 		"./util/util": 6,
 		"./util/util.js": 6,
-		"./zone": 40,
-		"./zone.js": 40,
-		"./zones/blank": 41,
-		"./zones/blank.js": 41,
-		"./zones/extras/blaster": 53,
-		"./zones/extras/blaster.js": 53,
-		"./zones/extras/burningMan": 42,
-		"./zones/extras/burningMan.js": 42,
-		"./zones/extras/shoggothBrawl": 44,
-		"./zones/extras/shoggothBrawl.js": 44,
-		"./zones/extras/subwayPlatform": 45,
-		"./zones/extras/subwayPlatform.js": 45,
-		"./zones/extras/tooManyCooks": 46,
-		"./zones/extras/tooManyCooks.js": 46,
-		"./zones/extras/zoneOne": 47,
-		"./zones/extras/zoneOne.js": 47,
-		"./zones/junction": 48,
-		"./zones/junction.js": 48,
-		"./zones/throop": 49,
-		"./zones/throop.js": 49
+		"./zone": 43,
+		"./zone.js": 43,
+		"./zones/blank": 44,
+		"./zones/blank.js": 44,
+		"./zones/extras/blaster": 45,
+		"./zones/extras/blaster.js": 45,
+		"./zones/extras/burningMan": 46,
+		"./zones/extras/burningMan.js": 46,
+		"./zones/extras/shoggothBrawl": 47,
+		"./zones/extras/shoggothBrawl.js": 47,
+		"./zones/extras/subwayPlatform": 48,
+		"./zones/extras/subwayPlatform.js": 48,
+		"./zones/extras/tooManyCooks": 49,
+		"./zones/extras/tooManyCooks.js": 49,
+		"./zones/extras/zoneOne": 50,
+		"./zones/extras/zoneOne.js": 50,
+		"./zones/junction": 51,
+		"./zones/junction.js": 51,
+		"./zones/throop": 52,
+		"./zones/throop.js": 52
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -2610,6 +2610,338 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(6);
+	var Aura = __webpack_require__(9);
+	var blocks = __webpack_require__(7);
+	var movers = __webpack_require__(10);
+	var players = __webpack_require__(11);
+	
+	var Explosion = function (index, x, y) {
+	  this.type = "fireball";
+	  this.index = index;
+	  this.age = 0;
+	  this.radius = 86;
+	  this.spriteSize = 48;
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.setSprites();
+	  this.age = 0;
+	  this.center = {
+	    x: this.pos.x + this.sprite.width/2,
+	    y: this.pos.y + this.sprite.height
+	  };
+	  this.checkForPlayer();
+	};
+	
+	Explosion.prototype.act = function () {
+	  this.checkForMovers();
+	};
+	
+	Explosion.prototype.checkForPlayer = function () {
+	  players.forEach(function (player) {
+	    if (Util.distanceBetween(this.center, {
+	      x: player.pos.x + player.sprite.width/2,
+	      y: player.pos.y + player.sprite.height
+	    }) < this.radius) {
+	      player.explosionBite(this);
+	    }
+	  }.bind(this));
+	};
+	
+	Explosion.prototype.checkForMovers = function () {
+	  movers.forEach(function (mover) {
+	    if (Util.distanceBetween(this.center, {
+	      x: mover.pos.x + mover.sprite.width/2,
+	      y: mover.pos.y + mover.sprite.height
+	    }) < this.radius) {
+	      switch (mover.type) {
+	        case "skeleton":
+	          mover.shatter();
+	        break;
+	        case "wizard":
+	          mover.shatter();
+	        break;
+	        case "pigeon":
+	          mover.transmogrify();
+	        break;
+	        case "burningman":
+	          mover.shatter();
+	        break;
+	        case "madbomber":
+	          mover.getBlasted(this);
+	        break;
+	      }
+	    }
+	  }.bind(this));
+	};
+	
+	Explosion.prototype.destroy = function () {
+	  delete movers[this.index];
+	};
+	
+	Explosion.prototype.move = function () {
+	};
+	
+	Explosion.prototype.setSprites = function () {
+	  this.sprite = new Sprite (128, 128, 2, [
+	      "madbomber/bombs/firebomb/flat_explosion/0.gif",
+	      "madbomber/bombs/firebomb/flat_explosion/1.gif",
+	      "madbomber/bombs/firebomb/flat_explosion/2.gif",
+	      "madbomber/bombs/firebomb/flat_explosion/3.gif",
+	      "madbomber/bombs/firebomb/flat_explosion/4.gif",
+	      "madbomber/bombs/firebomb/flat_explosion/5.gif",
+	      "madbomber/bombs/firebomb/flat_explosion/6.gif",
+	      "madbomber/bombs/firebomb/flat_explosion/7.gif",
+	      "madbomber/bombs/firebomb/flat_explosion/8.gif",
+	      "madbomber/bombs/firebomb/flat_explosion/9.gif"
+	    ]
+	  );
+	  this.sprite.addAnimationEndCallback(function () {
+	    this.destroy();
+	  }.bind(this));
+	};
+	
+	module.exports = Explosion;
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var Util = __webpack_require__(6);
+	var Jumpman = __webpack_require__(5);
+	var Explosion = __webpack_require__(35);
+	var blocks = __webpack_require__(7);
+	var movers = __webpack_require__(10);
+	var players = __webpack_require__(11);
+	
+	var Firebomb = function (index, x, y, xspeed, yspeed) {
+	  this.type = "firebomb";
+	  this.index = index;
+	
+	  this.spriteSize = 48;
+	
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.speed = {
+	    x: xspeed,
+	    y: yspeed
+	  };
+	  this.accel = {
+	    x: 0,
+	    y: Util.universals.gravity
+	  };
+	  this.setSprites();
+	};
+	
+	Firebomb.prototype.act = function () {
+	  if (this.checkUnderFeet()) {
+	    this.explode();
+	  }
+	};
+	
+	Firebomb.prototype.checkUnderFeet = Jumpman.prototype.checkUnderFeet;
+	
+	Firebomb.prototype.explode = function () {
+	  movers[this.index] = new Explosion (this.index, this.pos.x - 48, this.pos.y - 80);
+	};
+	
+	Firebomb.prototype.move = function () {
+	  this.speed.x += this.accel.x;
+	  this.speed.y += this.accel.y;
+	  this.pos.x += this.speed.x;
+	  this.pos.y += this.speed.y;
+	};
+	
+	Firebomb.prototype.setSprites = function () {
+	  this.sprite = new Sprite (48, 48, 5, [
+	      "madbomber/bombs/firebomb/thrown/0.gif",
+	      "madbomber/bombs/firebomb/thrown/1.gif",
+	      "madbomber/bombs/firebomb/thrown/2.gif",
+	      "madbomber/bombs/firebomb/thrown/3.gif",
+	      "madbomber/bombs/firebomb/thrown/4.gif",
+	      "madbomber/bombs/firebomb/thrown/5.gif",
+	      "madbomber/bombs/firebomb/thrown/6.gif",
+	      "madbomber/bombs/firebomb/thrown/7.gif"
+	    ]
+	  );
+	};
+	
+	module.exports = Firebomb;
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
+	var Jumpman = __webpack_require__(5);
+	var Skeleton = __webpack_require__(15);
+	var Boneheap = __webpack_require__(16);
+	var Firebomb = __webpack_require__(36);
+	var Explosion = __webpack_require__(35);
+	var Util = __webpack_require__(6);
+	var blocks = __webpack_require__(7);
+	var metaBlocks = __webpack_require__(20);
+	var players = __webpack_require__(11);
+	var movers = __webpack_require__(10);
+	
+	var Madbomber = function (index, x, y, stats) {
+	  this.type = "madbomber";
+	  this.index = index;
+	  this.spriteSize = 48;
+	  this.age = 0;
+	  this.pos = {
+	    x: x,
+	    y: y
+	  };
+	  this.speed = {
+	    x: 0,
+	    y: 0
+	  };
+	  this.accel = {
+	    x: 0,
+	    y: Util.universals.gravity
+	  };
+	  this.facing = "right";
+	  this.frame = "right";
+	  this.spriteRoot = "madbomber";
+	  this.setSprites(5);
+	  this.sprite = this.sprites.standing_right;
+	
+	  if (stats === undefined) {
+	    this.stats = {
+	      sightRange: Util.approximately(330),
+	      runSpeed: Util.approximately(5.5) + 0.5,
+	      jumpPower: Util.approximately(12),
+	      throwPower: Util.approximately(12),
+	      jumpDistance: 1,
+	      chasingSkill: Util.approximately(5)
+	    };
+	  } else {
+	    this.stats = stats;
+	  }
+	  this.throwDistance = this.stats.throwPower*2 / Util.universals.gravity * this.stats.throwPower;
+	};
+	
+	Util.inherits(Madbomber, Jumpman);
+	
+	Madbomber.prototype.act = function () {
+	  if (Util.distanceBetween(this.pos, players[0].pos) > this.throwDistance) {
+	    this.chasePlayer();
+	  } else {
+	    this.avoidPlayer();
+	  }
+	  if (!Math.floor(Math.random()*48) &&
+	      (Math.abs(Util.distanceBetween(this.pos, players[0].pos) - this.throwDistance)) < 48) {
+	    this.facing = this.pos.x > players[0].pos.x ? "left" : "right";
+	    this.speed.x = 0;
+	    this.throwFireBomb();
+	  }
+	  this.checkForHammer();
+	  this.dodgeHammer();
+	  this.checkForJumpBlock();
+	  this.avoidRoomEdge();
+	};
+	
+	Madbomber.prototype.avoidPlayer = function () {
+	  if (Math.random()*32 <= this.stats.chasingSkill &&
+	      this.checkUnderFeet()) {
+	    Util.xChase(this, players[0].pos, 0-this.stats.runSpeed);
+	  }
+	};
+	
+	Madbomber.prototype.chasePlayer = function () {
+	  if (Math.random()*32 <= this.stats.chasingSkill &&
+	      this.checkUnderFeet()) {
+	    Util.xChase(this, players[0].pos, this.stats.runSpeed);
+	  }
+	};
+	
+	Madbomber.prototype.checkForHammer = function () {
+	  movers.forEach(function (mover) {
+	    if (mover.type === "hammer" &&
+	        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
+	        mover.soft <= 0) {
+	      mover.ricochet();
+	      mover.soft = 4;
+	      this.explode();
+	    }
+	  }.bind(this));
+	};
+	
+	Madbomber.prototype.checkForJumpBlock = Skeleton.prototype.checkForJumpBlock;
+	
+	Madbomber.prototype.dodgeHammer = function () {
+	  movers.forEach(function (mover) {
+	    if (mover.type === "hammer" &&
+	        Math.round(Math.random()*0.75) &&
+	        Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/5 &&
+	        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/3 ) {
+	      this.jump();
+	    }
+	  }.bind(this));
+	};
+	
+	Madbomber.prototype.getBlasted = function (explosion) {
+	  this.speed.x = this.pos.x+this.sprite.width/2 < explosion.center.x ? 0-this.stats.runSpeed*1.5 : this.stats.runSpeed*1.5;
+	  this.jump();
+	  this.speed.y *= 1.25;
+	  this.xStop();
+	  if (!Math.floor(Math.random()*7)) {
+	    this.explode();
+	  }
+	};
+	
+	Madbomber.prototype.throwFireBomb = function () {
+	  var currentThrow = this.stats.throwPower;
+	  if (!Math.floor(Math.random()*7)) {
+	    currentThrow *= 0.6;
+	  }
+	  movers.push(new Firebomb (
+	    movers.length,
+	    this.pos.x,
+	    this.pos.y,
+	    this.facing === "right" ? currentThrow : 0-currentThrow,
+	    0-this.stats.throwPower
+	  ));
+	};
+	
+	Madbomber.prototype.jump = function () {
+	  if (this.checkUnderFeet()) {
+	    this.speed.y = 0-this.stats.jumpPower;
+	    this.speed.x *= this.stats.jumpDistance;
+	  }
+	};
+	
+	Madbomber.prototype.setExtraSprites = function () {
+	};
+	
+	Madbomber.prototype.explode = function () {
+	  movers[this.index] = new Explosion (this.index, this.pos.x - 48, this.pos.y - 80);
+	};
+	
+	Madbomber.prototype.wander = function () {
+	  if (Math.random()*256*(Math.abs(this.speed.x)+0.5) < 1) {
+	    this.speed.x = this.stats.runSpeed;
+	  } else if (Math.random()*128 < 2) {
+	    this.speed.x = 0-this.stats.runSpeed;
+	  }
+	};
+	
+	module.exports = Madbomber;
+
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Sprite = __webpack_require__(3);
 	var metaBlocks = __webpack_require__(20);
 	
 	var MetaBlock = function (index, x, y, types) {
@@ -2629,7 +2961,7 @@
 
 
 /***/ },
-/* 36 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -2780,7 +3112,7 @@
 	};
 	
 	Pigeon.prototype.transmogrify = function (kill) {
-	  var Wizard = __webpack_require__(37);
+	  var Wizard = __webpack_require__(40);
 	  var wizard = new Wizard (this.index, this.pos.x, this.pos.y, this.stats);
 	  movers[this.index] = wizard;
 	  if (kill) {
@@ -2805,7 +3137,7 @@
 
 
 /***/ },
-/* 37 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -3054,7 +3386,7 @@
 	};
 	
 	Wizard.prototype.transmogrify = function () {
-	  var Pigeon = __webpack_require__(36);
+	  var Pigeon = __webpack_require__(39);
 	  movers[this.index] = new Pigeon (this.index, this.pos.x, this.pos.y, this.stats);
 	};
 	
@@ -3076,14 +3408,14 @@
 
 
 /***/ },
-/* 38 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
 	var Jumpman = __webpack_require__(5);
 	var Boneheap = __webpack_require__(16);
 	var Util = __webpack_require__(6);
-	var Sparks = __webpack_require__(39);
+	var Sparks = __webpack_require__(42);
 	var blocks = __webpack_require__(7);
 	var metaBlocks = __webpack_require__(20);
 	var players = __webpack_require__(11);
@@ -3438,7 +3770,7 @@
 
 
 /***/ },
-/* 39 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sprite = __webpack_require__(3);
@@ -3563,19 +3895,19 @@
 
 
 /***/ },
-/* 40 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Block = __webpack_require__(21);
-	var metaBlock = __webpack_require__(35);
+	var metaBlock = __webpack_require__(38);
 	var Player = __webpack_require__(2);
 	var Skeleton = __webpack_require__(15);
-	var Madbomber = __webpack_require__(50);
+	var Madbomber = __webpack_require__(37);
 	var Burningman = __webpack_require__(17);
-	var Shoggoth = __webpack_require__(38);
+	var Shoggoth = __webpack_require__(41);
 	var Boneheap = __webpack_require__(16);
-	var Pigeon = __webpack_require__(36);
-	var Wizard = __webpack_require__(37);
+	var Pigeon = __webpack_require__(39);
+	var Wizard = __webpack_require__(40);
 	
 	var Zone = function (name, blueprint, metaBlueprint) {
 	  this.name = name;
@@ -3651,10 +3983,10 @@
 
 
 /***/ },
-/* 41 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(40);
+	var Zone = __webpack_require__(43);
 	
 	var blank = new Zone ( "blank", [
 	  "---------------------------------------------------------------------------",
@@ -3675,10 +4007,46 @@
 
 
 /***/ },
-/* 42 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(40);
+	var Zone = __webpack_require__(43);
+	
+	var buster = new Zone ("buster", [
+	  "--------------------------------------------------------",
+	  "-----------------%%---------------%---------------------",
+	  "---------F-------FTTTTF--------FTTTTF-------F-----------",
+	  "--------------------------------------------------------",
+	  "-!---------------------------------%------------------!-",
+	  "TTF--------------FTTF------------FTTF----------------TTF",
+	  "--------------------------------------------------------",
+	  "---------%-----!-------------1-----------!------%-------",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	],[
+	  "--------------------------------------------------------",
+	  "---------}------------}--------{------------{-----------",
+	  "]--------F-------FTTTTF--------FTTTTF-------F----------[",
+	  "]------------------------------------------------------[",
+	  "]-}---------------}----------------{-----------------{-[",
+	  "TTF--------------FTTF------------FTTF----------------TTF",
+	  "]------------------------------------------------------[",
+	  "]----------->-------------<-->----------<--#-----------[",
+	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
+	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
+	]
+	);
+	
+	module.exports = buster;
+
+
+/***/ },
+/* 46 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Zone = __webpack_require__(43);
 	
 	var burningMan = new Zone ( "burningMan", [
 	  "--------------------------------------------------------",
@@ -3711,11 +4079,10 @@
 
 
 /***/ },
-/* 43 */,
-/* 44 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(40);
+	var Zone = __webpack_require__(43);
 	
 	var shoggothBrawl = new Zone ( "shoggothBrawl", [
 	  "--------------------------------------------------------",
@@ -3748,10 +4115,10 @@
 
 
 /***/ },
-/* 45 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(40);
+	var Zone = __webpack_require__(43);
 	
 	var subwayPlatform = new Zone ("subwayPlatform", [
 	  "--------------------------------------------------------",
@@ -3784,10 +4151,10 @@
 
 
 /***/ },
-/* 46 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(40);
+	var Zone = __webpack_require__(43);
 	
 	
 	var tooManyCooks = new Zone ("tooManyCooks", [
@@ -3821,10 +4188,10 @@
 
 
 /***/ },
-/* 47 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(40);
+	var Zone = __webpack_require__(43);
 	
 	var zoneOne = new Zone ("zoneOne", [
 	  "------XXXXXXXXXXXXXXXXXXXXX----XXXXXXXX----XXXXXXXXXXXXX",
@@ -3848,20 +4215,20 @@
 
 
 /***/ },
-/* 48 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(40);
+	var Zone = __webpack_require__(43);
 	
 	var junction = new Zone ( "Broadway Junction", [
 	  "-------------------------------------------------------------------",
 	  "----------------------1--------------------------------------------",
-	  "---------FTTTTTTTF---F----FTTTF------FTTTF----F---FTTTTTTTF--------",
+	  "----------FTTF----------FTTFTTF-----------FTTFTTTF----------FTTTF--",
 	  "-------------------------------------------------------------------",
 	  "-----*-------------------------------------------------------------",
-	  "---FTF-------------------------------------------------------FTF---",
+	  "--------------------------FTF------------1-------------------------",
 	  "-------------------------------------------------------------------",
-	  "----------------!--------------------$--!---------------!--------$-",
+	  "-%--------------!------------------------------------!----!------$-",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
@@ -3871,9 +4238,9 @@
 	  "---------FTTTTTTTF---F----FTTTF------FTTTF----F---FTTTTTTTF--------",
 	  "-------------------------------------------------------------------",
 	  "----}---------------------------------------------------------{----",
-	  "---FTF-------------------------------------------------------FTF---",
-	  "-------------------------------------------------------------------",
-	  "---------{-----------------------------$--------------!-!}*------$-",
+	  "-#-FTF-------------------------------------------------------FTF---",
+	  "--#----------------------------------------------------------------",
+	  "---#-----{-----------------------------$--------------!#!}*------$-",
 	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY",
 	  "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
@@ -3884,10 +4251,10 @@
 
 
 /***/ },
-/* 49 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Zone = __webpack_require__(40);
+	var Zone = __webpack_require__(43);
 	
 	var throop = new Zone ("Throop", [
 	  "---------------------------------------------------------------------------",
@@ -3918,361 +4285,6 @@
 	
 	throop.trainY = 8*48;
 	module.exports = throop;
-
-
-/***/ },
-/* 50 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	var Jumpman = __webpack_require__(5);
-	var Skeleton = __webpack_require__(15);
-	var Boneheap = __webpack_require__(16);
-	var Firebomb = __webpack_require__(52);
-	var Explosion = __webpack_require__(51);
-	var Util = __webpack_require__(6);
-	var blocks = __webpack_require__(7);
-	var metaBlocks = __webpack_require__(20);
-	var players = __webpack_require__(11);
-	var movers = __webpack_require__(10);
-	
-	var Madbomber = function (index, x, y, stats) {
-	  this.type = "madbomber";
-	  this.index = index;
-	  this.spriteSize = 48;
-	  this.age = 0;
-	  this.pos = {
-	    x: x,
-	    y: y
-	  };
-	  this.speed = {
-	    x: 0,
-	    y: 0
-	  };
-	  this.accel = {
-	    x: 0,
-	    y: Util.universals.gravity
-	  };
-	  this.facing = "right";
-	  this.frame = "right";
-	  this.spriteRoot = "madbomber";
-	  this.setSprites(5);
-	  this.sprite = this.sprites.standing_right;
-	
-	  if (stats === undefined) {
-	    this.stats = {
-	      sightRange: Util.approximately(330),
-	      runSpeed: Util.approximately(6) + 0.5,
-	      jumpPower: Util.approximately(12),
-	      throwPower: Util.approximately(12),
-	      jumpDistance: 1,
-	      chasingSkill: Util.approximately(2.5)
-	    };
-	  } else {
-	    this.stats = stats;
-	  }
-	  this.throwDistance = this.stats.throwPower*2 / Util.universals.gravity * this.stats.throwPower;
-	};
-	
-	Util.inherits(Madbomber, Jumpman);
-	
-	Madbomber.prototype.act = function () {
-	  if (Util.distanceBetween(this.pos, players[0].pos) > this.throwDistance) {
-	    this.chasePlayer();
-	  } else {
-	    this.avoidPlayer();
-	  }
-	  if (!Math.floor(Math.random()*16) &&
-	      (Math.abs(Util.distanceBetween(this.pos, players[0].pos) - this.throwDistance)) < 48) {
-	    this.facing = this.pos.x > players[0].pos.x ? "left" : "right";
-	    this.speed.x = 0;
-	    this.throwFireBomb();
-	  }
-	  this.checkForHammer();
-	  this.avoidRoomEdge();
-	  this.avoidRoomEdge();
-	  this.dodgeHammer();
-	  this.checkForJumpBlock();
-	};
-	
-	Madbomber.prototype.avoidPlayer = function () {
-	  if (Math.random()*32 <= this.stats.chasingSkill) {
-	    Util.xChase(this, players[0].pos, 0-this.stats.runSpeed);
-	  }
-	};
-	
-	Madbomber.prototype.avoidRoomEdge = Skeleton.prototype.avoidRoomEdge;
-	
-	Madbomber.prototype.chasePlayer = function () {
-	  if (Math.random()*32 <= this.stats.chasingSkill) {
-	    Util.xChase(this, players[0].pos, this.stats.runSpeed);
-	  }
-	};
-	
-	Madbomber.prototype.checkForHammer = function () {
-	  movers.forEach(function (mover) {
-	    if (mover.type === "hammer" &&
-	        Util.distanceBetween(this.pos, mover.pos) < this.sprite.height/2 &&
-	        mover.soft <= 0) {
-	      mover.ricochet();
-	      mover.soft = 4;
-	      this.shatter();
-	    }
-	  }.bind(this));
-	};
-	
-	Madbomber.prototype.checkForJumpBlock = Skeleton.prototype.checkForJumpBlock;
-	
-	Madbomber.prototype.dodgeHammer = function () {
-	  movers.forEach(function (mover) {
-	    if (mover.type === "hammer" &&
-	        Math.round(Math.random()*0.75) &&
-	        Util.distanceBetween(this.pos, mover.pos) > this.stats.sightRange/5 &&
-	        Util.distanceBetween(this.pos, mover.pos) < this.stats.sightRange/3 ) {
-	      this.jump();
-	    }
-	  }.bind(this));
-	};
-	
-	Madbomber.prototype.throwFireBomb = function () {
-	  movers.push(new Firebomb (
-	    movers.length,
-	    this.pos.x,
-	    this.pos.y,
-	    this.facing === "right" ? this.stats.throwPower : 0-this.throwPower,
-	    0-this.stats.throwPower
-	  ));
-	};
-	
-	Madbomber.prototype.jump = function () {
-	  if (this.checkUnderFeet()) {
-	    this.speed.y = 0-this.stats.jumpPower;
-	    this.speed.x *= this.stats.jumpDistance;
-	  }
-	};
-	
-	Madbomber.prototype.setExtraSprites = function () {
-	};
-	
-	Madbomber.prototype.shatter = function () {
-	  movers[this.index] = new Explosion (this.index, this.pos.x - 48, this.pos.y - 80);
-	};
-	
-	Madbomber.prototype.wander = function () {
-	  if (Math.random()*256*(Math.abs(this.speed.x)+0.5) < 1) {
-	    this.speed.x = this.stats.runSpeed;
-	  } else if (Math.random()*128 < 2) {
-	    this.speed.x = 0-this.stats.runSpeed;
-	  }
-	};
-	
-	module.exports = Madbomber;
-
-
-/***/ },
-/* 51 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(6);
-	var Aura = __webpack_require__(9);
-	var blocks = __webpack_require__(7);
-	var movers = __webpack_require__(10);
-	var players = __webpack_require__(11);
-	
-	var Explosion = function (index, x, y) {
-	  this.type = "fireball";
-	  this.index = index;
-	  this.age = 0;
-	  this.radius = 86;
-	  this.spriteSize = 48;
-	  this.pos = {
-	    x: x,
-	    y: y
-	  };
-	  this.setSprites();
-	  this.age = 0;
-	  this.center = {
-	    x: this.pos.x + this.sprite.width/2,
-	    y: this.pos.y + this.sprite.height
-	  };
-	  this.checkForPlayer();
-	};
-	
-	Explosion.prototype.act = function () {
-	  this.checkForMovers();
-	};
-	
-	Explosion.prototype.checkForPlayer = function () {
-	  players.forEach(function (player) {
-	    if (Util.distanceBetween(this.center, {
-	      x: player.pos.x + player.sprite.width/2,
-	      y: player.pos.y + player.sprite.height
-	    }) < this.radius) {
-	      player.explosionBite(this);
-	    }
-	  }.bind(this));
-	};
-	
-	Explosion.prototype.checkForMovers = function () {
-	  movers.forEach(function (mover) {
-	    if (Util.distanceBetween(this.center, {
-	      x: mover.pos.x + mover.sprite.width/2,
-	      y: mover.pos.y + mover.sprite.height
-	    }) < this.radius) {
-	      switch (mover.type) {
-	        case "skeleton":
-	          mover.shatter();
-	        break;
-	        case "wizard":
-	          mover.shatter();
-	        break;
-	        case "pigeon":
-	          mover.transmogrify();
-	        break;
-	        case "burningman":
-	          mover.shatter();
-	        break;
-	        case "madbomber":
-	          mover.shatter();
-	        break;
-	      }
-	    }
-	  }.bind(this));
-	};
-	
-	Explosion.prototype.destroy = function () {
-	  delete movers[this.index];
-	};
-	
-	Explosion.prototype.move = function () {
-	};
-	
-	Explosion.prototype.setSprites = function () {
-	  this.sprite = new Sprite (128, 128, 2, [
-	      "madbomber/bombs/firebomb/flat_explosion/0.gif",
-	      "madbomber/bombs/firebomb/flat_explosion/1.gif",
-	      "madbomber/bombs/firebomb/flat_explosion/2.gif",
-	      "madbomber/bombs/firebomb/flat_explosion/3.gif",
-	      "madbomber/bombs/firebomb/flat_explosion/4.gif",
-	      "madbomber/bombs/firebomb/flat_explosion/5.gif",
-	      "madbomber/bombs/firebomb/flat_explosion/6.gif",
-	      "madbomber/bombs/firebomb/flat_explosion/7.gif",
-	      "madbomber/bombs/firebomb/flat_explosion/8.gif",
-	      "madbomber/bombs/firebomb/flat_explosion/9.gif"
-	    ]
-	  );
-	  this.sprite.addAnimationEndCallback(function () {
-	    this.destroy();
-	  }.bind(this));
-	};
-	
-	module.exports = Explosion;
-
-
-/***/ },
-/* 52 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Sprite = __webpack_require__(3);
-	var Util = __webpack_require__(6);
-	var Jumpman = __webpack_require__(5);
-	var Explosion = __webpack_require__(51);
-	var blocks = __webpack_require__(7);
-	var movers = __webpack_require__(10);
-	var players = __webpack_require__(11);
-	
-	var Firebomb = function (index, x, y, xspeed, yspeed) {
-	  this.type = "firebomb";
-	  this.index = index;
-	
-	  this.spriteSize = 48;
-	
-	  this.pos = {
-	    x: x,
-	    y: y
-	  };
-	  this.speed = {
-	    x: xspeed,
-	    y: yspeed
-	  };
-	  this.accel = {
-	    x: 0,
-	    y: Util.universals.gravity
-	  };
-	  this.setSprites();
-	};
-	
-	Firebomb.prototype.act = function () {
-	  if (this.checkUnderFeet()) {
-	    this.explode();
-	  }
-	};
-	
-	Firebomb.prototype.checkUnderFeet = Jumpman.prototype.checkUnderFeet;
-	
-	Firebomb.prototype.explode = function () {
-	  movers[this.index] = new Explosion (this.index, this.pos.x - 48, this.pos.y - 80);
-	};
-	
-	Firebomb.prototype.move = function () {
-	  this.speed.x += this.accel.x;
-	  this.speed.y += this.accel.y;
-	  this.pos.x += this.speed.x;
-	  this.pos.y += this.speed.y;
-	};
-	
-	Firebomb.prototype.setSprites = function () {
-	  this.sprite = new Sprite (48, 48, 5, [
-	      "madbomber/bombs/firebomb/thrown/0.gif",
-	      "madbomber/bombs/firebomb/thrown/1.gif",
-	      "madbomber/bombs/firebomb/thrown/2.gif",
-	      "madbomber/bombs/firebomb/thrown/3.gif",
-	      "madbomber/bombs/firebomb/thrown/4.gif",
-	      "madbomber/bombs/firebomb/thrown/5.gif",
-	      "madbomber/bombs/firebomb/thrown/6.gif",
-	      "madbomber/bombs/firebomb/thrown/7.gif"
-	    ]
-	  );
-	};
-	
-	module.exports = Firebomb;
-
-
-/***/ },
-/* 53 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Zone = __webpack_require__(40);
-	
-	var buster = new Zone ("buster", [
-	  "--------------------------------------------------------",
-	  "-----------------%%---------------%---------------------",
-	  "---------F-------FTTTTF--------FTTTTF-------F-----------",
-	  "--------------------------------------------------------",
-	  "-!---------------------------------%------------------!-",
-	  "TTF--------------FTTF------------FTTF----------------TTF",
-	  "--------------------------------------------------------",
-	  "---------%-----!-------------1-----------!------%-------",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	],[
-	  "--------------------------------------------------------",
-	  "---------}------------}--------{------------{-----------",
-	  "]--------F-------FTTTTF--------FTTTTF-------F----------[",
-	  "]------------------------------------------------------[",
-	  "]-}---------------}----------------{-----------------{-[",
-	  "TTF--------------FTTF------------FTTF----------------TTF",
-	  "]------------------------------------------------------[",
-	  "]----------->-------------<-->----------<--#-----------[",
-	  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYYY--YYYYYYYYYYYYYYYYYYYYYYYYYYYY",
-	  "YYYYYYYYYYYYYYYYYYYYYYYYY----YYYYYYYYYYYYYYYYYYYYYYYYYYY"
-	]
-	);
-	
-	module.exports = buster;
 
 
 /***/ }
